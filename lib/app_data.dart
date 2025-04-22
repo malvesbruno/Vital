@@ -11,6 +11,8 @@ import 'models/AtividadeModel.dart';
 import 'services/Notication.dart';
 import 'services/challenge_service.dart';
 import 'models/DailyStatsModel.dart';
+import 'models/AvatarModel.dart';
+import '../pages/LevelUpPage.dart';
 
 class AppData {
   static List<TreinoModel> treinos = [];
@@ -45,6 +47,7 @@ static Future<void> salvarStatsDoDia() async {
     completedActivities: completedActivities,
     completedWorkouts: treinosDiarios,
     wasActive: true,
+    bmi: bmi
   );
 
   historicoStats.add(stats);
@@ -111,15 +114,17 @@ static Future<void> carregarDesafiosDoDia() async {
   static int waterConsumed = 0;
   static int coins = 0;
   static int exp = 0;
-  static int level = 0;
+  static int level = 1;
+  static String currentAvatar = avatars[0].name;
   static int treinosDiarios = 0;
+  static double bmi = 0.0;
   static int completedActivities = 0;
   static double progress = 0.0;
   static double horasDormidas = 0;
   static List<double> lista = [10, 8, 9, 10, 4, 0, 10];
   static bool ativoHoje = false;
 
-  static void addExperience(int xp) {
+  static void addExperience(BuildContext context, int xp) {
     print("[DEBUG] Adding EXP: $xp | Current EXP: $exp | Level: $level"); // ✅ Debug
     exp += xp;
 
@@ -129,11 +134,67 @@ static Future<void> carregarDesafiosDoDia() async {
       level++;
       xpNeeded = 100 + (level - 1) * 50;
       print("[DEBUG] Level Up! New Level: $level | EXP Left: $exp"); // ✅ Debug
+      AvatarModel? avatar = avatars.firstWhere((el) => el.requiredLevel == level, orElse: () => AvatarModel(name: 'Desconhecido', imagePath: '', requiredLevel: 0, price: 0,));
+      late List<String> lista_levelUp;
+      if (avatar.name != 'Desconhecido'){
+        lista_levelUp = [avatar.name, avatar.imagePath];
+      } else{
+        lista_levelUp = [];
+      }
+      salvarDados();
+
+      Navigator.push(context, MaterialPageRoute(builder: (context) => LevelUpPage(newLevel: level, unlockedItems: lista_levelUp)));
     }
 }
 
+  static Future<void> saveOwnedAvatars() async {
+    final prefs = await SharedPreferences.getInstance();
+    final ownedNames = avatars
+        .where((avatar) => avatar.owned)
+        .map((avatar) => avatar.name)
+        .toList();
+    await prefs.setStringList('Owned Avatars', ownedNames);
+  }
+
+  static Future<void> loadOwnedAvatars() async {
+  final prefs = await SharedPreferences.getInstance();
+  final ownedNames = prefs.getStringList('Owned Avatars') ?? [];
+
+  for (var avatar in avatars) {
+    if (avatar.name == 'Default'){
+      avatar.owned = true;
+    } else{
+    avatar.owned = ownedNames.contains(avatar.name);
+    }
+  }
+}
 
 
+  static List<AvatarModel> avatars = [
+    AvatarModel(name: 'Default', imagePath: 'assets/avatares/default.png', price: 0, requiredLevel: 1, owned: true),
+    AvatarModel(name: 'Nerd', imagePath: 'assets/avatares/nerd.png', price: 100, requiredLevel: 3),
+    AvatarModel(name: 'Hippie', imagePath: 'assets/avatares/hippie.png', price: 120, requiredLevel: 5),
+    AvatarModel(name: 'Girl', imagePath: 'assets/avatares/girl.png', price: 140, requiredLevel: 8),
+    AvatarModel(name: 'Rocker', imagePath: 'assets/avatares/rocker.png', price: 160, requiredLevel: 10),
+    AvatarModel(name: 'Boho', imagePath: 'assets/avatares/boho.png', price: 180, requiredLevel: 12),
+    AvatarModel(name: 'Atleta', imagePath: 'assets/avatares/atleta.png', price: 200, requiredLevel: 14),
+    AvatarModel(name: 'Mago', imagePath: 'assets/avatares/mago.png', price: 220, requiredLevel: 18),
+    AvatarModel(name: 'Street', imagePath: 'assets/avatares/street.png', price: 240, requiredLevel: 20),
+    AvatarModel(name: 'Robô', imagePath: 'assets/avatares/robo.png', price: 260, requiredLevel: 25),
+    AvatarModel(name: 'Musicman', imagePath: 'assets/avatares/musicman.png', price: 280, requiredLevel: 30),
+    AvatarModel(name: 'Rocketman', imagePath: 'assets/avatares/rocketman.png', price: 300, requiredLevel: 40),
+    AvatarModel(name: 'Dex', imagePath: 'assets/avatares/dex.png', price: 350, requiredLevel: 50),
+  ];
+
+
+  static void buyAvatar(String name) async{
+    final avatar = avatars.firstWhere((a) => a.name == name);
+    if (!avatar.owned && coins >= avatar.price && level >= avatar.requiredLevel) {
+      coins -= avatar.price;
+      avatar.owned = true;
+      await saveOwnedAvatars();
+    }
+  }
   
 
   static List<StatsModel> getStatsOfLastDays(int n) {
@@ -156,7 +217,8 @@ static Future<void> carregarDesafiosDoDia() async {
       isPercentage: false,
       labels: ultimosDias.map((e) => "${e.date.day}/${e.date.month}").toList(),
       data: ultimosDias.map((e) => e.waterLiters.toDouble()).toList(),
-      goal: 2
+      goal: 2000,
+      isBmi: false
     ),
     StatsModel(
       date: DateTime.now(),
@@ -167,7 +229,8 @@ static Future<void> carregarDesafiosDoDia() async {
       isPercentage: false,
       labels: ultimosDias.map((e) => "${e.date.day}/${e.date.month}").toList(),
       data: ultimosDias.map((e) => e.completedActivities.toDouble()).toList(),
-      goal: AppData.listaAtividades.where((el) => isHojeNaLista(el.dias)).length.toDouble()
+      goal: AppData.listaAtividades.where((el) => isHojeNaLista(el.dias)).length.toDouble(),
+      isBmi: false
     ),
     StatsModel(
       date: DateTime.now(),
@@ -178,7 +241,8 @@ static Future<void> carregarDesafiosDoDia() async {
       isPercentage: false,
       labels: ultimosDias.map((e) => "${e.date.day}/${e.date.month}").toList(),
       data: ultimosDias.map((e) => e.completedWorkouts.toDouble()).toList(),
-      goal: AppData.listaAtividades.where((el) => isHojeNaLista(el.dias)).length.toDouble()
+      goal: AppData.listaAtividades.where((el) => isHojeNaLista(el.dias)).length.toDouble(),
+      isBmi: false
     ),
     StatsModel(
       date: DateTime.now(),
@@ -189,12 +253,29 @@ static Future<void> carregarDesafiosDoDia() async {
       isPercentage: true,
       labels: ultimosDias.map((e) => "${e.date.day}/${e.date.month}").toList(),
       data: ultimosDias.map((e) => e.wasActive ? 1.0 : 0.0).toList(),
-      goal: 1.0
+      goal: 1.0,
+      isBmi: false
+    ),
+    StatsModel(
+      date: DateTime.now(),
+      title: "IMC Atual",
+      unit: "",
+      icon: Icons.monitor_weight,
+      color: Colors.purple,
+      isPercentage: true,
+      labels: ultimosDias.map((e) => "${e.date.day}/${e.date.month}").toList(),
+      data: ultimosDias.map((e) => e.bmi.toDouble()).toList(),
+      goal: 0.0,
+      isBmi: true
     ),
   ];
 }
 
 
+static void setBmi(double bmiImput){
+  bmi = bmiImput;
+  atualizarDailyStats(bmi: bmiImput);
+}
 
 
   // Retorna os exercícios do dia atual
@@ -217,6 +298,7 @@ static Future<void> carregarDesafiosDoDia() async {
   double? agua,
   bool atividadeConcluida = false,
   bool treinoConcluido = false,
+  double bmi = 0.0,
 }) {
   final hoje = DateTime.now();
   final hojeFormatado = DateTime(hoje.year, hoje.month, hoje.day);
@@ -239,6 +321,7 @@ static Future<void> carregarDesafiosDoDia() async {
     completedActivities: statsHoje.completedActivities + (atividadeConcluida ? 1 : 0),
     completedWorkouts: statsHoje.completedWorkouts + (treinoConcluido ? 1 : 0),
     wasActive: true,
+    bmi: bmi,
   );
 
   // Substitui o antigo
@@ -269,11 +352,14 @@ static void salvarDailyStats() async {
     prefs.setInt('coins', coins);
     prefs.setInt('exp', exp);
     prefs.setInt('level', level);
+    prefs.setString('currentAvatar', currentAvatar);
+    prefs.setStringList('desafios_do_dia', dailyChallenges.map((d) => jsonEncode(d.toJson())).toList());
 
     prefs.setInt('waterConsumed', waterConsumed);
     prefs.setInt('treinosDiarios', treinosDiarios);
     prefs.setInt('completedActivities', completedActivities);
     prefs.setDouble('progress', progress);
+    prefs.setDouble('bmi', bmi);
     prefs.setDouble('horasDormidas', horasDormidas);
   }
 
@@ -317,6 +403,10 @@ static void salvarDailyStats() async {
   if (statsJson != null) {
     dailyStats = statsJson.map((jsonStr) => DailyStats.fromJson(jsonDecode(jsonStr))).toList();
   }
+  final challengesJson = prefs.getStringList('desafios_do_dia');
+  if (challengesJson != null){
+    dailyChallenges = challengesJson.map((jsonStr) => DailyChallengeModel.fromJson(jsonDecode(jsonStr))).toList();
+  }
 
   final dataString = prefs.getString('ultimaDataSalva');
   if (dataString != null) {
@@ -337,9 +427,11 @@ static void salvarDailyStats() async {
 
   waterConsumed = prefs.getInt('waterConsumed') ?? 0;
   treinosDiarios = prefs.getInt('treinosDiarios') ?? 0;
-  coins = prefs.getInt('coins') ?? 0;
-  exp = prefs.getInt('exp') ?? 0;
-  level = prefs.getInt('level') ?? 0;
+  coins = prefs.getInt('coins') ?? 2000;
+  exp = prefs.getInt('exp') ?? 190;
+  level = prefs.getInt('level') ?? 2;
+  bmi = prefs.getDouble('bmi') ?? 0.0;
+  currentAvatar = prefs.getString('currentAvatar') ?? 'Default';
   completedActivities = prefs.getInt('completedActivities') ?? 0;
   progress = prefs.getDouble('progress') ?? 0.0;
   horasDormidas = prefs.getDouble('horasDormidas') ?? 0.0;

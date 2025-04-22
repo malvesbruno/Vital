@@ -3,6 +3,7 @@ import '../app_data.dart';
 import 'AddQuickActionPage.dart';
 import '../models/DailyChallenge.dart';
 import '../widgets/ChangeTile.dart';
+import '../pages/menuShop.dart';
 
 
 class MyHomePage extends StatefulWidget {
@@ -88,6 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+  
 
   Widget _dailyCard(List<DailyChallengeModel> dailyChallenges){
 
@@ -196,7 +198,7 @@ Widget _buildCoinsDisplay() {
         Icon(Icons.monetization_on, color: Colors.amber, size: 28),
         const SizedBox(width: 8),
         Text(
-          "${AppData.coins}", // Supondo que você tenha essa variável
+          "${AppData.coins}",
           style: const TextStyle(
             color: Colors.white,
             fontSize: 22,
@@ -209,10 +211,12 @@ Widget _buildCoinsDisplay() {
   );
 }
 
+
 Widget _buildAvatar() {
   return Padding(
     padding: const EdgeInsets.only(top: 10, bottom: 10),
-    child: GestureDetector(
+    child: _AvatarPulse(
+      child: GestureDetector(
       onTap: () {
         showModalBottomSheet(
           context: context,
@@ -227,21 +231,20 @@ Widget _buildAvatar() {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ListTile(
-                    leading: Icon(Icons.brush, color: Colors.white),
-                    title: Text("Customização", style: TextStyle(color: Colors.white)),
-                    onTap: () {
-                      Navigator.pop(context);
-                      // Navegar para tela de customização
-                    },
-                  ),
-                  ListTile(
                     leading: Icon(Icons.store, color: Colors.white),
                     title: Text("Loja", style: TextStyle(color: Colors.white)),
-                    onTap: () {
-                      Navigator.pop(context);
+                    onTap: () async{
+                      final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => MenushopPage()));
                       // Navegar para tela da loja
+                      if(result){
+                        setState(() {
+                        });
+                      } else {
+                        Navigator.pop(context);
+                      }
                     },
                   ),
+                  SizedBox(height: 40,)
                 ],
               ),
             );
@@ -250,10 +253,51 @@ Widget _buildAvatar() {
       },
       child: CircleAvatar(
         radius: 25,
-        backgroundImage: AssetImage('assets/avatares/default.png'), // substitua pelo avatar atual do usuário
+        backgroundImage: AssetImage(AppData.avatars.firstWhere((el) => el.name == AppData.currentAvatar).imagePath), // substitua pelo avatar atual do usuário
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
     ),
+    )
   );
 }
+}
+
+class _AvatarPulse extends StatefulWidget {
+  final Widget child;
+  const _AvatarPulse({required this.child});
+
+  @override
+  State<_AvatarPulse> createState() => _AvatarPulseState();
+}
+
+class _AvatarPulseState extends State<_AvatarPulse> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    _animation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: _animation,
+      child: widget.child,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 }

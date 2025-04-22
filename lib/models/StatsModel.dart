@@ -10,6 +10,7 @@ class StatsModel {
   final String unit;
   final bool isPercentage;
   final double goal;
+  final bool isBmi;
 
   StatsModel({
     required this.date,
@@ -20,7 +21,8 @@ class StatsModel {
     required this.color,
     required this.unit,
     required this.isPercentage,
-    required this.goal
+    required this.goal,
+    required this.isBmi
   });
 
 }

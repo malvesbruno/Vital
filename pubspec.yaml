@@ -45,6 +45,7 @@ dependencies:
   device_info_plus: ^10.0.1
   vector_math: ^2.1.4
   flutter_launcher_icons: ^0.13.1
+  confetti: ^0.7.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -74,6 +75,8 @@ flutter:
   assets:
     - assets/sounds/coinUp.mp3
     - assets/sounds/coinDown.mp3
+    - assets/sounds/buyItem.mp3
+    - assets/sounds/levelUp.mp3
     - assets/sounds/retro_game.mp3
     - assets/images/corpo_inteiro.png
     - assets/images/pernas.png

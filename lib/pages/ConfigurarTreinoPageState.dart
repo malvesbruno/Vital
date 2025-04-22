@@ -91,6 +91,7 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
 
 
     return Scaffold(
+      resizeToAvoidBottomInset: true, 
       appBar: AppBar(
         title: const Text("Configurar Treino", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent,

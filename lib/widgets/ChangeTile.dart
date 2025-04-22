@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vital/app_data.dart';
+import '../app_data.dart';
 import '../models/DailyChallenge.dart';
 import 'package:audioplayers/audioplayers.dart';
 
@@ -57,16 +57,17 @@ class _ChallengeTileState extends State<ChallengeTile> {
     if (widget.challenge.completed) {
       await _audioPlayer.play(AssetSource('sounds/coinUp.mp3'));
       print("[DEBUG] Desafio completado! EXP a adicionar: ${widget.challenge.exp}"); // ✅
-      AppData.addExperience(widget.challenge.exp); // ⚠️ Garantido que será chamado
+      AppData.addExperience(context, widget.challenge.exp); // ⚠️ Garantido que será chamado
     } else {
       await _audioPlayer.play(AssetSource('sounds/coinDown.mp3'));
       print("[DEBUG] Desafio desmarcado! EXP a remover: ${widget.challenge.exp}"); // ✅
-      AppData.addExperience(-widget.challenge.exp); // Remove o EXP
+      AppData.addExperience(context, -widget.challenge.exp); // Remove o EXP
     }
+    AppData.salvarDados();
   } catch (e) {
     print("[ERRO] Ao reproduzir áudio: $e"); // Se o áudio falhar, não bloqueia o EXP
     if (widget.challenge.completed) {
-      AppData.addExperience(widget.challenge.exp); // Fallback
+      AppData.addExperience(context, widget.challenge.exp); // Fallback
     }
   }
 

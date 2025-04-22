@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import '../app_data.dart';
 import 'WorkoutComplete.dart';
+import '../services/challenge_service.dart';
 
 class WorkoutPagePersonalizado extends StatefulWidget {
   final List<Map<String, dynamic>> excercicios;
@@ -102,6 +103,7 @@ class _WorkoutPagePersonalizadoState extends State<WorkoutPagePersonalizado> wit
         // Salva antes de sair
         AppData.salvarDados(); // sem await no setState
         AppData.atualizarDailyStats(treinoConcluido: true);
+        ChallengeService.verificarDesafiosAutomaticos();
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => WorkoutCompletePage()),

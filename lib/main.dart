@@ -71,6 +71,7 @@ void main() async {
   );
   await _startForegroundTask();
   await AppData.carregarDesafiosDoDia();
+  await AppData.loadOwnedAvatars();
 
   // Executa o app
   runApp(const MyApp());
@@ -138,7 +139,9 @@ class _MainPageState extends State<MainPage> {
           AppData.completedActivities++;
         }
       }
+      ChallengeService.verificarDesafiosAutomaticos();
       _updateProgressBar();
+      AppData.salvarDados();
     });
   }
 

@@ -49,6 +49,76 @@ class _StatsPageState extends State<StatsPage> {
     );
   }
 
+  MapEntry<String, Color> _getBmiLabel(double bmi) {
+  if (bmi < 10) return MapEntry("Não Calculado", Colors.grey);
+  if (bmi < 18.5) return MapEntry("Abaixo do peso", Colors.orangeAccent);
+  if (bmi < 25) return MapEntry("Normal", Colors.greenAccent);
+  if (bmi < 30) return MapEntry("Sobrepeso", Colors.yellow);
+  if (bmi < 35) return MapEntry("Obesidade I", Colors.orange);
+  if (bmi < 40) return MapEntry("Obesidade II", Colors.deepOrange);
+  return MapEntry("Obesidade III", Colors.red);
+}
+
+void _showBmiDialog() {
+  final alturaController = TextEditingController();
+  final pesoController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Text("Calcular IMC", style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: alturaController,
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: "Altura (m)",
+                labelStyle: TextStyle(color: Colors.white70),
+              ),
+              style: const TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: pesoController,
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: "Peso (kg)",
+                labelStyle: TextStyle(color: Colors.white70),
+              ),
+              style: const TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            child: const Text("Cancelar", style: TextStyle(color: Colors.redAccent)),
+            onPressed: () => Navigator.pop(context),
+          ),
+          TextButton(
+            child: const Text("Calcular", style: TextStyle(color: Colors.greenAccent)),
+            onPressed: () {
+              final altura = double.tryParse(alturaController.text);
+              final peso = double.tryParse(pesoController.text);
+
+              if (altura != null && peso != null && altura > 0) {
+                final bmi = peso / (altura * altura);
+                AppData.setBmi(bmi); // Crie esse método em AppData, explico abaixo.
+                Navigator.pop(context);
+                setState(() {}); // Atualiza a UI
+              }
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
   Widget _buildDropdown() {
     return Container(
       decoration: BoxDecoration(
@@ -76,6 +146,10 @@ class _StatsPageState extends State<StatsPage> {
   }
 
   Widget _buildStatCard(StatsModel stat) {
+    final bmi = _getBmiLabel(stat.data.first);
+    final bmiText = bmi.key;
+    final bmiColor = bmi.value;
+
   return Container(
     margin: const EdgeInsets.only(bottom: 16),
     padding: const EdgeInsets.all(16),
@@ -95,6 +169,54 @@ class _StatsPageState extends State<StatsPage> {
         ]),
         SizedBox(height: 20),
         const SizedBox(height: 12),
+        if (stat.isBmi && selectedPeriod == 'day') ...[ 
+          SizedBox(width: 300, height: 200,
+          child: 
+          InkWell(
+            onTap: () {
+              if (stat.data.isEmpty) {
+                _showBmiDialog();
+              }
+            },
+            child: Card(
+            color: Colors.transparent,
+            elevation: 0,
+            child: 
+            stat.data.isEmpty ? 
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+              Text("Não calculado", style: const TextStyle(color: Colors.white70, fontSize: 20)),
+              Text('Clique aqui para calcular', style: const TextStyle(color: Colors.white70, fontSize: 12))
+            ],):
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: bmiColor, width: 4),
+                    color: Colors.transparent, // ou qualquer cor de fundo, tipo Colors.black45
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    stat.data.first.toStringAsFixed(1),
+                    style: TextStyle(color: bmiColor, fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                ),
+
+                Text(bmiText, style:  TextStyle(color: bmiColor, fontSize: 20))
+              ]
+            )
+            )
+            ),)
+
+      
+    ] else ...[
         SizedBox(
           height: 150,
           child: selectedPeriod == 'day'
@@ -183,7 +305,7 @@ class _StatsPageState extends State<StatsPage> {
                     ],
                   ),
                 ),
-        ),
+        ),]
       ],
     ),
   );

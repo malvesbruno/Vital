@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../app_data.dart';
 import '../models/AtividadeModel.dart';
+import '../services/challenge_service.dart';
 
 class AddRemdyIntakePage extends StatefulWidget {
   const AddRemdyIntakePage({super.key});
@@ -55,12 +56,16 @@ class _AddRemedyIntakePageState extends State<AddRemdyIntakePage>{
   return Padding(
     padding: EdgeInsets.only(left: 30, right: 30, top: 10),
     child: InkWell(
-      onTap: () {
-  setState(() async{
-    remedio.completed= true;
-    await AppData.salvarDados();
-  });
-},
+      onTap: () async {  // Move async here, outside of setState
+        remedio.completed = true;
+        await AppData.salvarDados();
+        ChallengeService.verificarDesafiosAutomaticos();  // First do the async work
+        setState(() {  // Then update the state synchronously
+          // Any state updates would go here
+          // Though in this case, we're modifying the object directly
+          // so we might not need anything here
+        });
+      },
       borderRadius: BorderRadius.circular(10),
       child: Card(
         color: const Color.fromARGB(255, 31, 31, 31),

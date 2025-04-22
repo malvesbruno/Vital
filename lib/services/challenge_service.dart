@@ -28,33 +28,60 @@ class ChallengeService {
 ];
 
   static Future<void> inicializarDesafios() async {
-    final prefs = await SharedPreferences.getInstance();
-    final hoje = DateTime.now().toIso8601String().substring(0, 10);
-    final ultimoDia = prefs.getString('ultimo_dia_desafios');
+  final prefs = await SharedPreferences.getInstance();
+  final hoje = DateTime.now().toIso8601String().substring(0, 10);
+  final ultimoDia = prefs.getString('ultimo_dia_desafios');
+  final desafiosSalvos = prefs.getStringList('desafios_do_dia');
 
-    if (hoje != ultimoDia) {
-      final desafiosAleatorios = List<DailyChallengeModel>.from(_todosDesafios)..shuffle();
-      final escolhidos = desafiosAleatorios.take(2).toList();
+  // Gera novos desafios se for um novo dia ou os dados estiverem faltando
+  if (hoje != ultimoDia || desafiosSalvos == null || desafiosSalvos.isEmpty) {
+    final desafiosAleatorios = List<DailyChallengeModel>.from(_todosDesafios)..shuffle();
+    final escolhidos = desafiosAleatorios.take(2).toList();
 
-      prefs.setString('ultimo_dia_desafios', hoje);
-      prefs.setString(
-        'desafios_do_dia',
-        jsonEncode(escolhidos.map((d) => d.toJson()).toList()),
-      );
-    }
+    prefs.setString('ultimo_dia_desafios', hoje);
+    prefs.setStringList(
+      'desafios_do_dia',
+      escolhidos.map((d) => jsonEncode(d.toJson())).toList(),
+    );
+
+    print('Desafios do dia gerados!');
   }
+}
 
   static Future<List<DailyChallengeModel>> carregarDesafiosDoDia() async {
-    final prefs = await SharedPreferences.getInstance();
-    final data = prefs.getString('desafios_do_dia');
+  final prefs = await SharedPreferences.getInstance();
+  final challengesJson = prefs.getStringList('desafios_do_dia');
 
-    if (data != null) {
-      final lista = jsonDecode(data) as List;
-      return lista.map((json) => DailyChallengeModel.fromJson(json)).toList();
+  if (challengesJson != null && challengesJson.isNotEmpty) {
+    try {
+      return challengesJson
+          .map((jsonStr) => DailyChallengeModel.fromJson(jsonDecode(jsonStr)))
+          .toList();
+    } catch (e) {
+      print('Erro ao carregar desafios: $e');
+      // Se der erro, continua para gerar novos
     }
-
-    return [];
   }
+
+  // Garante que desafios sejam criados se não existirem
+  await inicializarDesafios();
+
+  // Agora tenta carregar novamente os desafios recém-criados
+  final novosChallengesJson = prefs.getStringList('desafios_do_dia');
+  if (novosChallengesJson != null && novosChallengesJson.isNotEmpty) {
+    try {
+      return novosChallengesJson
+          .map((jsonStr) => DailyChallengeModel.fromJson(jsonDecode(jsonStr)))
+          .toList();
+    } catch (e) {
+      print('Erro ao recarregar desafios após criação: $e');
+    }
+  }
+
+  // Se ainda assim falhar, retorna vazio
+  return [];
+}
+
 
   static Future<void> marcarComoConcluido(DailyChallengeModel desafio) async {
     final lista = await carregarDesafiosDoDia();
@@ -62,7 +89,10 @@ class ChallengeService {
     if (index != -1) {
       lista[index].completed = true;
       final prefs = await SharedPreferences.getInstance();
-      prefs.setString('desafios_do_dia', jsonEncode(lista.map((e) => e.toJson()).toList()));
+      prefs.setStringList(
+  'desafios_do_dia',
+  lista.map((e) => jsonEncode(e.toJson())).toList(),
+);
     }
   }
 

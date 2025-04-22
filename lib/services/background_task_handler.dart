@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:isolate';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import '../services/Notication.dart'; // ou onde estiver sua lógica de notificação
-import 'package:vital/app_data.dart';
+import '../app_data.dart';
 
 class MyTaskHandler extends TaskHandler {
   @override

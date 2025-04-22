@@ -5,6 +5,7 @@ class DailyStats {
   final int completedActivities;
   final int completedWorkouts;
   final bool wasActive;
+  final double bmi;
 
   DailyStats({
     required this.date,
@@ -12,6 +13,7 @@ class DailyStats {
     this.completedActivities = 0,
     this.completedWorkouts = 0,
     this.wasActive = false,
+    this.bmi = 0.0,
   });
 
   Map<String, dynamic> toJson() {
@@ -21,6 +23,7 @@ class DailyStats {
       'completedActivities': completedActivities,
       'completedWorkouts': completedWorkouts,
       'wasActive': wasActive,
+      'bmi': bmi
     };
   }
 
@@ -31,6 +34,7 @@ class DailyStats {
       completedActivities: json['completedActivities'] as int,
       completedWorkouts: json['completedWorkouts'] as int,
       wasActive: json['wasActive'] as bool,
+      bmi: (json['bmi'] as num).toDouble(),
     );
   }
 }
