@@ -27,13 +27,13 @@ class _ChallengeTileState extends State<ChallengeTile> {
       contentPadding: EdgeInsets.zero,
       leading: Icon(
         widget.challenge.completed ? Icons.check_circle : Icons.circle_outlined,
-        color: widget.challenge.completed ? Colors.green : Colors.grey,
+        color: widget.challenge.completed ? Theme.of(context).colorScheme.secondary : Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.4),
         size: 28,
       ),
       title: Text(
         widget.challenge.title,
         style: TextStyle(
-          color: Colors.white,
+          color: Theme.of(context).textTheme.bodyLarge?.color,
           fontSize: 18,
           fontFamily: 'Montserrat',
           decoration: widget.challenge.completed ? TextDecoration.lineThrough : null,

@@ -1,28 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:vital/app_data.dart';
-import '../models/AvatarModel.dart';
+import '../models/ColorsModel.dart';
 import '../widgets/zeldaBackground.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:provider/provider.dart';
+import 'package:vital/themeNotifier.dart';
 
 
-class AvatarStorePage extends StatefulWidget {
-  final List<AvatarModel> avatars;
+class ColorsStorePage extends StatefulWidget {
+  final List<AppTheme> colors;
   final int userLevel;
 
-  const AvatarStorePage({
+  const ColorsStorePage({
     super.key,
-    required this.avatars,
+    required this.colors,
     required this.userLevel,
   });
 
   @override
-  _AvatarStorePageState createState() => _AvatarStorePageState();
+  _ColorsStorePageState createState() => _ColorsStorePageState();
 }
 
-class _AvatarStorePageState extends State<AvatarStorePage> {
+class _ColorsStorePageState extends State<ColorsStorePage> {
   int coins = AppData.coins;
 
-  void _showZeldaUnlockAnimation(BuildContext context, AvatarModel avatar) async{
+  void _showZeldaUnlockAnimation(BuildContext context, AppTheme color) async{
     final player = AudioPlayer();
     await player.setVolume(1.0);
     player.play(AssetSource('sounds/buyItem.mp3'));
@@ -58,12 +60,12 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
                 children: [
                   CircleAvatar(
                     radius: 70,
-                    backgroundImage: AssetImage(avatar.imagePath),
-                    backgroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+                    backgroundImage: AssetImage(color.imagePath),
+                    backgroundColor: const Color.fromARGB(108, 255, 255, 255),
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'Novo avatar desbloqueado!',
+                    'Nova Cor desbloqueada!',
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.secondary,
                       fontSize: 22,
@@ -79,7 +81,7 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Continuar', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
+              child: const Text('Continuar', style: TextStyle(color: Colors.black)),
             ),
           ],
         ),
@@ -93,32 +95,32 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
 }
 
 
-  void _showAvatarDialog(BuildContext context, AvatarModel avatar) {
+  void _showColorDialog(BuildContext context, AppTheme color) {
   setState(() {}); // força rebuild antes do diálogo, só pra garantir
-  final updatedAvatar = widget.avatars.firstWhere((a) => a.name == avatar.name);
-  final isUnlocked = widget.userLevel >= updatedAvatar.requiredLevel;
-  final hasCoins = AppData.coins >= updatedAvatar.price;
-  final alreadyOwned = updatedAvatar.owned;
-  final isSelected = AppData.currentAvatar == updatedAvatar.name;
+  final updateColor = widget.colors.firstWhere((a) => a.name == color.name);
+  final isUnlocked = widget.userLevel >= updateColor.requiredLevel;
+  final hasCoins = AppData.coins >= updateColor.price;
+  final alreadyOwned = updateColor.owned;
+  final isSelected = AppData.currentTheme == updateColor.name;
 
   String buttonText = '';
   bool isButtonEnabled = false;
   Color buttonColor = Colors.grey;
 
   if (!isUnlocked) {
-    buttonText = 'Nível ${updatedAvatar.requiredLevel} necessário';
+    buttonText = 'Nível ${updateColor.requiredLevel} necessário';
     isButtonEnabled = false;
     buttonColor = Colors.grey.shade700;
   } else if (!alreadyOwned && !hasCoins) {
-    buttonText = '${updatedAvatar.price}\nmoedas (insuficiente)';
+    buttonText = '${updateColor.price}\nmoedas (insuficiente)';
     isButtonEnabled = false;
     buttonColor = Colors.red.shade300;
   } else if (!alreadyOwned && hasCoins) {
-    buttonText = 'Comprar avatar\n(${updatedAvatar.price} moedas)';
+    buttonText = 'Comprar Cor\n(${updateColor.price} moedas)';
     isButtonEnabled = true;
     buttonColor = Colors.green;
   } else if (alreadyOwned && !isSelected) {
-    buttonText = 'Usar avatar';
+    buttonText = 'Usar Cor';
     isButtonEnabled = true;
     buttonColor = Colors.blue;
   } else if (isSelected) {
@@ -130,10 +132,10 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Colors.grey[900],
       title: Center(
         child: Text(
-          updatedAvatar.name ,
+          updateColor.name ,
           style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 22),
         ),
       ),
@@ -142,8 +144,8 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
         children: [
           CircleAvatar(
         radius: 80,
-        backgroundImage: AssetImage(updatedAvatar.imagePath), // substitua pelo avatar atual do usuário
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        backgroundImage: AssetImage(updateColor.imagePath), // substitua pelo avatar atual do usuário
+        backgroundColor: const Color.fromARGB(108, 255, 255, 255),
       ),
           const SizedBox(height: 20),
           ElevatedButton(
@@ -151,15 +153,16 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
                 ? () {
                     Navigator.pop(context, true);
                     if (!alreadyOwned) {
-                      AppData.buyAvatar(updatedAvatar.name); // sua lógica aqui
+                      AppData.buyColor(updateColor.name); // sua lógica aqui
                       setState(() {
                           coins = AppData.coins; // <- aqui atualiza a interface com o novo valor
                         });
                       // você pode disparar uma animação ou som aqui;
-                      _showZeldaUnlockAnimation(context, updatedAvatar);
+                      _showZeldaUnlockAnimation(context, updateColor);
                       AppData.salvarDados(); // força rebuild pra atualizar moedas
                     } else if (!isSelected) {
-                      AppData.currentAvatar = updatedAvatar.name;
+                      Provider.of<ThemeNotifier>(context, listen: false).currentTheme = updateColor;
+                      AppData.currentTheme = updateColor.name;
                       setState(() {});
                       AppData.salvarDados();
                     }
@@ -175,7 +178,7 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
               ),
             ),
 
-            child: Text(buttonText, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),),
+            child: Text(buttonText, style: TextStyle(color: Colors.white),),
           ),
         ],
       ),
@@ -196,15 +199,15 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
       appBar: AppBar(
         title: Row(
           children: [
-            const Text('Avatares'),
+            const Text('Cores'),
             const Spacer(),
             _buildCoinsDisplay(),
           ],
         ),
         backgroundColor: Colors.transparent,
-        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+        foregroundColor: Colors.white,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyLarge?.color),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context, true);
           },
@@ -212,7 +215,7 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
       ),
       body: GridView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: widget.avatars.length,
+        itemCount: widget.colors.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           mainAxisSpacing: 16,
@@ -220,10 +223,10 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
           childAspectRatio: 1,
         ),
         itemBuilder: (context, index) {
-          return AvatarGridItem(
-            avatar: widget.avatars[index],
+          return ColorGridItem(
+            color: widget.colors[index],
             userLevel: widget.userLevel,
-            onTap: () => _showAvatarDialog(context, widget.avatars[index]),
+            onTap: () => _showColorDialog(context, widget.colors[index]),
           );
         },
       ),
@@ -240,8 +243,8 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
           const SizedBox(width: 8),
           Text(
             "$coins",
-            style:  TextStyle(
-              color: Theme.of(context).textTheme.bodyLarge?.color,
+            style: const TextStyle(
+              color: Colors.white,
               fontSize: 22,
               fontFamily: 'Montserrat',
               fontWeight: FontWeight.w600,
@@ -256,22 +259,22 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
 
 
 
-class AvatarGridItem extends StatelessWidget {
-  final AvatarModel avatar;
+class ColorGridItem extends StatelessWidget {
+  final AppTheme color;
   final int userLevel;
   final VoidCallback onTap;
 
-  const AvatarGridItem({
+  const ColorGridItem({
     super.key,
-    required this.avatar,
+    required this.color,
     required this.userLevel,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isUnlocked = userLevel >= avatar.requiredLevel;
-    final canBuy = isUnlocked && !avatar.owned;
+    final isUnlocked = userLevel >= color.requiredLevel;
+    final canBuy = isUnlocked && !color.owned;
 
     return GestureDetector(
       onTap: () { onTap();
@@ -280,14 +283,14 @@ class AvatarGridItem extends StatelessWidget {
         children: [
           Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).textTheme.bodyLarge?.color, // fundo branco
+            color: const Color.fromARGB(108, 255, 255, 255), // fundo branco
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.grey.shade800, width: 2),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Image.asset(
-              avatar.imagePath,
+              color.imagePath,
               fit: BoxFit.contain, // ou cover, dependendo do efeito que quiser
             ),
           ),
@@ -297,7 +300,7 @@ class AvatarGridItem extends StatelessWidget {
           if (!isUnlocked)
             _overlay(
               icon: Icons.lock,
-              label: 'Nível ${avatar.requiredLevel}',
+              label: 'Nível ${color.requiredLevel}',
               color: Colors.black.withOpacity(0.6),
             ),
 
@@ -305,10 +308,10 @@ class AvatarGridItem extends StatelessWidget {
           if (canBuy)
             _overlay(
               icon: Icons.monetization_on,
-              label: '${avatar.price} moedas',
+              label: '${color.price} moedas',
               color: Colors.orange.withOpacity(0.5),
             ),
-            if (AppData.currentAvatar == avatar.name)
+            if (AppData.currentTheme == color.name)
             Positioned(
               right: 30,
               left: 30,

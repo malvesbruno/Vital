@@ -94,16 +94,16 @@ void _navigateToSetTreino() async {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyLarge?.color),
           onPressed: () {
             Navigator.pop(context, true);
           },
         ),
-        title: const Text(
+        title: Text(
           'Adicionar Ação Rápida',
-          style: TextStyle(color: Colors.white, fontSize: 30.0, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30.0, fontWeight: FontWeight.bold),
         ),
       ),
       body: Center(
@@ -122,14 +122,14 @@ void _navigateToSetTreino() async {
                 width: 150,
                 height: 150,
                 decoration: BoxDecoration(
-                  color: Colors.teal,
+                  color: Theme.of(context).primaryColor,
                   shape: BoxShape.circle,
                 ),
                 child: SizedBox(
                   width: 150,
                   height: 150,
                   child: IconButton(
-                    icon: Icon(Icons.water_drop, color: Colors.white, size: 80),
+                    icon: Icon(Icons.water_drop, color: Theme.of(context).textTheme.bodyLarge?.color, size: 80),
                     onPressed: _navigateToWaterIntake
                   ),
                 ),
@@ -138,7 +138,7 @@ void _navigateToSetTreino() async {
             SizedBox(height: 20),
             Text(
               'Beber Água',
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20, fontWeight: FontWeight.bold),
             ),
             buildCard('VitalTrack', 'Marque um remédio/suplemento ingerido', Icons.medication, _navigateToRemedyIntake),
             buildCard('Treino em Casa', 'Registre um treino curto ou improvisado', FontAwesomeIcons.personRunning, _navigateToSetTreino),
@@ -158,14 +158,14 @@ void _navigateToSetTreino() async {
       }, // Ação ao tocar no card
       borderRadius: BorderRadius.circular(10),
       child: Card(
-        color: const Color.fromARGB(255, 31, 31, 31),
+        color: Theme.of(context).primaryColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 0,
         child: Padding(
           padding: EdgeInsets.all(30),
           child: Row(
             children: [
-              Icon(icone, size: 30, color: Colors.white),
+              Icon(icone, size: 30, color: Theme.of(context).textTheme.bodyLarge?.color),
               SizedBox(width: 20),
               // A coluna com o texto foi envolvida pelo Expanded
               Expanded(
@@ -175,7 +175,7 @@ void _navigateToSetTreino() async {
                     Text(
                       text,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -185,7 +185,7 @@ void _navigateToSetTreino() async {
                     Text(
                       subText,
                       style: TextStyle(
-                        color: const Color.fromARGB(255, 113, 113, 113),
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),

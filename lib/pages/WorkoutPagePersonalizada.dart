@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import '../app_data.dart';
 import 'WorkoutComplete.dart';
-import '../services/challenge_service.dart';
 
 class WorkoutPagePersonalizado extends StatefulWidget {
   final List<Map<String, dynamic>> excercicios;
@@ -41,6 +40,7 @@ class _WorkoutPagePersonalizadoState extends State<WorkoutPagePersonalizado> wit
         timer.cancel();
         _pulseController.stop(); // 👉 para de pulsar quando acaba
         _pulseController.value = 1.0;
+        completeSet();
         _audioPlayer.play(AssetSource('sounds/retro_game.mp3'));
         setState(() {
           isTimerRunning = false;
@@ -87,12 +87,13 @@ class _WorkoutPagePersonalizadoState extends State<WorkoutPagePersonalizado> wit
 
 
   void completeSet() async {
+  final exercise = widget.excercicios[currentExerciseIndex];
+
   setState(() {
-    var exercise = widget.excercicios[currentExerciseIndex];
     exercise['completedSets']++;
 
     if (exercise['completedSets'] >= exercise['sets']) {
-      AppData.treinosDiarios++;
+      exercise['completed'] = true;
       widget.excercicios.removeAt(currentExerciseIndex);
 
       if (currentExerciseIndex >= widget.excercicios.length) {
@@ -100,27 +101,32 @@ class _WorkoutPagePersonalizadoState extends State<WorkoutPagePersonalizado> wit
       }
 
       if (widget.excercicios.isEmpty) {
-        // Salva antes de sair
-        AppData.salvarDados(); // sem await no setState
+        AppData.salvarDados();
         AppData.atualizarDailyStats(treinoConcluido: true);
-        ChallengeService.verificarDesafiosAutomaticos();
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => WorkoutCompletePage()),
         );
         return;
       }
+    }
 
-      int durationInMinutes = widget.excercicios[currentExerciseIndex]['duration'];
-      timerDuration = Duration(minutes: durationInMinutes);
+    // Atualiza o exercício atual e reinicia o timer
+    if (widget.excercicios.isNotEmpty) {
+      final nextExercise = widget.excercicios[currentExerciseIndex];
+      timerDuration = Duration(minutes: nextExercise['duration']);
       _remainingTime = timerDuration;
 
-      _countdownTimer?.cancel();
-      isTimerRunning = false;
+      // Só reinicia automaticamente se ainda tem sets pra esse exercício
+      if (nextExercise['completedSets'] < nextExercise['sets']) {
+        isTimerRunning = false; // espera o usuário clicar de novo
+        _pulseController.stop();
+        _pulseController.value = 1.0;
+        _countdownTimer?.cancel();
+      }
     }
   });
 
-  // Garante persistência fora do setState
   await AppData.salvarDados();
 }
 
@@ -161,12 +167,12 @@ void initState() {
     bool isWarning = _remainingTime <= Duration(minutes: 1);
     if (widget.excercicios.isEmpty) {
   return Scaffold(
-    backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     body: 
     Center(
       child: Text(
         "Você concluiu todos os exercícios! 🎉",
-        style: TextStyle(color: Colors.white, fontSize: 18),
+        style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 18),
         textAlign: TextAlign.center,
       ),
     ),
@@ -174,21 +180,21 @@ void initState() {
 }
     var currentExercise = widget.excercicios[currentExerciseIndex];
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyLarge?.color),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         title: Text("${widget.title}", style: TextStyle(
-                  color: Colors.white,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                   fontSize: 30.0,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w700,
                 )),
-        backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
       ),
       body: Padding(
@@ -196,10 +202,17 @@ void initState() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("${currentExercise['name']}", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+            Text("${currentExercise['name']}", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color)),
             SizedBox(height: 10),
-            Text("${currentExercise['sets']} sets", style: TextStyle(fontSize: 16, color: Colors.white70)),
+            Text("${currentExercise['sets']} sets", style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.4))),
             SizedBox(height: 20),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Clique para descansar", style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.4))),
+            ],),
+            SizedBox(height: 10),
             Center(
               child: GestureDetector(
                 onTap: toggleTimer,
@@ -216,7 +229,7 @@ void initState() {
                     height: 150,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.grey[900],
+                      color: Theme.of(context).primaryColor,
                     ),
                     alignment: Alignment.center,
                     child: Text(
@@ -224,7 +237,7 @@ void initState() {
                       style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
-                        color: isWarning ? Colors.redAccent : Colors.white,
+                        color: isWarning ? Colors.redAccent : Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                   ),
@@ -249,11 +262,11 @@ void initState() {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: Icon(Icons.arrow_back, color: Colors.white),
+                  icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyLarge?.color),
                   onPressed: previousExercise,
                 ),
                 IconButton(
-                  icon: Icon(Icons.arrow_forward, color: Colors.white),
+                  icon: Icon(Icons.arrow_forward, color: Theme.of(context).textTheme.bodyLarge?.color),
                   onPressed: nextExercise,
                 ),
               ],

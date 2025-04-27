@@ -38,9 +38,9 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          const Padding(
+           Padding(
             padding: EdgeInsets.only(top: 80.0),
-            child: Text('Dashboard', style: TextStyle(color: Colors.white, fontSize: 40.0, fontFamily: 'Poppins', fontWeight: FontWeight.w700)),
+            child: Text('Dashboard', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 40.0, fontFamily: 'Poppins', fontWeight: FontWeight.w700)),
           ),
           Row(
             children: [
@@ -64,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Card(
-        color: const Color.fromARGB(255, 31, 31, 31),
+        color: Theme.of(context).primaryColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 0,
         child: Padding(
@@ -74,14 +74,14 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               Row(
                 children: <Widget>[
-                  Icon(icon, color: Colors.grey, size: 30.0),
+                  Icon(icon, color: Theme.of(context).textTheme.bodyLarge?.color, size: 30.0),
                   const SizedBox(width: 20),
-                  Text(title, style: const TextStyle(color: Colors.white, fontSize: 25, fontFamily: 'Montserrat')),
+                  Text(title, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 25, fontFamily: 'Montserrat')),
                 ],
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 10),
-                child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 40, fontFamily: 'Montserrat')),
+                child: Text(value, style:  TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 40, fontFamily: 'Montserrat')),
               ),
             ],
           ),
@@ -96,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Card(
-        color: const Color.fromARGB(255, 31, 31, 31),
+        color: Theme.of(context).primaryColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 0,
         child: Padding(
@@ -106,17 +106,17 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               Row(
                 children: <Widget>[
-                  Icon(Icons.videogame_asset, color: Colors.grey, size: 30.0),
+                  Icon(Icons.videogame_asset, color: Theme.of(context).textTheme.bodyLarge?.color, size: 30.0),
                   const SizedBox(width: 20),
-                  Text('Desafios Diários', style: const TextStyle(color: Colors.white, fontSize: 30, fontFamily: 'Montserrat')),
+                  Text('Desafios Diários', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30, fontFamily: 'Montserrat')),
                 ],
               ),
               SizedBox(height: 10,),
-              Text('Nível ${AppData.level}', style: const TextStyle(color: Colors.white, fontSize: 20, fontFamily: 'Montserrat')),
+              Text('Nível ${AppData.level}', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20, fontFamily: 'Montserrat')),
             LinearProgressIndicator(
                 value: AppData.exp / (100 + (AppData.level - 1) * 50),
-                backgroundColor: const Color.fromARGB(63, 255, 255, 255),
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.secondary),
                 minHeight: 5,
               ),
               Padding(
@@ -138,7 +138,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-
   Widget _buildAddQuickAction() {
   return Padding(
     padding: const EdgeInsets.all(10.0),
@@ -149,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
         SizedBox(
           width: double.infinity,
           child: Card(
-            color: const Color.fromARGB(255, 31, 31, 31),
+            color: Theme.of(context).primaryColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
               side: BorderSide.none, // 🔥 Remove qualquer borda
@@ -160,8 +159,8 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
               child: Text(
                 "Adicionar ação rápida",
-                style: const TextStyle(
-                  color: Colors.white,
+                style:  TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                   fontSize: 25,
                   fontFamily: 'Montserrat',
                   fontWeight: FontWeight.w500,
@@ -179,8 +178,8 @@ class _MyHomePageState extends State<MyHomePage> {
             color: Colors.transparent,
             child: FloatingActionButton(
               onPressed: navigateToQuickAction,
-              backgroundColor: Colors.teal.shade700,
-              child: const Icon(Icons.add, color: Colors.white, size: 30),
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+              child: Icon(Icons.add, color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(red: 0, blue: 0, green: 0), size: 30),
             ),
           ),
         ),
@@ -195,12 +194,12 @@ Widget _buildCoinsDisplay() {
     child: Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Icon(Icons.monetization_on, color: Colors.amber, size: 28),
+        Icon(Icons.monetization_on, color: Theme.of(context).colorScheme.secondary, size: 28),
         const SizedBox(width: 8),
         Text(
           "${AppData.coins}",
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyLarge?.color,
             fontSize: 22,
             fontFamily: 'Montserrat',
             fontWeight: FontWeight.w600,
@@ -220,7 +219,7 @@ Widget _buildAvatar() {
       onTap: () {
         showModalBottomSheet(
           context: context,
-          backgroundColor: const Color.fromARGB(255, 40, 40, 40),
+          backgroundColor: Theme.of(context).primaryColor,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
@@ -231,8 +230,8 @@ Widget _buildAvatar() {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ListTile(
-                    leading: Icon(Icons.store, color: Colors.white),
-                    title: Text("Loja", style: TextStyle(color: Colors.white)),
+                    leading: Icon(Icons.store, color: Theme.of(context).textTheme.bodyLarge?.color),
+                    title: Text("Loja", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
                     onTap: () async{
                       final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => MenushopPage()));
                       // Navegar para tela da loja
@@ -254,7 +253,7 @@ Widget _buildAvatar() {
       child: CircleAvatar(
         radius: 25,
         backgroundImage: AssetImage(AppData.avatars.firstWhere((el) => el.name == AppData.currentAvatar).imagePath), // substitua pelo avatar atual do usuário
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        backgroundColor: Theme.of(context).textTheme.bodyLarge?.color,
       ),
     ),
     )

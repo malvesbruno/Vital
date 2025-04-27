@@ -24,14 +24,14 @@ class _StatsPageState extends State<StatsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1010),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Estatísticas',
-          style: TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30, fontWeight: FontWeight.bold),
         ),
       ),
       body: SafeArea(
@@ -67,30 +67,30 @@ void _showBmiDialog() {
     context: context,
     builder: (context) {
       return AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: Theme.of(context).primaryColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: const Text("Calcular IMC", style: TextStyle(color: Colors.white)),
+        title: Text("Calcular IMC", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: alturaController,
               keyboardType: TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: "Altura (m)",
-                labelStyle: TextStyle(color: Colors.white70),
+                labelStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: pesoController,
               keyboardType: TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: "Peso (kg)",
-                labelStyle: TextStyle(color: Colors.white70),
+                labelStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
             ),
           ],
         ),
@@ -122,17 +122,17 @@ void _showBmiDialog() {
   Widget _buildDropdown() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[900],
+        color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: DropdownButton<String>(
         value: selectedPeriod,
-        dropdownColor: Colors.grey[900],
+        dropdownColor: Theme.of(context).primaryColor,
         icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
         isExpanded: true,
         underline: const SizedBox(),
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
         items: const [
           DropdownMenuItem(value: 'day', child: Text("Hoje")),
           DropdownMenuItem(value: 'week', child: Text("Essa Semana")),
@@ -146,15 +146,23 @@ void _showBmiDialog() {
   }
 
   Widget _buildStatCard(StatsModel stat) {
-    final bmi = _getBmiLabel(stat.data.first);
-    final bmiText = bmi.key;
-    final bmiColor = bmi.value;
+    late final String bmiText;
+    late final Color bmiColor;
+    if (stat.data.isNotEmpty){
+      final bmi = _getBmiLabel(stat.data.first);
+      bmiText = bmi.key;  
+      bmiColor = bmi.value;
+    } else {
+      bmiColor = Colors.grey;
+      bmiText = 'Não Calculado';
+
+    }
 
   return Container(
     margin: const EdgeInsets.only(bottom: 16),
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      color: Colors.grey[850],
+      color: Theme.of(context).primaryColor,
       borderRadius: BorderRadius.circular(20),
       boxShadow: [BoxShadow(color: const Color.fromARGB(7, 0, 0, 0), blurRadius: 8)],
     ),
@@ -174,7 +182,7 @@ void _showBmiDialog() {
           child: 
           InkWell(
             onTap: () {
-              if (stat.data.isEmpty) {
+              if (stat.data.isEmpty || stat.data.last == 0.0) {
                 _showBmiDialog();
               }
             },
@@ -182,7 +190,7 @@ void _showBmiDialog() {
             color: Colors.transparent,
             elevation: 0,
             child: 
-            stat.data.isEmpty ? 
+            stat.data.isEmpty || stat.data.last == 0.0? 
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -238,7 +246,7 @@ void _showBmiDialog() {
                         value: stat.data.isNotEmpty
                             ? (1 - (stat.data.first / stat.goal)).clamp(0.0, 1.0)
                             : 1.0,
-                        color: const Color.fromARGB(183, 125, 125, 125),
+                        color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.4),
                         radius: 20,
                         showTitle: false,
                       ),
@@ -260,7 +268,7 @@ void _showBmiDialog() {
                             if (stat.title == "Dias Ativos") {
                               String label = value >= 0.5 ? "Ativo" : "Inativo";
                               return Text(label,
-                                  style: const TextStyle(color: Colors.white54, fontSize: 11));
+                                  style:  TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.4), fontSize: 11));
                             }
 
                             final displayValue = stat.isPercentage
@@ -268,7 +276,7 @@ void _showBmiDialog() {
                                 : value.toStringAsFixed(1);
 
                             return Text("$displayValue ${stat.unit}",
-                                style: const TextStyle(color: Colors.white54, fontSize: 11));
+                                style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.4), fontSize: 11));
                           },
                         ),
                       ),
@@ -279,7 +287,7 @@ void _showBmiDialog() {
                             final index = value.toInt();
                             if (index < stat.labels.length) {
                               return Text(stat.labels[index],
-                                  style: const TextStyle(color: Colors.white54, fontSize: 12));
+                                  style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.4), fontSize: 12));
                             }
                             return const SizedBox();
                           },

@@ -46,6 +46,7 @@ dependencies:
   vector_math: ^2.1.4
   flutter_launcher_icons: ^0.13.1
   confetti: ^0.7.0
+  provider: ^6.0.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -98,6 +99,32 @@ flutter:
     - assets/avatares/rocketman.png
     - assets/avatares/street.png
     - assets/avatares/boho.png
+    - assets/avatares/andorinha.png
+    - assets/avatares/betterman.png
+    - assets/avatares/broken_one.png
+    - assets/avatares/caos.png
+    - assets/avatares/carniceiro.png
+    - assets/avatares/cicatriz.png
+    - assets/avatares/feiticeira_nata.png
+    - assets/avatares/ghost.png
+    - assets/avatares/king_of_pirates.png
+    - assets/avatares/lightblade.png
+    - assets/avatares/mr_vega.png
+    - assets/avatares/narrator.png
+    - assets/avatares/negative_creep.png
+    - assets/avatares/original.png
+    - assets/avatares/princesa_rebelde.png
+    - assets/avatares/red_rebellion.png
+    - assets/avatares/sad_saddler.png
+    - assets/avatares/spider.png
+    - assets/avatares/tacitus.png
+    - assets/avatares/vinil_veneno.png
+    - assets/colors/ciano_escuro.png
+    - assets/colors/defaultColor.png
+    - assets/colors/espaço_&_azul.png
+    - assets/colors/grafite_&_neve.png
+    - assets/colors/noite_azulada.png
+    - assets/colors/vermelho_profundo.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

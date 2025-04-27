@@ -25,16 +25,16 @@ class _AddRemedyIntakePageState extends State<AddRemdyIntakePage>{
   Widget build(BuildContext context){
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyLarge?.color),
           onPressed: () {
             Navigator.pop(context, true);
           },
         ),
-        title: const Text(
+        title: Text(
           "VitalTrack",
-          style: TextStyle(color: Colors.white, fontSize: 30.0, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30.0, fontWeight: FontWeight.bold),
         ),
       ),
       body: SingleChildScrollView(
@@ -68,7 +68,7 @@ class _AddRemedyIntakePageState extends State<AddRemdyIntakePage>{
       },
       borderRadius: BorderRadius.circular(10),
       child: Card(
-        color: const Color.fromARGB(255, 31, 31, 31),
+        color: Theme.of(context).primaryColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 0,
         child: Padding(
@@ -81,11 +81,11 @@ class _AddRemedyIntakePageState extends State<AddRemdyIntakePage>{
                 children: [
                   Text(
                     remedio.title,
-                    style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   Text(
                     timeOfDayToString(remedio.horario),
-                    style: TextStyle(color: const Color.fromARGB(255, 119, 119, 119), fontSize: 15, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 15, fontWeight: FontWeight.bold),
                   )
                 ],
               ),

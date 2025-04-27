@@ -16,16 +16,16 @@ class _AddSleepIntakePageState extends State<AddSleepIntakePage>{
   Widget build(BuildContext context){
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyLarge?.color),
           onPressed: () {
             Navigator.pop(context, true);
           },
         ),
-        title: const Text(
+        title: Text(
           "Sono",
-          style: TextStyle(color: Colors.white, fontSize: 30.0, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30.0, fontWeight: FontWeight.bold),
         ),
       ),
       body: SingleChildScrollView(child: 
@@ -46,19 +46,20 @@ class _AddSleepIntakePageState extends State<AddSleepIntakePage>{
   }
 
 
-  Widget buildCard(String text, int value) {
+  Widget buildCard(String text, double value) {
   return Padding(
     padding: EdgeInsets.only(left: 30, right: 30, top: 10),
     child: InkWell(
       onTap: () async{
         AppData.horasDormidas += value;
+        AppData.atualizarDailyStats(horasDormidas: value);
         await AppData.salvarDados();
         if (!mounted) return;
         Navigator.pop(context, true);
 },
       borderRadius: BorderRadius.circular(10),
       child: Card(
-        color: const Color.fromARGB(255, 31, 31, 31),
+        color: Theme.of(context).primaryColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 0,
         child: Padding(
@@ -71,7 +72,7 @@ class _AddSleepIntakePageState extends State<AddSleepIntakePage>{
                 children: [
                   Text(
                     '$text horas dormidas',
-                    style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -93,14 +94,14 @@ Widget buildCardPersonalizado() {
     builder: (context) {
       double? customHours;
       return AlertDialog(
-        backgroundColor: const Color.fromARGB(255, 31, 31, 31),
-        title: Text("Quantidade Personalizada", style: TextStyle(color: Colors.white)),
+        backgroundColor: Theme.of(context).primaryColor,
+        title: Text("Quantidade Personalizada", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
         content: TextField(
           keyboardType: TextInputType.numberWithOptions(decimal: true),
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
           decoration: InputDecoration(
             hintText: "Digite o número de horas",
-            hintStyle: TextStyle(color: Colors.white54),
+            hintStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
           ),
           onChanged: (value) {
             customHours = double.tryParse(value);
@@ -112,10 +113,11 @@ Widget buildCardPersonalizado() {
             onPressed: () => Navigator.pop(context),
           ),
           TextButton(
-            child: Text("Adicionar", style: TextStyle(color: Colors.tealAccent)),
+            child: Text("Adicionar", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
             onPressed: () {
               if (customHours != null && customHours! > 0) {
                 AppData.horasDormidas += customHours!;
+                AppData.atualizarDailyStats(horasDormidas: customHours?.toDouble());
                 Navigator.pop(context); // Fecha o dialog
                 Navigator.pop(context, true); // Volta para a tela anterior
               }
@@ -128,7 +130,7 @@ Widget buildCardPersonalizado() {
 },
       borderRadius: BorderRadius.circular(10),
       child: Card(
-        color: const Color.fromARGB(255, 31, 31, 31),
+        color: Theme.of(context).primaryColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 0,
         child: Padding(
@@ -141,7 +143,7 @@ Widget buildCardPersonalizado() {
                 children: [
                   Text(
                     'Adicione a Quantidade Exata',
-                    style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),

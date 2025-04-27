@@ -13,6 +13,7 @@ import 'services/challenge_service.dart';
 import 'models/DailyStatsModel.dart';
 import 'models/AvatarModel.dart';
 import '../pages/LevelUpPage.dart';
+import '../models/ColorsModel.dart';
 
 class AppData {
   static List<TreinoModel> treinos = [];
@@ -46,6 +47,7 @@ static Future<void> salvarStatsDoDia() async {
     waterLiters: waterConsumed.toDouble(),
     completedActivities: completedActivities,
     completedWorkouts: treinosDiarios,
+    horasDormidas: horasDormidas,
     wasActive: true,
     bmi: bmi
   );
@@ -116,6 +118,7 @@ static Future<void> carregarDesafiosDoDia() async {
   static int exp = 0;
   static int level = 1;
   static String currentAvatar = avatars[0].name;
+  static String currentTheme = avatars[0].name;
   static int treinosDiarios = 0;
   static double bmi = 0.0;
   static int completedActivities = 0;
@@ -156,9 +159,19 @@ static Future<void> carregarDesafiosDoDia() async {
     await prefs.setStringList('Owned Avatars', ownedNames);
   }
 
+  static Future<void> saveOwnedColors() async {
+    final prefs = await SharedPreferences.getInstance();
+    final ownedColorNames = themes
+        .where((color) => color.owned)
+        .map((color) => color.name)
+        .toList();
+    await prefs.setStringList('Owned Colors', ownedColorNames);
+  }
+
   static Future<void> loadOwnedAvatars() async {
   final prefs = await SharedPreferences.getInstance();
   final ownedNames = prefs.getStringList('Owned Avatars') ?? [];
+
 
   for (var avatar in avatars) {
     if (avatar.name == 'Default'){
@@ -169,22 +182,125 @@ static Future<void> carregarDesafiosDoDia() async {
   }
 }
 
+static Future<void> loadOwnedColors() async {
+  final prefs = await SharedPreferences.getInstance();
+  final ownedNames = prefs.getStringList('Owned Colors') ?? [];
+
+  for (var color in themes) {
+    if (color.name == 'Default'){
+      color.owned = true;
+    } else{
+    color.owned = ownedNames.contains(color.name);
+    }
+  }
+}
+
 
   static List<AvatarModel> avatars = [
-    AvatarModel(name: 'Default', imagePath: 'assets/avatares/default.png', price: 0, requiredLevel: 1, owned: true),
-    AvatarModel(name: 'Nerd', imagePath: 'assets/avatares/nerd.png', price: 100, requiredLevel: 3),
-    AvatarModel(name: 'Hippie', imagePath: 'assets/avatares/hippie.png', price: 120, requiredLevel: 5),
-    AvatarModel(name: 'Girl', imagePath: 'assets/avatares/girl.png', price: 140, requiredLevel: 8),
-    AvatarModel(name: 'Rocker', imagePath: 'assets/avatares/rocker.png', price: 160, requiredLevel: 10),
-    AvatarModel(name: 'Boho', imagePath: 'assets/avatares/boho.png', price: 180, requiredLevel: 12),
-    AvatarModel(name: 'Atleta', imagePath: 'assets/avatares/atleta.png', price: 200, requiredLevel: 14),
-    AvatarModel(name: 'Mago', imagePath: 'assets/avatares/mago.png', price: 220, requiredLevel: 18),
-    AvatarModel(name: 'Street', imagePath: 'assets/avatares/street.png', price: 240, requiredLevel: 20),
-    AvatarModel(name: 'Robô', imagePath: 'assets/avatares/robo.png', price: 260, requiredLevel: 25),
-    AvatarModel(name: 'Musicman', imagePath: 'assets/avatares/musicman.png', price: 280, requiredLevel: 30),
-    AvatarModel(name: 'Rocketman', imagePath: 'assets/avatares/rocketman.png', price: 300, requiredLevel: 40),
-    AvatarModel(name: 'Dex', imagePath: 'assets/avatares/dex.png', price: 350, requiredLevel: 50),
-  ];
+  AvatarModel(name: 'Default', imagePath: 'assets/avatares/default.png', price: 0, requiredLevel: 1, owned: true),
+  AvatarModel(name: 'Nerd', imagePath: 'assets/avatares/nerd.png', price: 30, requiredLevel: 3),
+  AvatarModel(name: 'Sad Saddler', imagePath: 'assets/avatares/sad_saddler.png', price: 50, requiredLevel: 5),
+  AvatarModel(name: 'Hippie', imagePath: 'assets/avatares/hippie.png', price: 80, requiredLevel: 8),
+  AvatarModel(name: 'Tacitus Kilgore', imagePath: 'assets/avatares/tacitus.png', price: 100, requiredLevel: 10),
+  AvatarModel(name: 'Andorinha', imagePath: 'assets/avatares/andorinha.png', price: 150, requiredLevel: 15),
+  AvatarModel(name: 'Girl', imagePath: 'assets/avatares/girl.png', price: 200, requiredLevel: 20),
+  AvatarModel(name: 'Carniceiro', imagePath: 'assets/avatares/carniceiro.png', price: 270, requiredLevel: 27),
+  AvatarModel(name: 'Cicatriz', imagePath: 'assets/avatares/cicatriz.png', price: 350, requiredLevel: 35),
+  AvatarModel(name: 'Feiticeira Nata', imagePath: 'assets/avatares/feiticeira_nata.png', price: 420, requiredLevel: 42),
+  AvatarModel(name: 'Atleta', imagePath: 'assets/avatares/atleta.png', price: 500, requiredLevel: 50),
+  AvatarModel(name: 'Fantasma De VitalCity', imagePath: 'assets/avatares/ghost.png', price: 580, requiredLevel: 58),
+  AvatarModel(name: 'Rocker', imagePath: 'assets/avatares/rocker.png', price: 630, requiredLevel: 63),
+  AvatarModel(name: 'Boho', imagePath: 'assets/avatares/boho.png', price: 700, requiredLevel: 70),
+  AvatarModel(name: 'King of Pirates', imagePath: 'assets/avatares/king_of_pirates.png', price: 750, requiredLevel: 75),
+  AvatarModel(name: 'Mago', imagePath: 'assets/avatares/mago.png', price: 800, requiredLevel: 80),
+  AvatarModel(name: 'Lightblade', imagePath: 'assets/avatares/lightblade.png', price: 870, requiredLevel: 87),
+  AvatarModel(name: 'Street', imagePath: 'assets/avatares/street.png', price: 900, requiredLevel: 90),
+  AvatarModel(name: 'Princesa Rebelde', imagePath: 'assets/avatares/princesa_rebelde.png', price: 950, requiredLevel: 95),
+  AvatarModel(name: 'Mr. Vega', imagePath: 'assets/avatares/mr_vega.png', price: 1000, requiredLevel: 100),
+  AvatarModel(name: 'Vinil & Veneno', imagePath: 'assets/avatares/vinil_veneno.png', price: 1100, requiredLevel: 110),
+  AvatarModel(name: 'Original de VitalWell', imagePath: 'assets/avatares/original.png', price: 1200, requiredLevel: 120),
+  AvatarModel(name: 'Caos', imagePath: 'assets/avatares/caos.png', price: 1300, requiredLevel: 130),
+  AvatarModel(name: 'Rocketman', imagePath: 'assets/avatares/rocketman.png', price: 1350, requiredLevel: 135),
+  AvatarModel(name: 'Broken One', imagePath: 'assets/avatares/broken_one.png', price: 1400, requiredLevel: 140),
+  AvatarModel(name: 'Red Rebellion', imagePath: 'assets/avatares/red_rebellion.png', price: 1500, requiredLevel: 150),
+  AvatarModel(name: 'Negative Creep', imagePath: 'assets/avatares/negative_creep.png', price: 1600, requiredLevel: 160),
+  AvatarModel(name: 'BetterMan', imagePath: 'assets/avatares/betterman.png', price: 1700, requiredLevel: 170),
+  AvatarModel(name: 'Ele já não apareceu?', imagePath: 'assets/avatares/narrator.png', price: 1750, requiredLevel: 175),
+  AvatarModel(name: 'Parceiro da Vizinhança', imagePath: 'assets/avatares/spider.png', price: 1800, requiredLevel: 180),
+  AvatarModel(name: 'Dex', imagePath: 'assets/avatares/dex.png', price: 1850, requiredLevel: 185),
+  AvatarModel(name: 'Robô', imagePath: 'assets/avatares/robo.png', price: 2000, requiredLevel: 200),
+];
+
+  static List<AppTheme> themes = [
+    AppTheme(
+  name: 'Default',
+  backgroundColor: Colors.black,
+  primaryColor: Color(0xFF1F1F1F),      // cor dos cards
+  secondaryColor: const Color(0xFF9E9E9E),         // texto secundário ou ícones
+  accentColor: const Color(0xFFFFC107),           // destaque, botões etc
+  textColor: Colors.white,
+  imagePath: 'assets/colors/defaultColor.png',
+  price: 0,
+  requiredLevel: 1,
+  owned: true,          // texto principal
+),
+  AppTheme(
+    name: "Ciano Escuro",
+    backgroundColor: Color(0xFF1E1E1E),
+    primaryColor: Color.fromARGB(255, 42, 81, 81),
+    secondaryColor: Color(0xFF4FBDBD), // tom mais claro do ciano
+    textColor: Colors.white,
+    accentColor: Color(0xFF00FFFF),
+    imagePath: 'assets/colors/ciano_escuro.png',
+    price: 100,
+    requiredLevel: 2,
+
+  ),
+  AppTheme(
+    name: "Noite Azulada",
+    backgroundColor: Color(0xFF0D1B2A),
+    primaryColor: Color.fromARGB(255, 90, 92, 102),
+    secondaryColor: Color(0xFF415A77), // azul escuro esmaecido
+    textColor: Colors.white,
+    accentColor: Color(0xFF00BFFF),
+    imagePath: 'assets/colors/noite_azulada.png',
+    price: 150,
+    requiredLevel: 7,
+  ),
+  AppTheme(
+    name: "Grafite & Neve",
+    backgroundColor: Color(0xFF2B2B2B),
+    primaryColor: Color.fromARGB(255, 116, 116, 116),
+    secondaryColor: Color(0xFFDADADA), // cinza claro elegante
+    textColor: const Color.fromARGB(255, 255, 255, 255),
+    accentColor: Color(0xFF4A90E2),
+    imagePath: 'assets/colors/grafite_&_neve.png',
+    price: 180,
+    requiredLevel: 13,
+  ),
+  AppTheme(
+    name: "Espaço & Azul",
+    backgroundColor: Color(0xFF202124),
+    primaryColor: Color(0xFF3F88C5),
+    secondaryColor: Color(0xFF72AEE6), // azul mais claro e suave
+    textColor: Colors.white,
+    accentColor: Color(0xFF64FFDA),
+    imagePath: 'assets/colors/espaço_&_azul.png',
+    price: 0,
+     requiredLevel: 19,
+  ),
+  AppTheme(
+    name: "Vermelho Profundo",
+    backgroundColor: Color(0xFF121212),
+    primaryColor: Color(0xFF8B0000),
+    secondaryColor: Color(0xFFB22222), // vermelho tijolo mais leve
+    textColor: Colors.white,
+    accentColor: Color(0xFFFF4500),
+    imagePath: 'assets/colors/vermelho_profundo.png',
+    price: 300,
+    requiredLevel: 35,
+  ),
+];
 
 
   static void buyAvatar(String name) async{
@@ -192,6 +308,15 @@ static Future<void> carregarDesafiosDoDia() async {
     if (!avatar.owned && coins >= avatar.price && level >= avatar.requiredLevel) {
       coins -= avatar.price;
       avatar.owned = true;
+      await saveOwnedAvatars();
+    }
+  }
+
+  static void buyColor(String name) async{
+    final color = themes.firstWhere((a) => a.name == name);
+    if (!color.owned && coins >= color.price && level >= color.requiredLevel) {
+      coins -= color.price;
+      color.owned = true;
       await saveOwnedAvatars();
     }
   }
@@ -246,6 +371,18 @@ static Future<void> carregarDesafiosDoDia() async {
     ),
     StatsModel(
       date: DateTime.now(),
+      title: "Horas Dormidas",
+      unit: "H",
+      icon: Icons.bed,
+      color: const Color.fromARGB(255, 166, 187, 255),
+      isPercentage: false,
+      labels: ultimosDias.map((e) => "${e.date.day}/${e.date.month}").toList(),
+      data: ultimosDias.map((e) => e.horasDormidas.toDouble()).toList(),
+      goal: 8,
+      isBmi: false
+    ),
+    StatsModel(
+      date: DateTime.now(),
       title: "Dias Ativos",
       unit: "",
       icon: Icons.local_fire_department,
@@ -275,6 +412,7 @@ static Future<void> carregarDesafiosDoDia() async {
 static void setBmi(double bmiImput){
   bmi = bmiImput;
   atualizarDailyStats(bmi: bmiImput);
+  salvarDados();
 }
 
 
@@ -298,7 +436,8 @@ static void setBmi(double bmiImput){
   double? agua,
   bool atividadeConcluida = false,
   bool treinoConcluido = false,
-  double bmi = 0.0,
+  double? horasDormidas,
+  double? bmi,
 }) {
   final hoje = DateTime.now();
   final hojeFormatado = DateTime(hoje.year, hoje.month, hoje.day);
@@ -320,8 +459,9 @@ static void setBmi(double bmiImput){
     waterLiters: statsHoje.waterLiters + (agua ?? 0.0),
     completedActivities: statsHoje.completedActivities + (atividadeConcluida ? 1 : 0),
     completedWorkouts: statsHoje.completedWorkouts + (treinoConcluido ? 1 : 0),
+    horasDormidas: statsHoje.horasDormidas + (horasDormidas ?? 0.0),
     wasActive: true,
-    bmi: bmi,
+    bmi: bmi ?? statsHoje.bmi,
   );
 
   // Substitui o antigo
@@ -353,6 +493,7 @@ static void salvarDailyStats() async {
     prefs.setInt('exp', exp);
     prefs.setInt('level', level);
     prefs.setString('currentAvatar', currentAvatar);
+    prefs.setString('currentTheme', currentTheme);
     prefs.setStringList('desafios_do_dia', dailyChallenges.map((d) => jsonEncode(d.toJson())).toList());
 
     prefs.setInt('waterConsumed', waterConsumed);
@@ -427,11 +568,12 @@ static void salvarDailyStats() async {
 
   waterConsumed = prefs.getInt('waterConsumed') ?? 0;
   treinosDiarios = prefs.getInt('treinosDiarios') ?? 0;
-  coins = prefs.getInt('coins') ?? 2000;
-  exp = prefs.getInt('exp') ?? 190;
-  level = prefs.getInt('level') ?? 2;
+  coins = prefs.getInt('coins') ?? 0;
+  exp = prefs.getInt('exp') ?? 0;
+  level = prefs.getInt('level') ?? 1;
   bmi = prefs.getDouble('bmi') ?? 0.0;
   currentAvatar = prefs.getString('currentAvatar') ?? 'Default';
+  currentTheme = prefs.getString('currentTheme') ?? 'Default';
   completedActivities = prefs.getInt('completedActivities') ?? 0;
   progress = prefs.getDouble('progress') ?? 0.0;
   horasDormidas = prefs.getDouble('horasDormidas') ?? 0.0;

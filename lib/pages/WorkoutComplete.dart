@@ -8,21 +8,21 @@ class WorkoutCompletePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.celebration, color: Colors.tealAccent, size: 100),
+              Icon(Icons.celebration, color: Theme.of(context).textTheme.bodyLarge?.color, size: 100),
               SizedBox(height: 20),
               Text(
                 "Parabéns!\nVocê concluiu seu treino 🎉",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 28,
-                  color: Colors.white,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.bold,
                 ),
@@ -38,13 +38,13 @@ class WorkoutCompletePage extends StatelessWidget {
 
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
+                  backgroundColor: Theme.of(context).primaryColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                   minimumSize: const ui.Size(double.infinity, 50),
                 ),
-                child: Text("Voltar ao início", style: TextStyle(fontSize: 16, color: Colors.white)),
+                child: Text("Voltar ao início", style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyLarge?.color)),
               ),
             ],
           ),

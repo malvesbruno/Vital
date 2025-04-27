@@ -19,6 +19,7 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
   String nomeTreino = '';
   bool erro = false;
   String? erroMensagem;
+  int intensidadeSelecionada = 1;
 
   final List<String> diasDaSemana = [
     "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"
@@ -76,7 +77,7 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
   }
 
   void _salvarTreino() async{
-  AppData.treinos.add(TreinoModel(nome: nomeTreino, diasSemana: formatar_dia(diasSelecionados), exercicios: List.from(AppData.treinosSelecionados), horario: horarioSelecionado as TimeOfDay));
+  AppData.treinos.add(TreinoModel(nome: nomeTreino, diasSemana: formatar_dia(diasSelecionados), exercicios: List.from(AppData.treinosSelecionados), horario: horarioSelecionado as TimeOfDay, intensidade: intensidadeSelecionada));
   AppData.treinosSelecionados.clear();
   await AppData.salvarDados();
   await Verificaragendamento.verficarAgendamento();
@@ -93,9 +94,9 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
     return Scaffold(
       resizeToAvoidBottomInset: true, 
       appBar: AppBar(
-        title: const Text("Configurar Treino", style: TextStyle(color: Colors.white)),
+        title: Text("Configurar Treino", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
         backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
+        foregroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: Center(
         child: Padding(
@@ -109,7 +110,7 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                    icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).textTheme.bodyLarge?.color),
                     onPressed: _anterior,
                   ),
                   Expanded(
@@ -117,8 +118,8 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
                       configurandoTreino
                           ? AppData.treinosSelecionados[indexAtual].name
                           : 'Agendamento',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style:  TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontSize: 24,
                       ),
                       maxLines: 1,
@@ -128,7 +129,7 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
                   ),
 
                   IconButton(
-                    icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+                    icon: Icon(Icons.arrow_forward_ios, color: Theme.of(context).textTheme.bodyLarge?.color),
                     onPressed: _proximo,
                   ),
                 ],
@@ -137,11 +138,11 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
 
               // Conteúdo dinâmico
               if (configurandoTreino) ...[
-                const Text("Sets:", style: TextStyle(color: Colors.white, fontSize: 20)),
+                Text("Sets:", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20)),
                 DropdownButton<int>(
                   value: AppData.treinosSelecionados[indexAtual].sets,
                   elevation: 0,
-                  dropdownColor: const Color.fromARGB(255, 31, 31, 31),
+                  dropdownColor: Theme.of(context).primaryColor,
                   onChanged: (int? value) {
                     setState(() {
                       AppData.treinosSelecionados[indexAtual].sets = value!;
@@ -150,17 +151,17 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
                   items: List.generate(10, (i) => i + 1)
                       .map((e) => DropdownMenuItem(
                             value: e,
-                            child: Text('$e', style: const TextStyle(color: Colors.white)),
+                            child: Text('$e', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
                           ))
                       .toList(),
                 ),
                 SizedBox(height: 5,),
-                const Text("Duração (min):", style: TextStyle(color: Colors.white, fontSize: 20)),
+                Text("Duração do Descanso (min):", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20)),
                 TextField(
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
+                style:  TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                decoration: InputDecoration(
                   labelText: 'Duração (min): ',
-                  labelStyle: TextStyle(color: Colors.white),
+                  labelStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white),
                   ),
@@ -188,24 +189,24 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
               ] else ...[
                 // Última tela: horário e dias
                 ListTile(
-                  title: const Text("Selecionar Horário", style: TextStyle(color: Colors.white)),
+                  title: Text("Selecionar Horário", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color,  fontSize: 20)),
                   subtitle: Text(
                     horarioSelecionado != null
                         ? "${horarioSelecionado!.hour.toString().padLeft(2, '0')}:${horarioSelecionado!.minute.toString().padLeft(2, '0')}"
                         : "Nenhum horário selecionado",
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                   ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.access_time, color: Colors.white),
+                    icon: Icon(Icons.access_time, color: Theme.of(context).textTheme.bodyLarge?.color),
                     onPressed: _selecionarHorario,
                   ),
                 ),
                 const SizedBox(height: 10),
                 TextField(
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
+                style:  TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color,  fontSize: 20),
+                decoration: InputDecoration(
                   labelText: 'Nome do Treino',
-                  labelStyle: TextStyle(color: Colors.white),
+                  labelStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                   enabledBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.white),
                   ),
@@ -220,7 +221,7 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
                 },
               ),
               SizedBox(height: 30,),
-                const Text("Dias da Semana", style: TextStyle(color: Colors.white)),
+                Text("Dias da Semana", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color,  fontSize: 20)),
                 Wrap(
                   spacing: 8.0,
                   children: diasDaSemana.map((dia) {
@@ -228,18 +229,55 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
                     return ChoiceChip(
                       label: Text(dia),
                       selected: selecionado,
-                      selectedColor: const Color.fromARGB(255, 210, 210, 210),
-                      backgroundColor: Colors.grey[800],
+                      selectedColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8, blue: 0.1, green: 0.6, red: 0.7),
+                      backgroundColor: Theme.of(context).primaryColor,
+                      checkmarkColor: Theme.of(context).scaffoldBackgroundColor,
                       labelStyle:
-                          TextStyle(color: selecionado ? Colors.black : Colors.white),
+                          TextStyle(color: selecionado ? Theme.of(context).scaffoldBackgroundColor : Theme.of(context).textTheme.bodyLarge?.color),
                       onSelected: (_) => _toggleDia(dia),
                     );
                   }).toList(),
                 ),
+                const SizedBox(height: 30),
+                Text("Intensidade", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20)),
+                DropdownButton<int>(
+  value: intensidadeSelecionada,
+  elevation: 0,
+  dropdownColor: Theme.of(context).scaffoldBackgroundColor,
+  items: [
+    DropdownMenuItem(
+      value: 3,
+      child: Text(
+        "Força (Até 6 repetições)",
+        style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+      ),
+    ),
+    DropdownMenuItem(
+      value: 2,
+      child: Text(
+        "Hipertrofia (Até 12 repetições)",
+        style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+      ),
+    ),
+    DropdownMenuItem(
+      value: 1,
+      child: Text(
+        "Perda de Gordura (Até 18 repetições)",
+        style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+      ),
+    ),
+  ],
+  onChanged: (value) {
+    setState(() {
+      intensidadeSelecionada = value!;
+    });
+  },
+),
+
                 const SizedBox(height: 20),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 210, 210, 210),
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -250,8 +288,8 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
                       const SnackBar(content: Text("Treino salvo com sucesso!")),
                     );
                   },
-                  icon: const Icon(Icons.check, color: Color.fromARGB(255, 0, 0, 0),),
-                  label: const Text("Salvar Treino", style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),),
+                  icon:  Icon(Icons.check, color: Theme.of(context).scaffoldBackgroundColor,),
+                  label:  Text("Salvar Treino", style: TextStyle(color: Theme.of(context).scaffoldBackgroundColor),),
                 ),
                 Spacer(),
               ]

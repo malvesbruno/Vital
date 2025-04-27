@@ -114,9 +114,9 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Editar Treino", style: TextStyle(color: Colors.white)),
+        title: Text("Editar Treino", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
         backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
+        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -128,7 +128,7 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                  icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).textTheme.bodyLarge?.color),
                   onPressed: _anterior,
                 ),
                 Expanded(
@@ -136,8 +136,8 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
                     configurandoTreino
                         ? AppData.treinosSelecionados[indexAtual].name
                         : 'Agendamento',
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                       fontSize: 24,
                     ),
                     maxLines: 1,
@@ -146,18 +146,18 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+                  icon: Icon(Icons.arrow_forward_ios, color: Theme.of(context).textTheme.bodyLarge?.color),
                   onPressed: _proximo,
                 ),
               ],
             ),
             const SizedBox(height: 30),
             if (configurandoTreino) ...[
-              const Text("Sets:", style: TextStyle(color: Colors.white, fontSize: 20)),
+              Text("Sets:", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20)),
               DropdownButton<int>(
                 value: AppData.treinosSelecionados[indexAtual].sets,
                 elevation: 0,
-                dropdownColor: const Color.fromARGB(255, 31, 31, 31),
+                dropdownColor: Theme.of(context).scaffoldBackgroundColor,
                 onChanged: (int? value) {
                   setState(() {
                     AppData.treinosSelecionados[indexAtual].sets = value!;
@@ -166,16 +166,16 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
                 items: List.generate(10, (i) => i + 1)
                     .map((e) => DropdownMenuItem(
                           value: e,
-                          child: Text('$e', style: const TextStyle(color: Colors.white)),
+                          child: Text('$e', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
                         ))
                     .toList(),
               ),
-              const Text("Duração (min):", style: TextStyle(color: Colors.white, fontSize: 20)),
+              Text("Duração (min):", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20)),
               TextField(
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
+                style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                decoration:  InputDecoration(
                   labelText: 'Duração (min): ',
-                  labelStyle: TextStyle(color: Colors.white),
+                  labelStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
@@ -194,29 +194,29 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
               Spacer(),
             ] else ...[
               ListTile(
-                title: const Text("Selecionar Horário", style: TextStyle(color: Colors.white)),
+                title: Text("Selecionar Horário", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
                 subtitle: Text(
                   horarioSelecionado != null
                       ? "${horarioSelecionado!.hour.toString().padLeft(2, '0')}:${horarioSelecionado!.minute.toString().padLeft(2, '0')}"
                       : "Nenhum horário selecionado",
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                 ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.access_time, color: Colors.white),
+                  icon: Icon(Icons.access_time, color: Theme.of(context).textTheme.bodyLarge?.color),
                   onPressed: _selecionarHorario,
                 ),
               ),
               TextField(
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
+                style:  TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                decoration:  InputDecoration(
                   labelText: 'Nome do Treino',
-                  labelStyle: TextStyle(color: Colors.white),
+                  labelStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                 ),
                 controller: TextEditingController(text: nomeTreino),
                 onChanged: (value) => nomeTreino = value,
               ),
               const SizedBox(height: 30),
-              const Text("Dias da Semana", style: TextStyle(color: Colors.white)),
+              Text("Dias da Semana", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
               Wrap(
                 spacing: 8.0,
                 children: diasDaSemana.map((dia) {
@@ -224,9 +224,10 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
                   return ChoiceChip(
                     label: Text(dia),
                     selected: selecionado,
-                    selectedColor: const Color.fromARGB(255, 210, 210, 210),
-                    backgroundColor: Colors.grey[800],
-                    labelStyle: TextStyle(color: selecionado ? Colors.black : Colors.white),
+                    selectedColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8, blue: 0.1, green: 0.6, red: 0.7),
+                    checkmarkColor: Theme.of(context).scaffoldBackgroundColor,
+                    backgroundColor: Theme.of(context).primaryColor,
+                    labelStyle: TextStyle(color: selecionado ? Theme.of(context).scaffoldBackgroundColor : Theme.of(context).textTheme.bodyLarge?.color),
                     onSelected: (_) => _toggleDia(dia),
                   );
                 }).toList(),
@@ -234,13 +235,13 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 210, 210, 210),
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: _salvarEdicao,
-                icon: const Icon(Icons.save, color: Colors.black),
-                label: const Text("Salvar Alterações", style: TextStyle(color: Colors.black)),
+                icon:  Icon(Icons.save, color: Theme.of(context).scaffoldBackgroundColor),
+                label: Text("Salvar Alterações", style: TextStyle(color: Theme.of(context).scaffoldBackgroundColor)),
               ),
               Spacer(),
             ]

@@ -4,86 +4,50 @@ import '../pages/MyHomePage.dart';
 import '../pages/ActivityPage.dart';
 import '../pages/WorkoutPage.dart';
 import '../pages/StatsPage.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart' as fft;
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'services/VerificarAgendamento.dart';
 import 'services/Notication.dart';
 import 'services/background_task_handler.dart';
 import './services/challenge_service.dart';
+import 'package:provider/provider.dart';
+import 'themeNotifier.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../services/reset_daily.dart';
+import 'dart:async';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializa os dados de fuso horário
-  tz.initializeTimeZones();
+    tz.initializeTimeZones();
 
-  // Inicializa o plugin de notificações locais
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-  const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-  final DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings(
-    requestAlertPermission: true,
-    requestBadgePermission: true,
-    requestSoundPermission: true,
-  );
-  final InitializationSettings initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-    iOS: initializationSettingsIOS,
-  );
-
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
-  // Inicializa o serviço de notificações e agendamento
-  Future.delayed(Duration.zero, () async {
     final notificationService = NotificationService();
     await notificationService.init();
-    
-    await Verificaragendamento.verficarAgendamento();  // Corrigido o nome da função para "verificar"
+
+    await Verificaragendamento.verficarAgendamento();
+    await AppData.carregarDados();
+    await AppData.verificarSePrecisaSalvarHoje();
+
+    await AppData.carregarDesafiosDoDia();
+    await AppData.loadOwnedAvatars();
+    await AppData.loadOwnedColors();
+
+    final prefs = await SharedPreferences.getInstance();
+    final themeName = prefs.getString('currentTheme') ?? AppData.themes.first.name;
+    final initialTheme = AppData.themes.firstWhere((t) => t.name == themeName);
+
+    runApp(
+      ChangeNotifierProvider(
+        create: (_) => ThemeNotifier(initialTheme),
+        child: const MyApp(),
+      ),
+    );
+  }, (error, stack) {
+    print('Erro no main: $error');
   });
-
-  // Carrega os dados do AppData antes de rodar o app
-  await AppData.carregarDados();
-  await AppData.verificarSePrecisaSalvarHoje();
-  
-  // Inicia o serviço de tarefas em segundo plano após a inicialização do App
-  fft.FlutterForegroundTask.init(
-    androidNotificationOptions: fft.AndroidNotificationOptions(
-      channelId: 'vital_foreground',
-      channelName: 'Vital Background',
-      channelDescription: 'Executa tarefas periódicas em segundo plano.',
-      channelImportance: fft.NotificationChannelImportance.MIN,
-      priority: fft.NotificationPriority.MIN,
-      iconData: const fft.NotificationIconData(
-        resType: fft.ResourceType.mipmap,
-        resPrefix: fft.ResourcePrefix.ic,
-        name: 'launcher',
-      ), 
-      visibility: fft.NotificationVisibility.VISIBILITY_SECRET,
-    ),
-    iosNotificationOptions: const fft.IOSNotificationOptions(),
-    foregroundTaskOptions: const fft.ForegroundTaskOptions(
-      interval: 600000,
-      isOnceEvent: false,
-      autoRunOnBoot: true,
-      allowWakeLock: true,
-      allowWifiLock: true,
-    ),
-  );
-  await _startForegroundTask();
-  await AppData.carregarDesafiosDoDia();
-  await AppData.loadOwnedAvatars();
-
-  // Executa o app
-  runApp(const MyApp());
 }
 
-Future<void> _startForegroundTask() async {
-  await fft.FlutterForegroundTask.startService(
-    notificationTitle: 'Vital está rodando em segundo plano',
-    notificationText: 'Monitorando suas atividades e treinos!',
-    callback: startCallback,
-  );
-}
 
 
 void startCallback() {
@@ -103,17 +67,31 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     ChallengeService.inicializarDesafios();
+    DailyResetService.verificarEDefinirNovoDia();
     ChallengeService.verificarDesafiosAutomaticos();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Provider.of<ThemeNotifier>(context).currentTheme;
     return MaterialApp(
       title: 'Vital',
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color.fromRGBO(13, 16, 16, 1),
-        splashColor: const Color.fromARGB(255, 31, 31, 31),
-        highlightColor: const Color.fromARGB(255, 86, 86, 86),
+        scaffoldBackgroundColor: theme.backgroundColor,
+        primaryColor: theme.primaryColor,
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          secondary: theme.accentColor,
+        ),
+        
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(color: theme.textColor),
+          bodyMedium: TextStyle(color: theme.secondaryColor),
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: theme.backgroundColor,
+          foregroundColor: theme.textColor,
+        ),
+        // você pode adicionar mais aqui com base no AppTheme
       ),
       home: const MainPage(),
     );
@@ -191,9 +169,9 @@ class _MainPageState extends State<MainPage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
-        selectedItemColor: Colors.tealAccent,
-        unselectedItemColor: const Color.fromARGB(255, 120, 120, 120),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        selectedItemColor: Theme.of(context).textTheme.bodyLarge?.color,
+        unselectedItemColor: Theme.of(context).textTheme.bodyLarge?.color?.withValues(red: 0.4, blue: 0.4, green: 0.4),
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [

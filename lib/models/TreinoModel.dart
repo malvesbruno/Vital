@@ -9,18 +9,21 @@ class TreinoModel {
   List<int> diasSemana;
   List<ExercicioModel> exercicios;
   TimeOfDay horario;
+  int intensidade;
 
   TreinoModel({
     required this.nome,
     required this.diasSemana,
     required this.exercicios,
     required this.horario,
+    required this.intensidade
   });
 
   Map<String, dynamic> toMap() => {
         'nome': nome,
         'diasSemana': diasSemana,
         'exercicios': exercicios.map((e) => e.toMap()).toList(),
+        'intensidade': intensidade
       };
 
   factory TreinoModel.fromMap(Map<String, dynamic> map) => TreinoModel(
@@ -29,7 +32,8 @@ class TreinoModel {
         exercicios: (map['exercicios'] as List)
             .map((e) => ExercicioModel.fromMap(e))
             .toList(),
-        horario: map['horario']
+        horario: map['horario'],
+        intensidade: map['intensidade']
       );
 
   Map<String, dynamic> toJson() {
@@ -37,7 +41,8 @@ class TreinoModel {
       'nome': nome,
       'diasSemana': diasSemana,
       'exercicios': exercicios.map((e) => e.toJson()).toList(),
-      'horario': '${horario.hour}:${horario.minute}'
+      'horario': '${horario.hour}:${horario.minute}',
+      'intensidade': intensidade
     };
   }
 
@@ -55,6 +60,7 @@ class TreinoModel {
           .map((e) => ExercicioModel.fromJson(e))
           .toList(),
           horario: parseTimeOfDay(json['horario']),
+      intensidade: json['intensidade'],
     );
   }
 }

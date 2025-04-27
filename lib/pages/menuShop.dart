@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vital/app_data.dart';
 import '../pages/LojaAvatarPage.dart';
+import '../pages/LojaColorPage.dart';
 
 class MenushopPage extends StatefulWidget {
   const MenushopPage({super.key});
@@ -19,6 +20,13 @@ class _MenushopPageState extends State<MenushopPage> with SingleTickerProviderSt
     await Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => AvatarStorePage(avatars: AppData.avatars, userLevel: AppData.level)),
+        );
+}
+
+void _navigateToColorPage() async{
+    await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => ColorsStorePage(colors: AppData.themes, userLevel: AppData.level)),
         );
 }
 
@@ -83,16 +91,16 @@ class _MenushopPageState extends State<MenushopPage> with SingleTickerProviderSt
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyLarge?.color),
           onPressed: () {
             Navigator.pop(context, true);
           },
         ),
-        title: const Text(
+        title: Text(
           'Lojinha',
-          style: TextStyle(color: Colors.white, fontSize: 30.0, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30.0, fontWeight: FontWeight.bold),
         ),
       ),
       body: Center(
@@ -100,7 +108,7 @@ class _MenushopPageState extends State<MenushopPage> with SingleTickerProviderSt
           children: [
             Spacer(),
             buildCard('Avatars', 'Novo avatar, mesma preguiça!', FontAwesomeIcons.users, _navigateToavatarPage),
-            buildCard('Cores', 'Pinte tudo, até o que não devia!', FontAwesomeIcons.palette, (){}),
+            buildCard('Cores', 'Pinte tudo, até o que não devia!', FontAwesomeIcons.palette, _navigateToColorPage),
             Spacer(),
           ],
         ),
@@ -117,14 +125,14 @@ class _MenushopPageState extends State<MenushopPage> with SingleTickerProviderSt
       }, // Ação ao tocar no card
       borderRadius: BorderRadius.circular(10),
       child: Card(
-        color: const Color.fromARGB(255, 31, 31, 31),
+        color: Theme.of(context).primaryColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 0,
         child: Padding(
           padding: EdgeInsets.all(30),
           child: Row(
             children: [
-              Icon(icone, size: 30, color: Colors.white),
+              Icon(icone, size: 30, color: Theme.of(context).textTheme.bodyLarge?.color),
               SizedBox(width: 20),
               // A coluna com o texto foi envolvida pelo Expanded
               Expanded(
@@ -134,7 +142,7 @@ class _MenushopPageState extends State<MenushopPage> with SingleTickerProviderSt
                     Text(
                       text,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -144,7 +152,7 @@ class _MenushopPageState extends State<MenushopPage> with SingleTickerProviderSt
                     Text(
                       subText,
                       style: TextStyle(
-                        color: const Color.fromARGB(255, 113, 113, 113),
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),

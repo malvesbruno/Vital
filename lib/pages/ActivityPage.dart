@@ -45,12 +45,12 @@ void _updateProgressBar() {
     bool vazio = widget.lista.every((item) => item.completed);
     if (!vazio){
       return Scaffold(
-      backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Atividades', style: TextStyle(color: Colors.white, fontSize: 30.0, fontWeight: FontWeight.bold)),
+        title: Text('Atividades', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30.0, fontWeight: FontWeight.bold)),
       ),
       body: SafeArea(
   child: ListView(
@@ -63,7 +63,7 @@ void _updateProgressBar() {
         .toList(),
       const SizedBox(height: 20), // espaço antes do botão
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 30),
         child: ElevatedButton(
           onPressed: () async {
             Navigator.push(
@@ -80,13 +80,11 @@ void _updateProgressBar() {
             );
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.teal,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Theme.of(context).primaryColor,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    minimumSize: const ui.Size(double.infinity, 50),
           ),
-          child: const Text("Adicionar Atividade", style: TextStyle(fontSize: 20, color: Colors.white)),
+          child: Text("Adicionar Atividade", style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyLarge?.color)),
         ),
       ),
       const SizedBox(height: 30), // espaço após o botão
@@ -96,11 +94,11 @@ void _updateProgressBar() {
     );
     }
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Atividades', style: TextStyle(color: Colors.white, fontSize: 30.0, fontWeight: FontWeight.bold)),
+        title: Text('Atividades', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30.0, fontWeight: FontWeight.bold)),
       ),
       body: SafeArea(
         child: Column(
@@ -124,6 +122,8 @@ void _updateProgressBar() {
   shadowColor: const Color.fromARGB(0, 255, 193, 7),
   borderRadius: BorderRadius.circular(20),
   color: Colors.transparent, // Mantém a transparência
+  child: 
+  Padding(padding: EdgeInsets.symmetric(horizontal: 30),
   child: ElevatedButton(
     onPressed: () async {
     Navigator.push(
@@ -140,17 +140,15 @@ void _updateProgressBar() {
     );
   },
     style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.teal,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-    ),
+                    backgroundColor: Theme.of(context).primaryColor,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    minimumSize: const ui.Size(double.infinity, 50),
+          ),
     child: Text(
       "Adicionar Atividade",
-      style: TextStyle(color: Colors.white, fontSize: 20),
+      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 16),
     ),
-  ),
+  ),)
 )
 
 )
@@ -173,14 +171,14 @@ void _updateProgressBar() {
             child: LinearProgressIndicator(
               value: progress.clamp(0.0, 1.0),
               minHeight: 10,
-              backgroundColor: Colors.grey[800],
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.tealAccent),
+              backgroundColor: Theme.of(context).primaryColor,
+              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.secondary),
             ),
           ),
           const SizedBox(height: 5),
           Text(
             "${(progress * 100).toStringAsFixed(1)}%",
-            style: const TextStyle(color: Colors.white, fontSize: 16),
+            style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 16),
           ),
         ],
       ),
@@ -205,8 +203,8 @@ void _updateProgressBar() {
                 ),
               );
             },
-            backgroundColor: const Color.fromARGB(255, 72, 108, 137),
-            foregroundColor: Colors.white,
+            backgroundColor: const Color.fromARGB(255, 68, 102, 161),
+            foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
             icon: Icons.edit,
             label: 'Editar',
             
@@ -215,9 +213,9 @@ void _updateProgressBar() {
             onPressed: (_) async{final confirmar = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Color.fromARGB(255, 31, 31, 31),
-        title: const Text('Confirmar Exclusão', style: TextStyle(color: Colors.white),),
-        content: const Text('Tem certeza que deseja excluir esta atividade?', style: TextStyle(color: Colors.white)),
+        backgroundColor: Theme.of(context).primaryColor,
+        title:  Text('Confirmar Exclusão', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),),
+        content:  Text('Tem certeza que deseja excluir esta atividade?', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -239,14 +237,14 @@ void _updateProgressBar() {
     }
             },
             backgroundColor: const Color.fromARGB(255, 171, 54, 46),
-            foregroundColor: Colors.white,
+            foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
             icon: Icons.delete,
             label: 'Excluir',
           ),
         ],
       ),
       child: Card(
-        color: const Color.fromARGB(255, 31, 31, 31),
+        color: Theme.of(context).primaryColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 0,
         child: Padding(
@@ -260,8 +258,8 @@ void _updateProgressBar() {
                   children: [
                     Text(
                       atividade.title,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontSize: 25,
                         fontFamily: 'Montserrat',
                       ),
@@ -269,16 +267,16 @@ void _updateProgressBar() {
                     const SizedBox(height: 5),
                     Text(
                       '${timeOfDayToString(atividade.horario)} - ${atividade.categoria}',
-                      style: const TextStyle(
-                        color: Colors.grey,
+                      style:  TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontSize: 14,
                       ),
                     ),
                     Center(child: Padding(padding: EdgeInsets.only(top: 5, bottom: 5),
                     child: Row(children: [
                       Spacer(),
-                      Icon(FontAwesomeIcons.arrowLeft, color:const Color.fromARGB(105, 158, 158, 158), size: 13,),
-                      Text(' Deslize para mais ações', style: TextStyle(color: const Color.fromARGB(105, 158, 158, 158),
+                      Icon(FontAwesomeIcons.arrowLeft, color:Theme.of(context).textTheme.bodyLarge?.color, size: 13,),
+                      Text(' Deslize para mais ações', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontSize: 13)),
                         Spacer(),
                     ],),)
@@ -295,14 +293,14 @@ void _updateProgressBar() {
                     AppData.atualizarDailyStats(atividadeConcluida: true),
                     onComplete(atividade.title)},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     padding: const EdgeInsets.all(12),
                     minimumSize: const ui.Size(50, 50),
                   ),
-                  child: const Icon(Icons.check, size: 30, color: Colors.white),
+                  child: Icon(Icons.check, size: 30, color: Theme.of(context).textTheme.bodyLarge?.color),
                 ),
               ),
             ],

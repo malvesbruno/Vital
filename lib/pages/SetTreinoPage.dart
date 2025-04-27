@@ -92,17 +92,17 @@ List<String> legExercises = [
   Widget build(BuildContext context){
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyLarge?.color),
           onPressed: () {
             AppData.treinosSelecionados.clear();
             Navigator.pop(context);
           },
         ),
-        title: const Text(
+        title: Text(
           "Treino",
-          style: TextStyle(color: Colors.white, fontSize: 30.0, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30.0, fontWeight: FontWeight.bold),
         ),
       ),
       body: Center(
@@ -120,7 +120,7 @@ List<String> legExercises = [
       floatingActionButton: algumSelecionado
     ? FloatingActionButton(
         elevation: 0,
-        backgroundColor: const Color.fromARGB(255, 31, 31, 31),
+        backgroundColor: Theme.of(context).primaryColor,
         onPressed: () {
           Navigator.push(
             context,
@@ -134,7 +134,7 @@ List<String> legExercises = [
       width: 2,
     ),
   ),
-        child: const Icon(Icons.navigate_next, color: Colors.white),
+        child:  Icon(Icons.navigate_next, color: Theme.of(context).textTheme.bodyLarge?.color),
       )
     : null,
     );
@@ -150,7 +150,7 @@ List<String> legExercises = [
       },
       borderRadius: BorderRadius.circular(10),
       child: Card(
-        color: const Color.fromARGB(255, 31, 31, 31),
+        color:  Theme.of(context).primaryColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 0,
         child: Padding(
@@ -174,8 +174,8 @@ List<String> legExercises = [
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontSize: 18, // Tamanho reduzido
                         fontWeight: FontWeight.bold,
                       ),
@@ -185,8 +185,8 @@ List<String> legExercises = [
                     const SizedBox(height: 4),
                     Text(
                       !personalizado? '$qtd excercícios': '',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontSize: 16, // Tamanho reduzido
                       ),
                     ),

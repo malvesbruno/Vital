@@ -59,7 +59,11 @@ class _AddActivityPageState extends State<AddActivityPage> {
     widget.onAdd(novaAtividade);
     _updateProgressBar();
     await AppData.salvarDados();
-    await Verificaragendamento.verficarAgendamento();
+    try {
+      await Verificaragendamento.verficarAgendamento();
+    } catch (e) {
+      print("Erro ao verificar agendamento: $e");
+    }
     if (!mounted) return;
     Navigator.pop(context);
   }
@@ -96,12 +100,13 @@ class _AddActivityPageState extends State<AddActivityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+      resizeToAvoidBottomInset: true, 
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Nova Atividade', style: TextStyle(color: Colors.white)),
+        title: Text('Nova Atividade', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: Theme.of(context).textTheme.bodyLarge?.color),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -112,10 +117,10 @@ class _AddActivityPageState extends State<AddActivityPage> {
               // Título
               TextField(
                 controller: _titleController,
-                style: const TextStyle(color: Colors.white, fontSize: 20),
-                decoration: const InputDecoration(
+                style:  TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20),
+                decoration: InputDecoration(
                   labelText: 'Nome da Atividade',
-                  labelStyle: TextStyle(color: Colors.grey, fontSize: 20),
+                  labelStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20),
                   enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
                 ),
               ),
@@ -124,11 +129,11 @@ class _AddActivityPageState extends State<AddActivityPage> {
               // Categoria
               DropdownButtonFormField<String>(
                 value: _categoriaSelecionada,
-                dropdownColor: Colors.black,
-                style: const TextStyle(color: Colors.white, fontSize: 20),
-                decoration: const InputDecoration(
+                dropdownColor: Theme.of(context).scaffoldBackgroundColor,
+                style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20),
+                decoration: InputDecoration(
                   labelText: 'Categoria',
-                  labelStyle: TextStyle(color: Colors.grey, fontSize: 20),
+                  labelStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20),
                 ),
                 items: AppData.categorias.map((cat) {
                   return DropdownMenuItem(
@@ -145,34 +150,34 @@ class _AddActivityPageState extends State<AddActivityPage> {
               // Horário
               Row(
                 children: [
-                  const Text('Horário:', style: TextStyle(color: Colors.white, fontSize: 20)),
+                  Text('Horário:', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20)),
                   const SizedBox(width: 10),
                   Text(
                     _horarioSelecionado?.format(context) ?? 'Selecione',
-                    style: const TextStyle(color: Colors.tealAccent, fontSize: 20),
+                    style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20),
                   ),
                   const Spacer(),
                   ElevatedButton(
                     onPressed: _selecionarHorario,
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-                    child: const Text('Escolher', style: TextStyle(color: Colors.white),),
+                    style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
+                    child: Text('Escolher', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),),
                   )
                 ],
               ),
               const SizedBox(height: 20),
 
               // Dias da semana
-              const Text('Dias da Semana:', style: TextStyle(color: Colors.white, fontSize: 16)),
+              Text('Dias da Semana:', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 16)),
               Wrap(
                 spacing: 8,
                 children: diasDaSemana.map((dia) {
                   final selecionado = diasSelecionados.contains(dia);
                   return FilterChip(
-                    label: Text(DiaSemana(dia), style: TextStyle(color: selecionado ? Color.fromARGB(255, 0, 0, 0) : Colors.white),),
-                    labelStyle: TextStyle(color: selecionado ? Colors.black : Colors.white,),
+                    label: Text(DiaSemana(dia), style: TextStyle(color: selecionado ? Theme.of(context).scaffoldBackgroundColor : Theme.of(context).textTheme.bodyLarge?.color),),
+                    labelStyle: TextStyle(color: selecionado ? Theme.of(context).scaffoldBackgroundColor : Theme.of(context).textTheme.bodyLarge?.color,),
                     selected: selecionado,
-                    selectedColor: Colors.tealAccent,
-                    backgroundColor: const Color.fromARGB(255, 101, 101, 101),
+                    selectedColor: Theme.of(context).colorScheme.secondary,
+                    backgroundColor: Theme.of(context).primaryColor,
                     onSelected: (_) {
                       setState(() {
                         if (selecionado) {
@@ -192,11 +197,11 @@ class _AddActivityPageState extends State<AddActivityPage> {
                 child: ElevatedButton(
                   onPressed: _salvarAtividade,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
+                    backgroundColor: Theme.of(context).primaryColor,
                     padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  child: const Text('Salvar Atividade', style: TextStyle(fontSize: 18, color: Colors.white)),
+                  child: Text('Salvar Atividade', style: TextStyle(fontSize: 18, color: Theme.of(context).textTheme.bodyLarge?.color)),
                 ),
               )
             ],

@@ -4,6 +4,7 @@ class DailyStats {
   final double waterLiters;
   final int completedActivities;
   final int completedWorkouts;
+  final double horasDormidas;
   final bool wasActive;
   final double bmi;
 
@@ -12,6 +13,7 @@ class DailyStats {
     this.waterLiters = 0.0,
     this.completedActivities = 0,
     this.completedWorkouts = 0,
+    this.horasDormidas = 0,
     this.wasActive = false,
     this.bmi = 0.0,
   });
@@ -22,6 +24,7 @@ class DailyStats {
       'waterLiters':waterLiters,
       'completedActivities': completedActivities,
       'completedWorkouts': completedWorkouts,
+      'horasDormidas': horasDormidas,
       'wasActive': wasActive,
       'bmi': bmi
     };
@@ -33,6 +36,7 @@ class DailyStats {
       waterLiters: (json['waterLiters'] as num).toDouble(),
       completedActivities: json['completedActivities'] as int,
       completedWorkouts: json['completedWorkouts'] as int,
+      horasDormidas: (json['horasDormidas'] as num).toDouble(),
       wasActive: json['wasActive'] as bool,
       bmi: (json['bmi'] as num).toDouble(),
     );

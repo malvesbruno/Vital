@@ -56,16 +56,16 @@ class _PersonalizeTreinoPageState extends State<PersonalizeTreinoPage>{
   Widget build(BuildContext context){
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyLarge?.color),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        title: const Text(
+        title: Text(
           "Treino Rápido",
-          style: TextStyle(color: Colors.white, fontSize: 30.0, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30.0, fontWeight: FontWeight.bold),
         ),
       ),
       body: Center(
@@ -98,13 +98,13 @@ class _PersonalizeTreinoPageState extends State<PersonalizeTreinoPage>{
         ); 
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
+                backgroundColor: Theme.of(context).primaryColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
                 minimumSize: const ui.Size(double.infinity, 50),
               ),
-              child: Text('Ir para Treino', style: TextStyle(color: Colors.white, fontSize: 20),),
+              child: Text('Ir para Treino', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20),),
             ),
           ),
           SizedBox(height: 50,)
@@ -126,7 +126,7 @@ class _PersonalizeTreinoPageState extends State<PersonalizeTreinoPage>{
       onTap: () { },
       borderRadius: BorderRadius.circular(10),
       child: Card(
-        color: const Color.fromARGB(255, 31, 31, 31),
+        color: Theme.of(context).primaryColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 0,
         child: Padding(
@@ -141,8 +141,8 @@ class _PersonalizeTreinoPageState extends State<PersonalizeTreinoPage>{
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontSize: 18, // Tamanho reduzido
                         fontWeight: FontWeight.bold,
                       ),
@@ -152,8 +152,8 @@ class _PersonalizeTreinoPageState extends State<PersonalizeTreinoPage>{
                     const SizedBox(height: 4),
                     Text(
                       '${formatDuration(duracao)} min',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontSize: 16, // Tamanho reduzido
                       ),
                     ),
@@ -178,14 +178,14 @@ class _PersonalizeTreinoPageState extends State<PersonalizeTreinoPage>{
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: escolhido? Colors.teal : const Color.fromARGB(26, 0, 150, 135),
+                    backgroundColor: escolhido? Theme.of(context).textTheme.bodyLarge?.color : Theme.of(context).primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     padding: const EdgeInsets.all(12), // Espaçamento interno pro ícone ficar no centro
                     minimumSize:  const ui.Size(50, 50), // Tamanho fixo do botão
                   ),
-                  child: const Icon(Icons.check, size: 30, color: Colors.white),
+                  child: Icon(Icons.check, size: 30, color: Theme.of(context).textTheme.bodyLarge?.color),
                 ),
 
               ),

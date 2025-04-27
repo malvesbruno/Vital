@@ -25,7 +25,7 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
   TreinoModel getTreinoDoExercicio(ExercicioModel exercicio) {
   return widget.treino.firstWhere(
     (t) => t.exercicios.contains(exercicio),
-    orElse: () => TreinoModel(nome: "Desconhecido", exercicios: [], diasSemana: [], horario: TimeOfDay(hour: 00, minute: 00)), // caso não encontre
+    orElse: () => TreinoModel(nome: "Desconhecido", exercicios: [], diasSemana: [], horario: TimeOfDay(hour: 00, minute: 00), intensidade: 1), // caso não encontre
   );
 }
 
@@ -46,6 +46,7 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
 
     exerciciosDoDia = widget.treinosDoDia.where((e) => !e.completed).toList();
     exerciciosDoDia.isNotEmpty ? treinoAtual = getTreinoDoExercicio(exerciciosDoDia[currentExerciseIndex]): null;
+
 
     if (exerciciosDoDia.isNotEmpty) {
       final currentExercise = exerciciosDoDia[currentExerciseIndex];
@@ -80,6 +81,7 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
           _pulseController.value = 1.0;
           _audioPlayer.play(AssetSource('sounds/retro_game.mp3'));
           setState(() => isTimerRunning = false);
+          completeSet();
         }
       });
     } else {
@@ -124,12 +126,10 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
   }
 
   void completeSet() async {
+  final exercise = exerciciosDoDia[currentExerciseIndex];
+
   setState(() {
-    final exercise = exerciciosDoDia[currentExerciseIndex];
     exercise.completedSets++;
-    exerciciosDoDia.isNotEmpty
-        ? treinoAtual = getTreinoDoExercicio(exerciciosDoDia[currentExerciseIndex])
-        : null;
 
     if (exercise.completedSets >= exercise.sets) {
       exercise.completed = true;
@@ -140,8 +140,7 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
       }
 
       if (exerciciosDoDia.isEmpty) {
-        // Aqui salvamos antes de trocar de tela
-        AppData.salvarDados(); // não precisa de await aqui porque estamos dentro do setState
+        AppData.salvarDados();
         AppData.atualizarDailyStats(treinoConcluido: true);
         Navigator.pushReplacement(
           context,
@@ -149,21 +148,57 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
         );
         return;
       }
+    }
 
-      final durationInMinutes = exerciciosDoDia[currentExerciseIndex].duration;
-      timerDuration = Duration(minutes: durationInMinutes);
+    // Atualiza o exercício atual e reinicia o timer
+    if (exerciciosDoDia.isNotEmpty) {
+      final nextExercise = exerciciosDoDia[currentExerciseIndex];
+      treinoAtual = getTreinoDoExercicio(nextExercise);
+      timerDuration = Duration(minutes: nextExercise.duration);
       _remainingTime = timerDuration;
 
-      _countdownTimer?.cancel();
-      isTimerRunning = false;
+      // Só reinicia automaticamente se ainda tem sets pra esse exercício
+      if (nextExercise.completedSets < nextExercise.sets) {
+        isTimerRunning = false; // espera o usuário clicar de novo
+        _pulseController.stop();
+        _pulseController.value = 1.0;
+        _countdownTimer?.cancel();
+      }
     }
   });
 
-  // Aqui salvamos fora do setState pra garantir que o estado foi aplicado primeiro
   await AppData.salvarDados();
 }
 
 
+  String gerarFraseMotivacional(int reps) {
+  final frases = [
+    "Foco total! Complete as $reps reps e suba de nível!",
+    "Cada uma das $reps reps te deixa mais forte.",
+    "Você consegue! São só $reps reps entre você e a evolução!",
+    "Bora quebrar limites — $reps reps, vai com tudo!",
+    "Não é só treino, é transformação! Faça suas $reps reps!",
+  ];
+  frases.shuffle();
+  return frases.first;
+}
+
+  int getReps(int intensidade){
+    switch(intensidade){
+      case(1):{
+        return 18;
+      }
+      case(2):{
+        return 12;
+      }
+      case(3):{
+        return 6;
+      }
+      default:{
+        return 18;
+      }
+    }
+  }
   
 
 
@@ -176,13 +211,14 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    
     if (exerciciosDoDia.isEmpty) {
       return Scaffold(
-        backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
   automaticallyImplyLeading: false,
-  title: Text("Workouts", style: TextStyle(color: Colors.white, fontSize: 30, fontFamily: 'Poppins', fontWeight: FontWeight.w700)),
-  backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+  title: Text("Workouts", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30, fontFamily: 'Poppins', fontWeight: FontWeight.w700)),
+  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
   elevation: 0,
 ),
         body: Center(
@@ -191,7 +227,7 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
               Spacer(),
               Text(
                 "Não Há exercícios para hoje...",
-                style: TextStyle(color: Colors.white, fontSize: 18),
+                style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 18),
                 textAlign: TextAlign.center,
               ),
               Spacer(),
@@ -202,11 +238,11 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
                     Navigator.push(context, MaterialPageRoute(builder: (context) => SetTreinoPage()));
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
+                    backgroundColor: Theme.of(context).primaryColor,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                     minimumSize: const ui.Size(double.infinity, 50),
                   ),
-                  child: Text("Adicionar Treinos", style: TextStyle(fontSize: 16, color: Colors.white)),
+                  child: Text("Adicionar Treinos", style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyLarge?.color)),
                 ),
               ),
               SizedBox(height: 30),
@@ -220,15 +256,15 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
     final isWarning = _remainingTime <= Duration(minutes: 1);
 
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
   automaticallyImplyLeading: false,
-  title: Text("${treinoAtual.nome}", style: TextStyle(color: Colors.white, fontSize: 30, fontFamily: 'Poppins', fontWeight: FontWeight.w700)),
-  backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+  title: Text("${treinoAtual.nome}", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30, fontFamily: 'Poppins', fontWeight: FontWeight.w700)),
+  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
   elevation: 0,
   actions: [
     IconButton(
-      icon: Icon(Icons.edit, color: Colors.white),
+      icon: Icon(Icons.edit, color: Theme.of(context).textTheme.bodyLarge?.color),
       onPressed: () {
         // Leva para uma tela de edição passando o exercício atual
         Navigator.push(
@@ -280,10 +316,17 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(exercise.name, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+            Text(exercise.name, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color)),
             SizedBox(height: 10),
-            Text("${exercise.sets} sets", style: TextStyle(fontSize: 16, color: Colors.white70)),
+            Text("${exercise.sets} sets", style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.4))),
             SizedBox(height: 20),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Clique para descansar", style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.4))),
+            ],),
+            SizedBox(height: 10),
             Center(
               child: GestureDetector(
                 onTap: toggleTimer,
@@ -295,11 +338,11 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
                   child: Container(
                     width: 150,
                     height: 150,
-                    decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.grey[900]),
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: Theme.of(context).primaryColor),
                     alignment: Alignment.center,
                     child: Text(
                       "${_remainingTime.inMinutes.remainder(60).toString().padLeft(2, '0')}:${_remainingTime.inSeconds.remainder(60).toString().padLeft(2, '0')}",
-                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: isWarning ? Colors.redAccent : Colors.white),
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: isWarning ? Colors.redAccent : Theme.of(context).textTheme.bodyLarge?.color),
                     ),
                   ),
                 ),
@@ -312,18 +355,28 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
                 return IconButton(
                   icon: Icon(
                     index < exercise.completedSets ? Icons.check_circle : Icons.radio_button_unchecked,
-                    color: Colors.green,
+                    color: Theme.of(context).colorScheme.secondary,
                   ),
                   onPressed: completeSet,
                 );
               }),
             ),
+            SizedBox(height: 20,),
+            Center(
+              child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children:[ 
+                Padding(padding: EdgeInsets.symmetric(horizontal: 30),
+                child: Text("${getReps(treinoAtual.intensidade)} Repetições", textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.4), fontSize: 20),),)
+            ],),
+            ),
             Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(icon: Icon(Icons.arrow_back, color: Colors.white), onPressed: previousExercise),
-                IconButton(icon: Icon(Icons.arrow_forward, color: Colors.white), onPressed: nextExercise),
+                IconButton(icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyLarge?.color), onPressed: previousExercise),
+                IconButton(icon: Icon(Icons.arrow_forward, color: Theme.of(context).textTheme.bodyLarge?.color), onPressed: nextExercise),
               ],
             ),
             SizedBox(height: 20),
@@ -332,11 +385,11 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
                 Navigator.push(context, MaterialPageRoute(builder: (context) => SetTreinoPage()));
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
+                backgroundColor: Theme.of(context).primaryColor,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 minimumSize: const ui.Size(double.infinity, 50),
               ),
-              child: Text("Adicionar Treinos", style: TextStyle(fontSize: 16, color: Colors.white)),
+              child: Text("Adicionar Treinos", style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyLarge?.color)),
             ),
           ],
         ),

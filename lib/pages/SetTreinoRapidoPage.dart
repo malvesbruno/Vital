@@ -57,16 +57,16 @@ class _SetTreinoRapidoPageState extends State<SetTreinoRapidoPage>{
   Widget build(BuildContext context){
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(13, 16, 16, 1),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyLarge?.color),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        title: const Text(
+        title: Text(
           "Treino Rápido",
-          style: TextStyle(color: Colors.white, fontSize: 30.0, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30.0, fontWeight: FontWeight.bold),
         ),
       ),
       body: Center(
@@ -107,7 +107,7 @@ class _SetTreinoRapidoPageState extends State<SetTreinoRapidoPage>{
       },
       borderRadius: BorderRadius.circular(10),
       child: Card(
-        color: const Color.fromARGB(255, 31, 31, 31),
+        color: Theme.of(context).primaryColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 0,
         child: Padding(
@@ -131,8 +131,8 @@ class _SetTreinoRapidoPageState extends State<SetTreinoRapidoPage>{
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontSize: 18, // Tamanho reduzido
                         fontWeight: FontWeight.bold,
                       ),
@@ -142,8 +142,8 @@ class _SetTreinoRapidoPageState extends State<SetTreinoRapidoPage>{
                     const SizedBox(height: 4),
                     Text(
                       !personalizado? '$qtd excercícios': '',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         fontSize: 16, // Tamanho reduzido
                       ),
                     ),
