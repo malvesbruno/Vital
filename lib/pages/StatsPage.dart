@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:vital/pages/DeluxePage.dart';
 import '../app_data.dart';
 import '../models/StatsModel.dart';
+import 'package:vital/themeNotifier.dart';
+import 'package:provider/provider.dart';
 
 class StatsPage extends StatefulWidget {
   const StatsPage({super.key});
@@ -24,17 +27,39 @@ class _StatsPageState extends State<StatsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppData.isExclusiveTheme ? Colors.transparent : Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         title: Text(
           'Estatísticas',
           style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30, fontWeight: FontWeight.bold),
         ),
       ),
-      body: SafeArea(
+      body: 
+      
+      Stack(
+        children: [
+          Consumer<ThemeNotifier>(builder: (context, themeNotifier, child){
+        if (!AppData.isExclusiveTheme) {
+      return const SizedBox.shrink(); // Não mostra nada
+    }
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(themeNotifier.currentTheme.imagePath),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            Colors.black.withOpacity(0.7), // 👈 escurece a imagem
+            BlendMode.darken,
+          ),
+        ),
+      ),
+    );
+    },),
+          SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -46,6 +71,8 @@ class _StatsPageState extends State<StatsPage> {
           ),
         ),
       ),
+        ],
+      )
     );
   }
 
@@ -102,8 +129,8 @@ void _showBmiDialog() {
           TextButton(
             child: const Text("Calcular", style: TextStyle(color: Colors.greenAccent)),
             onPressed: () {
-              final altura = double.tryParse(alturaController.text);
-              final peso = double.tryParse(pesoController.text);
+              final altura = double.tryParse(alturaController.text.replaceAll(RegExp(r','), '.'));
+              final peso = double.tryParse(pesoController.text.replaceAll(RegExp(r','), '.'));
 
               if (altura != null && peso != null && altura > 0) {
                 final bmi = peso / (altura * altura);
@@ -120,30 +147,62 @@ void _showBmiDialog() {
 }
 
   Widget _buildDropdown() {
-    return Container(
+  return GestureDetector(
+    onTap: () {
+      if (AppData.ultimate) {
+        _showDropdownMenu(); // abre as opções manualmente
+      } else {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => Deluxepage()));
+      }
+    },
+    child: Container(
       decoration: BoxDecoration(
         color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.circular(12),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: DropdownButton<String>(
-        value: selectedPeriod,
-        dropdownColor: Theme.of(context).primaryColor,
-        icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-        isExpanded: true,
-        underline: const SizedBox(),
-        style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
-        items: const [
-          DropdownMenuItem(value: 'day', child: Text("Hoje")),
-          DropdownMenuItem(value: 'week', child: Text("Essa Semana")),
-          DropdownMenuItem(value: 'month', child: Text("Esse Mês")),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            _getPeriodLabel(selectedPeriod),
+            style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+          ),
+          const Icon(Icons.arrow_drop_down, color: Colors.white),
         ],
-        onChanged: (value) {
-          setState(() => selectedPeriod = value!);
-        },
       ),
-    );
+    ),
+  );
+}
+
+void _showDropdownMenu() async {
+  final value = await showMenu<String>(
+    context: context,
+    position: const RelativeRect.fromLTRB(100, 100, 100, 100),
+    items: const [
+      PopupMenuItem(value: 'day', child: Text("Hoje")),
+      PopupMenuItem(value: 'week', child: Text("Essa Semana")),
+      PopupMenuItem(value: 'month', child: Text("Esse Mês")),
+    ],
+  );
+
+  if (value != null) {
+    setState(() => selectedPeriod = value);
   }
+}
+
+String _getPeriodLabel(String value) {
+  switch (value) {
+    case 'day':
+      return 'Hoje';
+    case 'week':
+      return 'Essa Semana';
+    case 'month':
+      return 'Esse Mês';
+    default:
+      return '';
+  }
+}
 
   Widget _buildStatCard(StatsModel stat) {
     late final String bmiText;
@@ -172,7 +231,7 @@ void _showBmiDialog() {
         Row(children: [
           Icon(stat.icon, color: stat.color),
           SizedBox(width: 12),
-          Text(stat.title,
+          Text("${stat.title}",
             style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
         ]),
         SizedBox(height: 20),
@@ -236,8 +295,8 @@ void _showBmiDialog() {
                     sections: [
                       PieChartSectionData(
                         value: (stat.data.isNotEmpty && stat.goal > 0)
-                            ? (stat.data.first / stat.goal).clamp(0.0, 1.0)
-                            : 0.0,
+                        ? (stat.data.first >= stat.goal ? 1.0 : (stat.data.first / stat.goal))
+                        : 0.0,
                         color: stat.color,
                         radius: 20,
                         showTitle: false,

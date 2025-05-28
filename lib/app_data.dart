@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vital/app_data_service.dart';
 
 import 'models/ExercicioModel.dart';
 import 'models/TreinoModel.dart';
@@ -8,12 +9,14 @@ import 'models/QuickAction.dart';
 import 'models/DailyChallenge.dart';
 import 'models/StatsModel.dart';
 import 'models/AtividadeModel.dart';
-import 'services/Notication.dart';
 import 'services/challenge_service.dart';
 import 'models/DailyStatsModel.dart';
 import 'models/AvatarModel.dart';
 import '../pages/LevelUpPage.dart';
 import '../models/ColorsModel.dart';
+import '../models/AmigoModel.dart';
+import 'package:uuid/uuid.dart';
+
 
 class AppData {
   static List<TreinoModel> treinos = [];
@@ -22,7 +25,7 @@ class AppData {
   static List<AtividadeModel> listaAtividades = [];
   static List<DailyStats> dailyStats = [];
   static List<String> categorias = [
-    'Estudo', 'Trabalho', 'Treino', 'Saúde', 'Lazer', 'Social', 'Rotina', 'Outro'
+    'Estudo', 'Trabalho', 'Saúde', 'Lazer', 'Social', 'Rotina', 'Outro'
   ];
   static DateTime ultimaDataSalva = DateTime.now();
   static List<DailyStats> historicoStats = [];
@@ -33,7 +36,7 @@ class AppData {
     await salvarStatsDoDia();
     resetarDadosDoDia();
     ultimaDataSalva = hoje;
-    await salvarDados();
+    await AppDataService.salvarTudo();
   }
 }
 
@@ -62,50 +65,6 @@ static void resetarDadosDoDia() {
   ativoHoje = false;
 }
 
-  void verificarEAgendarNotificacoes() {
-
-    DateTime _timeOfDayToDateTime(TimeOfDay time) {
-      final now = DateTime.now();
-      return DateTime(now.year, now.month, now.day, time.hour, time.minute);
-  }
-  
-
-
-
-  final agora = DateTime.now();
-
-  for (var treino in treinos) {
-    final horarioTreino = _timeOfDayToDateTime(treino.horario);
-
-    // Notificar se estiver dentro dos próximos 5 minutos
-    if (horarioTreino.difference(agora).inMinutes >= 0 &&
-        horarioTreino.difference(agora).inMinutes <= 5) {
-      NotificationService().agendarNotificacao(
-        id: NotificationService.gerarId(),
-        titulo: 'Hora do treino!',
-        corpo: '${treino.nome} está prestes a começar!',
-        horario: horarioTreino,
-      );
-    }
-  }
-
-  for (var atividade in listaAtividades) {
-    final horarioAtividade = _timeOfDayToDateTime(atividade.horario);
-    
-
-    if (horarioAtividade.difference(agora).inMinutes >= 0 &&
-        horarioAtividade.difference(agora).inMinutes <= 5) {
-      NotificationService().agendarNotificacao(
-        id: NotificationService.gerarId(),
-        titulo: 'Atividade importante',
-        corpo: '${atividade.title} está chegando!',
-        horario: horarioAtividade
-      );
-    }
-  }
-}
-
-
   static List<DailyChallengeModel> dailyChallenges = [];
 
 static Future<void> carregarDesafiosDoDia() async {
@@ -114,13 +73,27 @@ static Future<void> carregarDesafiosDoDia() async {
 }
 
   static int waterConsumed = 0;
+  static bool ultimate = false;
+  static String name = 'bruno';
   static int coins = 0;
   static int exp = 0;
   static int level = 1;
   static String currentAvatar = avatars[0].name;
-  static String currentTheme = avatars[0].name;
+  static String currentTheme = themes[0].name;
+  static bool isExclusiveTheme = false;
   static int treinosDiarios = 0;
   static double bmi = 0.0;
+  static int multiplicador = 1;
+  static int steps = 0;
+
+  var uuid = Uuid();
+  static String id = Uuid().v4();
+
+  static List<AmigoModel> amigos = [
+    AmigoModel(nome: 'Bruno', avatar: 'Mr. Vega', level: 150, id: '12219911'),
+    AmigoModel(nome: 'Vitor', avatar: 'King of Pirates', level: 130, id: '12334221'),
+    AmigoModel(nome: 'Matheus', avatar: 'Red Rebellion', level: 120, id: '11244911')
+  ];
   static int completedActivities = 0;
   static double progress = 0.0;
   static double horasDormidas = 0;
@@ -129,7 +102,7 @@ static Future<void> carregarDesafiosDoDia() async {
 
   static void addExperience(BuildContext context, int xp) {
     print("[DEBUG] Adding EXP: $xp | Current EXP: $exp | Level: $level"); // ✅ Debug
-    exp += xp;
+    exp += xp * multiplicador;
 
     int xpNeeded = 100 + (level - 1) * 50;
     while (exp >= xpNeeded) {
@@ -137,14 +110,14 @@ static Future<void> carregarDesafiosDoDia() async {
       level++;
       xpNeeded = 100 + (level - 1) * 50;
       print("[DEBUG] Level Up! New Level: $level | EXP Left: $exp"); // ✅ Debug
-      AvatarModel? avatar = avatars.firstWhere((el) => el.requiredLevel == level, orElse: () => AvatarModel(name: 'Desconhecido', imagePath: '', requiredLevel: 0, price: 0,));
+      AvatarModel? avatar = avatars.firstWhere((el) => el.requiredLevel == level, orElse: () => AvatarModel(name: 'Desconhecido', imagePath: '', requiredLevel: 0, price: 0, exclusive: false));
       late List<String> lista_levelUp;
       if (avatar.name != 'Desconhecido'){
         lista_levelUp = [avatar.name, avatar.imagePath];
       } else{
         lista_levelUp = [];
       }
-      salvarDados();
+      AppDataService.salvarTudo();
 
       Navigator.push(context, MaterialPageRoute(builder: (context) => LevelUpPage(newLevel: level, unlockedItems: lista_levelUp)));
     }
@@ -197,110 +170,265 @@ static Future<void> loadOwnedColors() async {
 
 
   static List<AvatarModel> avatars = [
-  AvatarModel(name: 'Default', imagePath: 'assets/avatares/default.png', price: 0, requiredLevel: 1, owned: true),
-  AvatarModel(name: 'Nerd', imagePath: 'assets/avatares/nerd.png', price: 30, requiredLevel: 3),
-  AvatarModel(name: 'Sad Saddler', imagePath: 'assets/avatares/sad_saddler.png', price: 50, requiredLevel: 5),
-  AvatarModel(name: 'Hippie', imagePath: 'assets/avatares/hippie.png', price: 80, requiredLevel: 8),
-  AvatarModel(name: 'Tacitus Kilgore', imagePath: 'assets/avatares/tacitus.png', price: 100, requiredLevel: 10),
-  AvatarModel(name: 'Andorinha', imagePath: 'assets/avatares/andorinha.png', price: 150, requiredLevel: 15),
-  AvatarModel(name: 'Girl', imagePath: 'assets/avatares/girl.png', price: 200, requiredLevel: 20),
-  AvatarModel(name: 'Carniceiro', imagePath: 'assets/avatares/carniceiro.png', price: 270, requiredLevel: 27),
-  AvatarModel(name: 'Cicatriz', imagePath: 'assets/avatares/cicatriz.png', price: 350, requiredLevel: 35),
-  AvatarModel(name: 'Feiticeira Nata', imagePath: 'assets/avatares/feiticeira_nata.png', price: 420, requiredLevel: 42),
-  AvatarModel(name: 'Atleta', imagePath: 'assets/avatares/atleta.png', price: 500, requiredLevel: 50),
-  AvatarModel(name: 'Fantasma De VitalCity', imagePath: 'assets/avatares/ghost.png', price: 580, requiredLevel: 58),
-  AvatarModel(name: 'Rocker', imagePath: 'assets/avatares/rocker.png', price: 630, requiredLevel: 63),
-  AvatarModel(name: 'Boho', imagePath: 'assets/avatares/boho.png', price: 700, requiredLevel: 70),
-  AvatarModel(name: 'King of Pirates', imagePath: 'assets/avatares/king_of_pirates.png', price: 750, requiredLevel: 75),
-  AvatarModel(name: 'Mago', imagePath: 'assets/avatares/mago.png', price: 800, requiredLevel: 80),
-  AvatarModel(name: 'Lightblade', imagePath: 'assets/avatares/lightblade.png', price: 870, requiredLevel: 87),
-  AvatarModel(name: 'Street', imagePath: 'assets/avatares/street.png', price: 900, requiredLevel: 90),
-  AvatarModel(name: 'Princesa Rebelde', imagePath: 'assets/avatares/princesa_rebelde.png', price: 950, requiredLevel: 95),
-  AvatarModel(name: 'Mr. Vega', imagePath: 'assets/avatares/mr_vega.png', price: 1000, requiredLevel: 100),
-  AvatarModel(name: 'Vinil & Veneno', imagePath: 'assets/avatares/vinil_veneno.png', price: 1100, requiredLevel: 110),
-  AvatarModel(name: 'Original de VitalWell', imagePath: 'assets/avatares/original.png', price: 1200, requiredLevel: 120),
-  AvatarModel(name: 'Caos', imagePath: 'assets/avatares/caos.png', price: 1300, requiredLevel: 130),
-  AvatarModel(name: 'Rocketman', imagePath: 'assets/avatares/rocketman.png', price: 1350, requiredLevel: 135),
-  AvatarModel(name: 'Broken One', imagePath: 'assets/avatares/broken_one.png', price: 1400, requiredLevel: 140),
-  AvatarModel(name: 'Red Rebellion', imagePath: 'assets/avatares/red_rebellion.png', price: 1500, requiredLevel: 150),
-  AvatarModel(name: 'Negative Creep', imagePath: 'assets/avatares/negative_creep.png', price: 1600, requiredLevel: 160),
-  AvatarModel(name: 'BetterMan', imagePath: 'assets/avatares/betterman.png', price: 1700, requiredLevel: 170),
-  AvatarModel(name: 'Ele já não apareceu?', imagePath: 'assets/avatares/narrator.png', price: 1750, requiredLevel: 175),
-  AvatarModel(name: 'Parceiro da Vizinhança', imagePath: 'assets/avatares/spider.png', price: 1800, requiredLevel: 180),
-  AvatarModel(name: 'Dex', imagePath: 'assets/avatares/dex.png', price: 1850, requiredLevel: 185),
-  AvatarModel(name: 'Robô', imagePath: 'assets/avatares/robo.png', price: 2000, requiredLevel: 200),
+  AvatarModel(name: 'Default', imagePath: 'assets/avatares/default.png', price: 0, requiredLevel: 1, owned: true, exclusive: false),
+  AvatarModel(name: 'Nerd', imagePath: 'assets/avatares/nerd.png', price: 30, requiredLevel: 3, exclusive: false),
+  AvatarModel(name: 'Sad Saddler', imagePath: 'assets/avatares/sad_saddler.png', price: 50, requiredLevel: 5, exclusive: true),
+  AvatarModel(name: 'Hippie', imagePath: 'assets/avatares/hippie.png', price: 80, requiredLevel: 8, exclusive: false),
+  AvatarModel(name: 'Tacitus Kilgore', imagePath: 'assets/avatares/tacitus.png', price: 100, requiredLevel: 10, exclusive: true),
+  AvatarModel(name: 'Andorinha', imagePath: 'assets/avatares/andorinha.png', price: 150, requiredLevel: 15, exclusive: true),
+  AvatarModel(name: 'Girl', imagePath: 'assets/avatares/girl.png', price: 200, requiredLevel: 20, exclusive: false),
+  AvatarModel(name: 'Carniceiro', imagePath: 'assets/avatares/carniceiro.png', price: 270, requiredLevel: 27, exclusive: true),
+  AvatarModel(name: 'Cicatriz', imagePath: 'assets/avatares/cicatriz.png', price: 350, requiredLevel: 35, exclusive: true),
+  AvatarModel(name: 'Feiticeira Nata', imagePath: 'assets/avatares/feiticeira_nata.png', price: 420, requiredLevel: 42, exclusive: true),
+  AvatarModel(name: 'Atleta', imagePath: 'assets/avatares/atleta.png', price: 500, requiredLevel: 50, exclusive: false),
+  AvatarModel(name: 'Fantasma De VitalCity', imagePath: 'assets/avatares/ghost.png', price: 580, requiredLevel: 58, exclusive: true),
+  AvatarModel(name: 'Rocker', imagePath: 'assets/avatares/rocker.png', price: 630, requiredLevel: 63, exclusive: false),
+  AvatarModel(name: 'Boho', imagePath: 'assets/avatares/boho.png', price: 700, requiredLevel: 70, exclusive: false),
+  AvatarModel(name: 'King of Pirates', imagePath: 'assets/avatares/king_of_pirates.png', price: 750, requiredLevel: 75, exclusive: true),
+  AvatarModel(name: 'Mago', imagePath: 'assets/avatares/mago.png', price: 800, requiredLevel: 80, exclusive: false),
+  AvatarModel(name: 'Lightblade', imagePath: 'assets/avatares/lightblade.png', price: 870, requiredLevel: 87, exclusive: true),
+  AvatarModel(name: 'Street', imagePath: 'assets/avatares/street.png', price: 900, requiredLevel: 90, exclusive: false),
+  AvatarModel(name: 'Princesa Rebelde', imagePath: 'assets/avatares/princesa_rebelde.png', price: 950, requiredLevel: 95, exclusive: true),
+  AvatarModel(name: 'Mr. Vega', imagePath: 'assets/avatares/mr_vega.png', price: 1000, requiredLevel: 100, exclusive: true),
+  AvatarModel(name: 'Vinil & Veneno', imagePath: 'assets/avatares/vinil_veneno.png', price: 1100, requiredLevel: 110, exclusive: true),
+  AvatarModel(name: 'Original de VitalWell', imagePath: 'assets/avatares/original.png', price: 1200, requiredLevel: 120, exclusive: true),
+  AvatarModel(name: 'Caos', imagePath: 'assets/avatares/caos.png', price: 1300, requiredLevel: 130, exclusive: true),
+  AvatarModel(name: 'Rocketman', imagePath: 'assets/avatares/rocketman.png', price: 1350, requiredLevel: 135, exclusive: false),
+  AvatarModel(name: 'Broken One', imagePath: 'assets/avatares/broken_one.png', price: 1400, requiredLevel: 140, exclusive: true),
+  AvatarModel(name: 'Red Rebellion', imagePath: 'assets/avatares/red_rebellion.png', price: 1500, requiredLevel: 150, exclusive: true),
+  AvatarModel(name: 'Negative Creep', imagePath: 'assets/avatares/negative_creep.png', price: 1600, requiredLevel: 160, exclusive: true),
+  AvatarModel(name: 'BetterMan', imagePath: 'assets/avatares/betterman.png', price: 1700, requiredLevel: 170, exclusive: true),
+  AvatarModel(name: 'Ele já não apareceu?', imagePath: 'assets/avatares/narrator.png', price: 1750, requiredLevel: 175, exclusive: true),
+  AvatarModel(name: 'Parceiro da Vizinhança', imagePath: 'assets/avatares/spider.png', price: 1800, requiredLevel: 180, exclusive: true),
+  AvatarModel(name: 'Dex', imagePath: 'assets/avatares/dex.png', price: 1850, requiredLevel: 185,exclusive: false),
+  AvatarModel(name: 'Robô', imagePath: 'assets/avatares/robo.png', price: 2000, requiredLevel: 200, exclusive: false),
 ];
 
   static List<AppTheme> themes = [
-    AppTheme(
-  name: 'Default',
-  backgroundColor: Colors.black,
-  primaryColor: Color(0xFF1F1F1F),      // cor dos cards
-  secondaryColor: const Color(0xFF9E9E9E),         // texto secundário ou ícones
-  accentColor: const Color(0xFFFFC107),           // destaque, botões etc
-  textColor: Colors.white,
-  imagePath: 'assets/colors/defaultColor.png',
-  price: 0,
-  requiredLevel: 1,
-  owned: true,          // texto principal
-),
+  // Sempre começa com o padrão
+  AppTheme(
+    name: 'Default',
+    backgroundColor: Colors.black,
+    primaryColor: Color(0xFF1F1F1F),
+    secondaryColor: Color(0xFF9E9E9E),
+    accentColor: Color(0xFFFFC107),
+    textColor: Colors.white,
+    imagePath: 'assets/colors/defaultColor.png',
+    price: 0,
+    requiredLevel: 1,
+    owned: true,
+    exclusive: false,
+  ),
+  
+  // Início misturado
   AppTheme(
     name: "Ciano Escuro",
     backgroundColor: Color(0xFF1E1E1E),
     primaryColor: Color.fromARGB(255, 42, 81, 81),
-    secondaryColor: Color(0xFF4FBDBD), // tom mais claro do ciano
+    secondaryColor: Color(0xFF4FBDBD),
     textColor: Colors.white,
     accentColor: Color(0xFF00FFFF),
     imagePath: 'assets/colors/ciano_escuro.png',
-    price: 100,
+    price: 90,
     requiredLevel: 2,
-
+    exclusive: false,
   ),
   AppTheme(
-    name: "Noite Azulada",
-    backgroundColor: Color(0xFF0D1B2A),
-    primaryColor: Color.fromARGB(255, 90, 92, 102),
-    secondaryColor: Color(0xFF415A77), // azul escuro esmaecido
+    name: "Stage",
+    backgroundColor: Color.fromARGB(255, 0, 0, 0),
+    primaryColor: Color.fromARGB(255, 21, 21, 21),
+    secondaryColor: Color.fromARGB(255, 255, 255, 255),
     textColor: Colors.white,
-    accentColor: Color(0xFF00BFFF),
-    imagePath: 'assets/colors/noite_azulada.png',
-    price: 150,
-    requiredLevel: 7,
+    accentColor: Color.fromARGB(255, 114, 114, 114),
+    imagePath: 'assets/colors/themes/pj.png',
+    price: 130,
+    requiredLevel: 5,
+    exclusive: true,
   ),
   AppTheme(
     name: "Grafite & Neve",
     backgroundColor: Color(0xFF2B2B2B),
     primaryColor: Color.fromARGB(255, 116, 116, 116),
-    secondaryColor: Color(0xFFDADADA), // cinza claro elegante
-    textColor: const Color.fromARGB(255, 255, 255, 255),
+    secondaryColor: Color(0xFFDADADA),
+    textColor: Colors.white,
     accentColor: Color(0xFF4A90E2),
     imagePath: 'assets/colors/grafite_&_neve.png',
+    price: 150,
+    requiredLevel: 7,
+    exclusive: false,
+  ),
+  AppTheme(
+    name: "VitalCity",
+    backgroundColor: Color.fromARGB(255, 12, 22, 39),
+    primaryColor: Color(0xFF3A6199),
+    secondaryColor: Color(0xFF4A7FB8),
+    textColor: Colors.white,
+    accentColor: Color(0xFFABDEF1),
+    imagePath: 'assets/colors/themes/ny.png',
     price: 180,
-    requiredLevel: 13,
+    requiredLevel: 10,
+    exclusive: true,
+  ),
+  AppTheme(
+    name: "Noite Azulada",
+    backgroundColor: Color(0xFF0D1B2A),
+    primaryColor: Color.fromARGB(255, 90, 92, 102),
+    secondaryColor: Color(0xFF415A77),
+    textColor: Colors.white,
+    accentColor: Color(0xFF00BFFF),
+    imagePath: 'assets/colors/noite_azulada.png',
+    price: 200,
+    requiredLevel: 12,
+    exclusive: false,
+  ),
+  AppTheme(
+    name: "Apocalypse",
+    backgroundColor: Color(0xFF06070A),
+    primaryColor: Color(0xFF565B60),
+    secondaryColor: Color(0xFF405E56),
+    textColor: Colors.white,
+    accentColor: Color.fromARGB(255, 192, 219, 160),
+    imagePath: 'assets/colors/themes/dg.png',
+    price: 220,
+    requiredLevel: 15,
+    exclusive: true,
   ),
   AppTheme(
     name: "Espaço & Azul",
     backgroundColor: Color(0xFF202124),
     primaryColor: Color(0xFF3F88C5),
-    secondaryColor: Color(0xFF72AEE6), // azul mais claro e suave
+    secondaryColor: Color(0xFF72AEE6),
     textColor: Colors.white,
     accentColor: Color(0xFF64FFDA),
     imagePath: 'assets/colors/espaço_&_azul.png',
-    price: 0,
-     requiredLevel: 19,
+    price: 240,
+    requiredLevel: 17,
+    exclusive: false,
+  ),
+  AppTheme(
+    name: "Japan",
+    backgroundColor: Color.fromARGB(255, 6, 13, 14),
+    primaryColor: Color(0xFF9A0133),
+    secondaryColor: Color(0xFFB22222),
+    textColor: Colors.white,
+    accentColor: Color(0xFFFBB96A),
+    imagePath: 'assets/colors/themes/japan.png',
+    price: 260,
+    requiredLevel: 20,
+    exclusive: true,
+  ),
+  AppTheme(
+    name: '"Seu apartamento explodiu?"',
+    backgroundColor: Color.fromARGB(255, 4, 7, 12),
+    primaryColor: Color(0xFF132032),
+    secondaryColor: Color(0xFF172B40),
+    textColor: Colors.white,
+    accentColor: Color(0xFF41576D),
+    imagePath: 'assets/colors/themes/fc.png',
+    price: 290,
+    requiredLevel: 24,
+    exclusive: true,
+  ),
+  AppTheme(
+    name: "Big Kanuha",
+    backgroundColor: Color(0xFF14152B),
+    primaryColor: Color(0xFF414C68),
+    secondaryColor: Color(0xFF75818D),
+    textColor: Colors.white,
+    accentColor: Color(0xFFF82A44),
+    imagePath: 'assets/colors/themes/pf.png',
+    price: 310,
+    requiredLevel: 27,
+    exclusive: true,
   ),
   AppTheme(
     name: "Vermelho Profundo",
     backgroundColor: Color(0xFF121212),
     primaryColor: Color(0xFF8B0000),
-    secondaryColor: Color(0xFFB22222), // vermelho tijolo mais leve
+    secondaryColor: Color(0xFFB22222),
     textColor: Colors.white,
     accentColor: Color(0xFFFF4500),
     imagePath: 'assets/colors/vermelho_profundo.png',
-    price: 300,
-    requiredLevel: 35,
+    price: 330,
+    requiredLevel: 30,
+    exclusive: false,
+  ),
+
+  // Parte final: GRANDES temas
+  AppTheme(
+    name: "Faroeste",
+    backgroundColor: Color.fromARGB(255, 12, 6, 7),
+    primaryColor: Color(0xFF762017),
+    secondaryColor: Color(0xFFE05210),
+    textColor: Colors.white,
+    accentColor: Color(0xFFF8CD52),
+    imagePath: 'assets/colors/themes/faroeste.png',
+    price: 450,
+    requiredLevel: 50,
+    exclusive: true,
+  ),
+  AppTheme(
+    name: "Space",
+    backgroundColor: Color(0xFF010C27),
+    primaryColor: Color(0xFF352F6B),
+    secondaryColor: Color(0xFFE09A70),
+    textColor: Colors.white,
+    accentColor: Color(0xFFFF4500),
+    imagePath: 'assets/colors/themes/space.png',
+    price: 470,
+    requiredLevel: 53,
+    exclusive: true,
+  ),
+  AppTheme(
+    name: "Temple",
+    backgroundColor: Color.fromARGB(255, 9, 19, 20),
+    primaryColor: Color(0xFF265138),
+    secondaryColor: Color(0xFF7E9C47),
+    textColor: Colors.white,
+    accentColor: Color(0xFF779F32),
+    imagePath: 'assets/colors/themes/temple.png',
+    price: 480,
+    requiredLevel: 55,
+    exclusive: true,
+  ),
+  AppTheme(
+    name: "City",
+    backgroundColor: Color(0xFF03061D),
+    primaryColor: Color(0xFF021F56),
+    secondaryColor: Color(0xFF033369),
+    textColor: Colors.white,
+    accentColor: Color(0xFFB1357E),
+    imagePath: 'assets/colors/themes/city.png',
+    price: 490,
+    requiredLevel: 57,
+    exclusive: true,
+  ),
+  AppTheme(
+    name: "Sea",
+    backgroundColor: Color(0xFF164260),
+    primaryColor: Color(0xFF2D7684),
+    secondaryColor: Color(0xFFA6CFBA),
+    textColor: Colors.white,
+    accentColor: Color(0xFFA6CFBA),
+    imagePath: 'assets/colors/themes/sea.png',
+    price: 500,
+    requiredLevel: 60,
+    exclusive: true,
+  ),
+  AppTheme(
+    name: "Fire",
+    backgroundColor: Color.fromARGB(255, 1, 5, 10),
+    primaryColor: Color(0xFF8B0000),
+    secondaryColor: Color(0xFFB22222),
+    textColor: Colors.white,
+    accentColor: Color(0xFFFF4500),
+    imagePath: 'assets/colors/themes/fire.png',
+    price: 520,
+    requiredLevel: 65,
+    exclusive: true,
   ),
 ];
+
 
 
   static void buyAvatar(String name) async{
@@ -317,20 +445,30 @@ static Future<void> loadOwnedColors() async {
     if (!color.owned && coins >= color.price && level >= color.requiredLevel) {
       coins -= color.price;
       color.owned = true;
-      await saveOwnedAvatars();
+      await saveOwnedColors();
     }
   }
   
 
   static List<StatsModel> getStatsOfLastDays(int n) {
-  final List<DailyStats> ultimosDias = dailyStats
-    .where((s) => s.date.isAfter(DateTime.now().subtract(Duration(days: n))))
-    .toList();
+  final today = DateTime.now();
+  final startDate = DateTime(today.year, today.month, today.day).subtract(Duration(days: n - 1));
 
   bool isHojeNaLista(List<int> diasDaSemana) {
-  int weekday = DateTime.now().weekday;
-  return diasDaSemana.contains(weekday);
-}
+    int weekday = today.weekday;
+    return diasDaSemana.contains(weekday);
+  }
+
+  if (n > 1){
+
+  final List<DailyStats> ultimosDias = historicoStats
+    .where((s) {
+      final dataSemHora = DateTime(s.date.year, s.date.month, s.date.day);
+      return dataSemHora.isAfter(startDate.subtract(const Duration(days: 1))) &&
+             dataSemHora.isBefore(today.add(const Duration(days: 1)));
+    })
+    .toList()
+    ..sort((a, b) => a.date.compareTo(b.date)); // ordenar para os gráficos ficarem certos
 
   return [
     StatsModel(
@@ -366,7 +504,7 @@ static Future<void> loadOwnedColors() async {
       isPercentage: false,
       labels: ultimosDias.map((e) => "${e.date.day}/${e.date.month}").toList(),
       data: ultimosDias.map((e) => e.completedWorkouts.toDouble()).toList(),
-      goal: AppData.listaAtividades.where((el) => isHojeNaLista(el.dias)).length.toDouble(),
+      goal: AppData.treinos.where((el) => isHojeNaLista(el.diasSemana)).length.toDouble(),
       isBmi: false
     ),
     StatsModel(
@@ -406,13 +544,90 @@ static Future<void> loadOwnedColors() async {
       isBmi: true
     ),
   ];
+  } else {
+    DailyStats hj = DailyStats(date: DateTime.now(), waterLiters: waterConsumed.toDouble(), completedActivities: completedActivities, completedWorkouts: treinos.expand((treino) => treino.exercicios).where(((ex) => ex.completed)).length, bmi: AppData.bmi, horasDormidas: horasDormidas, wasActive: ativoHoje);
+     return [
+    StatsModel(
+      date: DateTime.now(),
+      title: "Consumo de Água",
+      unit: "L",
+      icon: Icons.water_drop,
+      color: Colors.blueAccent,
+      isPercentage: false,
+      labels: [hj.date.toIso8601String()],
+      data: [hj.waterLiters],
+      goal: 2000,
+      isBmi: false
+    ),
+    StatsModel(
+      date: DateTime.now(),
+      title: "Atividades Concluídas",
+      unit: "✓",
+      icon: Icons.check_circle,
+      color: Colors.greenAccent,
+      isPercentage: false,
+      labels: [hj.date.toIso8601String()],
+      data: [hj.completedActivities.toDouble()],
+      goal: AppData.listaAtividades.where((el) => isHojeNaLista(el.dias)).length.toDouble(),
+      isBmi: false
+    ),
+    StatsModel(
+      date: DateTime.now(),
+      title: "Treinos Concluídos",
+      unit: "✓",
+      icon: Icons.fitness_center,
+      color: Colors.orange,
+      isPercentage: false,
+      labels: [hj.date.toIso8601String()],
+      data: [hj.completedWorkouts.toDouble()],
+      goal: AppData.treinos.where((el) => isHojeNaLista(el.diasSemana)).length.toDouble(),
+      isBmi: false
+    ),
+    StatsModel(
+      date: DateTime.now(),
+      title: "Horas Dormidas",
+      unit: "H",
+      icon: Icons.bed,
+      color: const Color.fromARGB(255, 166, 187, 255),
+      isPercentage: false,
+      labels: [hj.date.toIso8601String()],
+      data: [hj.horasDormidas],
+      goal: 8,
+      isBmi: false
+    ),
+    StatsModel(
+      date: DateTime.now(),
+      title: "Dias Ativos",
+      unit: "",
+      icon: Icons.local_fire_department,
+      color: Colors.redAccent,
+      isPercentage: true,
+      labels: [hj.date.toIso8601String()],
+      data: [hj.wasActive ? 1.0 : 0.0],
+      goal: 1.0,
+      isBmi: false
+    ),
+    StatsModel(
+      date: DateTime.now(),
+      title: "IMC Atual",
+      unit: "",
+      icon: Icons.monitor_weight,
+      color: Colors.purple,
+      isPercentage: true,
+      labels: [hj.date.toIso8601String()],
+      data: [hj.bmi],
+      goal: 0.0,
+      isBmi: true
+    ),
+  ];
+  }
 }
 
 
 static void setBmi(double bmiImput){
   bmi = bmiImput;
   atualizarDailyStats(bmi: bmiImput);
-  salvarDados();
+  AppDataService.salvarTudo();
 }
 
 
@@ -476,112 +691,4 @@ static void salvarDailyStats() async {
   final jsonList = dailyStats.map((e) => jsonEncode(e.toJson())).toList();
   prefs.setStringList('stats', jsonList);
 }
-
-
-  // ========= SALVAR DADOS =========
-  static Future<void> salvarDados() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    prefs.setStringList('treinos', treinos.map((t) => jsonEncode(t.toJson())).toList());
-    prefs.setStringList('treinosSelecionados', treinosSelecionados.map((e) => jsonEncode(e.toJson())).toList());
-    prefs.setStringList('quickActions', quickActions.map((a) => jsonEncode(a.toJson())).toList());
-    prefs.setStringList('listaAtividades', listaAtividades.map((a) => jsonEncode(a)).toList());
-    prefs.setStringList('stats', dailyStats.map((s) => jsonEncode(s.toJson())).toList());
-    prefs.setString('ultimaDataSalva', ultimaDataSalva.toIso8601String());
-    prefs.setString('historicoStats', jsonEncode(historicoStats.map((e) => e.toJson()).toList()));
-    prefs.setInt('coins', coins);
-    prefs.setInt('exp', exp);
-    prefs.setInt('level', level);
-    prefs.setString('currentAvatar', currentAvatar);
-    prefs.setString('currentTheme', currentTheme);
-    prefs.setStringList('desafios_do_dia', dailyChallenges.map((d) => jsonEncode(d.toJson())).toList());
-
-    prefs.setInt('waterConsumed', waterConsumed);
-    prefs.setInt('treinosDiarios', treinosDiarios);
-    prefs.setInt('completedActivities', completedActivities);
-    prefs.setDouble('progress', progress);
-    prefs.setDouble('bmi', bmi);
-    prefs.setDouble('horasDormidas', horasDormidas);
-  }
-
-  static DateTime _parseDateSafely(String? dateStr) {
-  if (dateStr == null || dateStr.isEmpty) {
-    return DateTime.now(); // ou qualquer valor padrão que você queira
-  }
-  try {
-    return DateTime.parse(dateStr);
-  } catch (e) {
-    print("Erro ao converter data: $dateStr");
-    return DateTime.now(); // ou lança uma exceção se preferir
-  }
-}
-
-  // ========= CARREGAR DADOS =========
-  static Future<void> carregarDados() async {
-  final prefs = await SharedPreferences.getInstance();
-
-  final treinosJson = prefs.getStringList('treinos');
-  if (treinosJson != null) {
-    treinos = treinosJson.map((jsonStr) => TreinoModel.fromJson(jsonDecode(jsonStr))).toList();
-  }
-
-  final selecionadosJson = prefs.getStringList('treinosSelecionados');
-  if (selecionadosJson != null) {
-    treinosSelecionados = selecionadosJson.map((jsonStr) => ExercicioModel.fromJson(jsonDecode(jsonStr))).toList();
-  }
-
-  final actionsJson = prefs.getStringList('quickActions');
-  if (actionsJson != null) {
-    quickActions = actionsJson.map((jsonStr) => QuickAction.fromJson(jsonDecode(jsonStr))).toList();
-  }
-
-  final atividadesJson = prefs.getStringList('listaAtividades');
-  if (atividadesJson != null) {
-    listaAtividades = atividadesJson.map((jsonStr) => AtividadeModel.fromJson(jsonDecode(jsonStr))).toList();
-  }
-
-  final statsJson = prefs.getStringList('stats');
-  if (statsJson != null) {
-    dailyStats = statsJson.map((jsonStr) => DailyStats.fromJson(jsonDecode(jsonStr))).toList();
-  }
-  final challengesJson = prefs.getStringList('desafios_do_dia');
-  if (challengesJson != null){
-    dailyChallenges = challengesJson.map((jsonStr) => DailyChallengeModel.fromJson(jsonDecode(jsonStr))).toList();
-  }
-
-  final dataString = prefs.getString('ultimaDataSalva');
-  if (dataString != null) {
-  try {
-    ultimaDataSalva = _parseDateSafely(dataString);  // Tenta fazer o parse da string para DateTime
-  } catch (e) {
-    // Se o formato for inválido, podemos definir uma data padrão
-    ultimaDataSalva = DateTime.now();  // Defina como a data atual em caso de erro
-  }
-}
-
-
-  final historicoString = prefs.getString('historicoStats');
-  if (historicoString != null) {
-    final List<dynamic> listaJson = jsonDecode(historicoString);
-    historicoStats = listaJson.map((e) => DailyStats.fromJson(e)).toList();
-  }
-
-  waterConsumed = prefs.getInt('waterConsumed') ?? 0;
-  treinosDiarios = prefs.getInt('treinosDiarios') ?? 0;
-  coins = prefs.getInt('coins') ?? 0;
-  exp = prefs.getInt('exp') ?? 0;
-  level = prefs.getInt('level') ?? 1;
-  bmi = prefs.getDouble('bmi') ?? 0.0;
-  currentAvatar = prefs.getString('currentAvatar') ?? 'Default';
-  currentTheme = prefs.getString('currentTheme') ?? 'Default';
-  completedActivities = prefs.getInt('completedActivities') ?? 0;
-  progress = prefs.getDouble('progress') ?? 0.0;
-  horasDormidas = prefs.getDouble('horasDormidas') ?? 0.0;
-}
-
-  // ========= OPCIONAL: RESET =========
-  static Future<void> limparDados() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-  }
 }

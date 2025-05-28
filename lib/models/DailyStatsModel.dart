@@ -18,6 +18,18 @@ class DailyStats {
     this.bmi = 0.0,
   });
 
+  factory DailyStats.empty() {
+    return DailyStats(
+      date: DateTime.now(),
+      waterLiters: 0.0,
+      completedActivities: 0,
+      completedWorkouts: 0,
+      horasDormidas: 0.0,
+      wasActive: false,
+      bmi: 0.0,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'date': date.toIso8601String(),

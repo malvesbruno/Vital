@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vital/app_data_service.dart';
 import '../app_data.dart';
 import '../models/DailyChallenge.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -37,6 +38,7 @@ class _ChallengeTileState extends State<ChallengeTile> {
           fontSize: 18,
           fontFamily: 'Montserrat',
           decoration: widget.challenge.completed ? TextDecoration.lineThrough : null,
+          decorationThickness: 3.0,
         ),
       ),
       onTap: () async {
@@ -63,7 +65,7 @@ class _ChallengeTileState extends State<ChallengeTile> {
       print("[DEBUG] Desafio desmarcado! EXP a remover: ${widget.challenge.exp}"); // ✅
       AppData.addExperience(context, -widget.challenge.exp); // Remove o EXP
     }
-    AppData.salvarDados();
+    AppDataService.salvarTudo();
   } catch (e) {
     print("[ERRO] Ao reproduzir áudio: $e"); // Se o áudio falhar, não bloqueia o EXP
     if (widget.challenge.completed) {

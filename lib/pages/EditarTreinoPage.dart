@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../app_data.dart';
 import '../main.dart';
 import '../models/TreinoModel.dart';
-import '../services/VerificarAgendamento.dart';
+import '../app_data_service.dart';
+
 
 class EditarTreinoPage extends StatefulWidget {
   final TreinoModel treino;
@@ -98,8 +99,7 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
     widget.treino.diasSemana = formatarDias(diasSelecionados);
     widget.treino.exercicios = List.from(AppData.treinosSelecionados);
     widget.treino.horario = horarioSelecionado as TimeOfDay;
-    await AppData.salvarDados();
-    await Verificaragendamento.verficarAgendamento();
+    await AppDataService.salvarTudo();
     if (!mounted) return;
     Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage())); // volta para tela anterior
     ScaffoldMessenger.of(context).showSnackBar(

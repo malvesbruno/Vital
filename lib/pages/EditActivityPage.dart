@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../app_data.dart';
 import '../main.dart';
 import '../models/AtividadeModel.dart';
-import '../services/VerificarAgendamento.dart';
+import '../app_data_service.dart';
+
 
 class EditActivityPage extends StatefulWidget {
   final int index;
@@ -55,8 +56,7 @@ class _EditActivityPageState extends State<EditActivityPage> {
 
     AppData.listaAtividades[widget.index] = novaAtividade;
 
-    await AppData.salvarDados();
-    await Verificaragendamento.verficarAgendamento();
+    await AppDataService.salvarTudo();
     if (!mounted) return;
 
     Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage()));

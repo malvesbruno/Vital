@@ -3,6 +3,9 @@ import 'package:vital/app_data.dart';
 import '../models/AvatarModel.dart';
 import '../widgets/zeldaBackground.dart';
 import 'package:audioplayers/audioplayers.dart';
+import '../pages/DeluxePage.dart';
+import '../app_data_service.dart';
+
 
 
 class AvatarStorePage extends StatefulWidget {
@@ -59,7 +62,7 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
                   CircleAvatar(
                     radius: 70,
                     backgroundImage: AssetImage(avatar.imagePath),
-                    backgroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+                    backgroundColor: avatar.exclusive ? Colors.amber  : Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                   const SizedBox(height: 20),
                   Text(
@@ -109,7 +112,13 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
     buttonText = 'Nível ${updatedAvatar.requiredLevel} necessário';
     isButtonEnabled = false;
     buttonColor = Colors.grey.shade700;
-  } else if (!alreadyOwned && !hasCoins) {
+  } 
+  else if(!alreadyOwned && !AppData.ultimate && avatar.exclusive){
+    buttonText = 'Comprar avatar\n(${updatedAvatar.price} moedas)';
+    isButtonEnabled = true;
+    buttonColor = Colors.amber;
+  }
+  else if (!alreadyOwned && !hasCoins) {
     buttonText = '${updatedAvatar.price}\nmoedas (insuficiente)';
     isButtonEnabled = false;
     buttonColor = Colors.red.shade300;
@@ -143,12 +152,16 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
           CircleAvatar(
         radius: 80,
         backgroundImage: AssetImage(updatedAvatar.imagePath), // substitua pelo avatar atual do usuário
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        backgroundColor: avatar.exclusive ? Colors.amber  : Theme.of(context).textTheme.bodyLarge?.color,
       ),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: isButtonEnabled
-                ? () {
+                ? () async{
+                  if (!alreadyOwned && !AppData.ultimate && avatar.exclusive){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => Deluxepage()));
+                  }
+                  else{
                     Navigator.pop(context, true);
                     if (!alreadyOwned) {
                       AppData.buyAvatar(updatedAvatar.name); // sua lógica aqui
@@ -157,13 +170,14 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
                         });
                       // você pode disparar uma animação ou som aqui;
                       _showZeldaUnlockAnimation(context, updatedAvatar);
-                      AppData.salvarDados(); // força rebuild pra atualizar moedas
+                      await AppDataService.salvarTudo(); // força rebuild pra atualizar moedas
                     } else if (!isSelected) {
                       AppData.currentAvatar = updatedAvatar.name;
                       setState(() {});
-                      AppData.salvarDados();
+                      await AppDataService.salvarTudo();;
                     }
                   }
+                }
                 : null,
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(buttonColor),
@@ -201,7 +215,7 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
             _buildCoinsDisplay(),
           ],
         ),
-        backgroundColor: Colors.transparent,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyLarge?.color),
@@ -280,7 +294,7 @@ class AvatarGridItem extends StatelessWidget {
         children: [
           Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).textTheme.bodyLarge?.color, // fundo branco
+            color: avatar.exclusive ? Colors.amber  : Theme.of(context).textTheme.bodyLarge?.color, // fundo branco
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.grey.shade800, width: 2),
           ),

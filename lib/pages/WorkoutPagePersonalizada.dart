@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import '../app_data.dart';
 import 'WorkoutComplete.dart';
+import '../app_data_service.dart';
+
 
 class WorkoutPagePersonalizado extends StatefulWidget {
   final List<Map<String, dynamic>> excercicios;
@@ -101,7 +103,8 @@ class _WorkoutPagePersonalizadoState extends State<WorkoutPagePersonalizado> wit
       }
 
       if (widget.excercicios.isEmpty) {
-        AppData.salvarDados();
+        AppDataService.salvarTudo();
+         AppData.ativoHoje = true;
         AppData.atualizarDailyStats(treinoConcluido: true);
         Navigator.pushReplacement(
           context,
@@ -127,7 +130,7 @@ class _WorkoutPagePersonalizadoState extends State<WorkoutPagePersonalizado> wit
     }
   });
 
-  await AppData.salvarDados();
+  await AppDataService.salvarTudo();
 }
 
 

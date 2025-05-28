@@ -1,7 +1,8 @@
 import '../models/AtividadeModel.dart';
 import 'package:flutter/material.dart';
 import '../app_data.dart';
-import '../services/VerificarAgendamento.dart';
+import '../app_data_service.dart';
+
 
 class AddActivityPage extends StatefulWidget {
   final Function(AtividadeModel) onAdd;
@@ -58,12 +59,7 @@ class _AddActivityPageState extends State<AddActivityPage> {
 
     widget.onAdd(novaAtividade);
     _updateProgressBar();
-    await AppData.salvarDados();
-    try {
-      await Verificaragendamento.verficarAgendamento();
-    } catch (e) {
-      print("Erro ao verificar agendamento: $e");
-    }
+    await AppDataService.salvarTudo();
     if (!mounted) return;
     Navigator.pop(context);
   }

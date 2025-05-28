@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'WorkoutPagePersonalizada.dart';
 import 'dart:ui' as ui;
-import '../app_data.dart';
+import '../app_data_service.dart';
+
 
 class PersonalizeTreinoPage extends StatefulWidget{
   const PersonalizeTreinoPage({super.key});
@@ -174,7 +175,7 @@ class _PersonalizeTreinoPageState extends State<PersonalizeTreinoPage>{
                       } else {
                         lista.removeWhere((e) => e['name'] == exercicio['name']);
                       }
-                      await AppData.salvarDados();
+                      await AppDataService.salvarTudo();
                     });
                   },
                   style: ElevatedButton.styleFrom(

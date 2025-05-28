@@ -4,6 +4,7 @@ class AvatarModel {
   final int price;
   final int requiredLevel;
   bool owned;
+  final bool exclusive;
 
   AvatarModel({
     required this.name,
@@ -11,5 +12,6 @@ class AvatarModel {
     required this.price,
     required this.requiredLevel,
     this.owned = false,
+    required this.exclusive
   });
 }

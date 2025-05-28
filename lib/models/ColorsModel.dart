@@ -10,6 +10,7 @@ class AppTheme {
   final String imagePath;
   final int price;
   final int requiredLevel;
+  final bool exclusive;
   bool owned;
 
   AppTheme({
@@ -22,6 +23,7 @@ class AppTheme {
     required this.imagePath,
     required this.price,
     required this.requiredLevel,
+    required this.exclusive,
     this.owned = false,
   });
 

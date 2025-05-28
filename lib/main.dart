@@ -4,39 +4,31 @@ import '../pages/MyHomePage.dart';
 import '../pages/ActivityPage.dart';
 import '../pages/WorkoutPage.dart';
 import '../pages/StatsPage.dart';
-import 'package:flutter_foreground_task/flutter_foreground_task.dart' as fft;
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'services/VerificarAgendamento.dart';
-import 'services/Notication.dart';
-import 'services/background_task_handler.dart';
+
 import './services/challenge_service.dart';
 import 'package:provider/provider.dart';
 import 'themeNotifier.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../services/reset_daily.dart';
 import 'dart:async';
+import '../pages/SplashScreen.dart';
+
+import 'package:timezone/data/latest_all.dart' as tz;
+import '../services/navigation_service.dart';
+import '../app_data_service.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+
 
 void main() async {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
     tz.initializeTimeZones();
+    await Firebase.initializeApp();
 
-    final notificationService = NotificationService();
-    await notificationService.init();
-
-    await Verificaragendamento.verficarAgendamento();
-    await AppData.carregarDados();
-    await AppData.verificarSePrecisaSalvarHoje();
-
-    await AppData.carregarDesafiosDoDia();
-    await AppData.loadOwnedAvatars();
-    await AppData.loadOwnedColors();
-
-    final prefs = await SharedPreferences.getInstance();
-    final themeName = prefs.getString('currentTheme') ?? AppData.themes.first.name;
+    final themeName = AppData.currentTheme;
     final initialTheme = AppData.themes.firstWhere((t) => t.name == themeName);
-
+    
     runApp(
       ChangeNotifierProvider(
         create: (_) => ThemeNotifier(initialTheme),
@@ -49,10 +41,6 @@ void main() async {
 }
 
 
-
-void startCallback() {
-  fft.FlutterForegroundTask.setTaskHandler(MyTaskHandler());
-}
 
 
 class MyApp extends StatefulWidget {
@@ -75,6 +63,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     final theme = Provider.of<ThemeNotifier>(context).currentTheme;
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Vital',
       theme: ThemeData(
         scaffoldBackgroundColor: theme.backgroundColor,
@@ -91,9 +80,10 @@ class _MyAppState extends State<MyApp> {
           backgroundColor: theme.backgroundColor,
           foregroundColor: theme.textColor,
         ),
+        
         // você pode adicionar mais aqui com base no AppTheme
       ),
-      home: const MainPage(),
+      home: const SplashScreen(),
     );
   }
 }
@@ -115,11 +105,12 @@ class _MainPageState extends State<MainPage> {
         if (activity.title == title) {
           activity.completed = true; // Remove visualmente o card
           AppData.completedActivities++;
+           AppData.ativoHoje = true;
         }
       }
       ChallengeService.verificarDesafiosAutomaticos();
       _updateProgressBar();
-      AppData.salvarDados();
+      AppDataService.salvarTudo();
     });
   }
 
@@ -152,26 +143,25 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
+    return Stack(
+  children: [
+    Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, // Deixa o scaffold transparente!
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
         children: [
-          PageView(
-            controller: _pageController,
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              MyHomePage(),
-              ActivityPage(lista: AppData.listaAtividades, progresso: AppData.progress, onComplete: _handleActivityCompletion),
-              WorkoutPage(treinosDoDia: AppData.getExerciciosDoDia(), treino: AppData.getTreinosNome()),
-              StatsPage(),
-            ],
-          ),
+          MyHomePage(),
+          ActivityPage(lista: AppData.listaAtividades, progresso: AppData.progress, onComplete: _handleActivityCompletion),
+          WorkoutPage(treinosDoDia: AppData.getExerciciosDoDia(), treino: AppData.getTreinosNome()),
+          StatsPage(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.7), // Pode deixar semi-transparente se quiser
         selectedItemColor: Theme.of(context).textTheme.bodyLarge?.color,
-        unselectedItemColor: Theme.of(context).textTheme.bodyLarge?.color?.withValues(red: 0.4, blue: 0.4, green: 0.4),
+        unselectedItemColor: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.4),
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [
@@ -181,6 +171,8 @@ class _MainPageState extends State<MainPage> {
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Stats"),
         ],
       ),
-    );
+    ),
+  ],
+);
   }
 }

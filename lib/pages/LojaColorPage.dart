@@ -5,6 +5,9 @@ import '../widgets/zeldaBackground.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:provider/provider.dart';
 import 'package:vital/themeNotifier.dart';
+import '../pages/DeluxePage.dart';
+import '../app_data_service.dart';
+
 
 
 class ColorsStorePage extends StatefulWidget {
@@ -101,6 +104,7 @@ class _ColorsStorePageState extends State<ColorsStorePage> {
   final isUnlocked = widget.userLevel >= updateColor.requiredLevel;
   final hasCoins = AppData.coins >= updateColor.price;
   final alreadyOwned = updateColor.owned;
+  final isExclusive = updateColor.exclusive;
   final isSelected = AppData.currentTheme == updateColor.name;
 
   String buttonText = '';
@@ -111,7 +115,13 @@ class _ColorsStorePageState extends State<ColorsStorePage> {
     buttonText = 'Nível ${updateColor.requiredLevel} necessário';
     isButtonEnabled = false;
     buttonColor = Colors.grey.shade700;
-  } else if (!alreadyOwned && !hasCoins) {
+  } 
+   else if(!alreadyOwned && !AppData.ultimate && color.exclusive){
+    buttonText = 'Tema Exclusivo';
+    isButtonEnabled = true;
+    buttonColor = Colors.amber;
+  }
+  else if (!alreadyOwned && !hasCoins) {
     buttonText = '${updateColor.price}\nmoedas (insuficiente)';
     isButtonEnabled = false;
     buttonColor = Colors.red.shade300;
@@ -150,7 +160,11 @@ class _ColorsStorePageState extends State<ColorsStorePage> {
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: isButtonEnabled
-                ? () {
+                ? () async{
+                  if(!alreadyOwned && !AppData.ultimate && color.exclusive){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => Deluxepage()));
+                  }
+                  else{
                     Navigator.pop(context, true);
                     if (!alreadyOwned) {
                       AppData.buyColor(updateColor.name); // sua lógica aqui
@@ -159,13 +173,20 @@ class _ColorsStorePageState extends State<ColorsStorePage> {
                         });
                       // você pode disparar uma animação ou som aqui;
                       _showZeldaUnlockAnimation(context, updateColor);
-                      AppData.salvarDados(); // força rebuild pra atualizar moedas
+                      await AppDataService.salvarTudo(); // força rebuild pra atualizar moedas
                     } else if (!isSelected) {
                       Provider.of<ThemeNotifier>(context, listen: false).currentTheme = updateColor;
-                      AppData.currentTheme = updateColor.name;
-                      setState(() {});
-                      AppData.salvarDados();
+                      setState(() {
+                        AppData.currentTheme = updateColor.name;
+                      if (isExclusive){
+                        AppData.isExclusiveTheme = true;
+                      } else{
+                        AppData.isExclusiveTheme = false;
+                      }
+                      });
+                      await AppDataService.salvarTudo();
                     }
+                  }
                   }
                 : null,
             style: ButtonStyle(
@@ -204,10 +225,10 @@ class _ColorsStorePageState extends State<ColorsStorePage> {
             _buildCoinsDisplay(),
           ],
         ),
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyLarge?.color),
           onPressed: () {
             Navigator.pop(context, true);
           },
@@ -289,11 +310,14 @@ class ColorGridItem extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: Image.asset(
-              color.imagePath,
-              fit: BoxFit.contain, // ou cover, dependendo do efeito que quiser
+            child: SizedBox.expand( // <- AQUI! força ocupar 100% da área
+              child: FittedBox(
+                fit: BoxFit.cover, // <- Força preencher o quadrado
+                clipBehavior: Clip.hardEdge,
+                child: Image.asset(color.imagePath),
+              ),
             ),
-          ),
+          )
         ),
 
           // Overlay de bloqueado (nível insuficiente)
@@ -303,7 +327,7 @@ class ColorGridItem extends StatelessWidget {
               label: 'Nível ${color.requiredLevel}',
               color: Colors.black.withOpacity(0.6),
             ),
-
+        
           // Overlay de compra (nível ok, mas ainda não comprado)
           if (canBuy)
             _overlay(

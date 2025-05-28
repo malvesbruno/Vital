@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class AtividadeModel {
   final String title;
   final String categoria;
@@ -16,19 +15,26 @@ class AtividadeModel {
     this.completed = false,
   });
 
+  /// Construtor vazio seguro
+  AtividadeModel.empty()
+      : title = 'Sem atividade definida',
+        categoria = 'Geral',
+        horario = const TimeOfDay(hour: 0, minute: 0),
+        dias = [],
+        completed = false;
 
   factory AtividadeModel.fromJson(Map<String, dynamic> json) {
     TimeOfDay parseTimeOfDay(String time) {
-  final parts = time.split(':');
-  return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
-}
+      final parts = time.split(':');
+      return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+    }
 
     return AtividadeModel(
       title: json['title'],
       categoria: json['categoria'],
       horario: parseTimeOfDay(json['horario']),
       dias: List<int>.from(json['dias']),
-      completed: json['completed'] ?? false,
+      completed: json['completed'] == 1 ? true : false,
     );
   }
 
@@ -38,7 +44,7 @@ class AtividadeModel {
       'categoria': categoria,
       'horario': '${horario.hour}:${horario.minute}',
       'dias': dias,
-      'completed': completed,
+      'completed': completed ? 1 : 0,
     };
   }
 }

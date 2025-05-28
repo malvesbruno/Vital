@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:vital/themeNotifier.dart';
 import 'dart:ui' as ui;
 import '../pages/AddActivityPage.dart';
 import '../pages/EditActivityPage.dart';
 import '../models/AtividadeModel.dart';
 import '../app_data.dart';
+import 'package:provider/provider.dart';
 
 class ActivityPage extends StatefulWidget {
   final List<AtividadeModel> lista;
@@ -19,6 +21,11 @@ class ActivityPage extends StatefulWidget {
 }
 
 class _ActivityPageState extends State<ActivityPage> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   String timeOfDayToString(TimeOfDay time) {
   return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
@@ -36,23 +43,47 @@ void _updateProgressBar() {
     }
 
     final concluidas = atividadesHoje.where((el) => el.completed).length;
-    AppData.progress = concluidas / atividadesHoje.length;
+    if (concluidas > 0 || atividadesHoje.isNotEmpty){
+      AppData.progress = concluidas / atividadesHoje.length;
+    } else{
+      AppData.progress = 0;
+    }
 
   }
+
 
   @override
   Widget build(BuildContext context) {
     bool vazio = widget.lista.every((item) => item.completed);
     if (!vazio){
       return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        extendBodyBehindAppBar: true,
+      backgroundColor: AppData.isExclusiveTheme ? Colors.transparent : Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.transparent,
+        backgroundColor:  AppData.isExclusiveTheme ? Colors.transparent : Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         title: Text('Atividades', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30.0, fontWeight: FontWeight.bold)),
       ),
-      body: SafeArea(
+      body: Stack(children: [
+        Consumer<ThemeNotifier>(builder: (context, themeNotifier, child){
+        if (!AppData.isExclusiveTheme) {
+      return const SizedBox.shrink(); // Não mostra nada
+    }
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(themeNotifier.currentTheme.imagePath),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            Colors.black.withOpacity(0.7), // 👈 escurece a imagem
+            BlendMode.darken,
+          ),
+        ),
+      ),
+    );
+    },),
+        SafeArea(
   child: ListView(
     padding: const EdgeInsets.symmetric(vertical: 10),
     children: [
@@ -91,16 +122,37 @@ void _updateProgressBar() {
     ],
   ),
 ),
+      ],)
     );
     }
     return Scaffold(
+      extendBodyBehindAppBar: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor:  AppData.isExclusiveTheme ? Colors.transparent : Theme.of(context).scaffoldBackgroundColor ,
         elevation: 0,
         title: Text('Atividades', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30.0, fontWeight: FontWeight.bold)),
       ),
-      body: SafeArea(
+      body: 
+      Stack(children: [
+        Consumer<ThemeNotifier>(builder: (context, themeNotifier, child){
+        if (!AppData.isExclusiveTheme) {
+      return const SizedBox.shrink(); // Não mostra nada
+    }
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(themeNotifier.currentTheme.imagePath),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            Colors.black.withOpacity(0.7), // 👈 escurece a imagem
+            BlendMode.darken,
+          ),
+        ),
+      ),
+    );
+    },),
+        SafeArea(
         child: Column(
           children: [
             _buildActivityProgressBar(widget.progresso),
@@ -156,6 +208,7 @@ void _updateProgressBar() {
           ],
         ),
       ),
+      ],)
     );
   }
 

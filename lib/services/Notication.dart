@@ -1,117 +1,119 @@
-import 'dart:io';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:timezone/data/latest_all.dart' as tzi;
+import 'package:vital/pages/MyHomePage.dart';
+import 'package:flutter/material.dart';
+import '../services/navigation_service.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
-
-  factory NotificationService() {
-    return _instance;
-  }
-
+  factory NotificationService() => _instance;
   NotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
-  const AndroidInitializationSettings androidSettings =
-      AndroidInitializationSettings('vital_icon_notification');
+    tzi.initializeTimeZones();
 
-  const InitializationSettings initSettings =
-      InitializationSettings(android: androidSettings);
+    // Solicita permissão para notificações
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
 
-  await _notificationsPlugin.initialize(initSettings);
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@drawable/icon_noti');
 
-  if (Platform.isAndroid) {
-    final info = await DeviceInfoPlugin().androidInfo;
-    final sdkInt = info.version.sdkInt;
+    final DarwinInitializationSettings initializationSettingsDarwin =
+        DarwinInitializationSettings();
 
-    if (sdkInt >= 33) {
-      final status = await Permission.notification.status;
-      if (!status.isGranted) {
-        final result = await Permission.notification.request();
-        if (!result.isGranted) {
-          print('Permissão de notificação negada.');
-        }
-      }
-    }
+    final LinuxInitializationSettings initializationSettingsLinux =
+        LinuxInitializationSettings(defaultActionName: 'Open notification');
 
-    await _notificationsPlugin
-    .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-    ?.createNotificationChannel(AndroidNotificationChannel(
-      'canal_treino',
-      'Lembretes de treino',
-      description: 'Notificações para lembrar dos treinos',
-      importance: Importance.max,
-    ));
-
-  }
-}
-
-
-  static int gerarId() {
-    return DateTime.now().millisecondsSinceEpoch.remainder(100000);
-  }
-
-  Future<bool> _canScheduleExactAlarms() async {
-    if (!Platform.isAndroid) return true;
-
-    final info = await DeviceInfoPlugin().androidInfo;
-    final sdkInt = info.version.sdkInt;
-
-    if (sdkInt < 31) return true;
-
-    final status = await Permission.scheduleExactAlarm.status;
-    if (status.isGranted) {
-      return true;
-    }
-
-    // Tenta solicitar permissão
-    final result = await Permission.scheduleExactAlarm.request();
-    return result.isGranted;
-  }
-
-  Future<void> agendarNotificacao({
-    required int id,
-    required String titulo,
-    required String corpo,
-    required DateTime horario,
-  }) async {
-    final podeAgendar = await _canScheduleExactAlarms();
-
-    if (!podeAgendar) {
-      print('Permissão para alarme exato negada. Notificação não será agendada.');
-      return;
-    }
-
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'canal_treino',
-      'Lembretes de treino',
-      channelDescription: 'Notificações para lembrar dos treinos',
-      importance: Importance.max,
-      priority: Priority.high,
+    final InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsDarwin,
+      macOS: initializationSettingsDarwin,
+      linux: initializationSettingsLinux,
     );
 
-    const NotificationDetails detalhes = NotificationDetails(android: androidDetails);
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
+    );
+  }
 
-    final tz.TZDateTime dataNotificacao = tz.TZDateTime.from(horario, tz.local);
+  Future<void> mostrarNotificacao({
+    int id = 0,
+    required String titulo,
+    required String corpo,
+    String? payload,
+  }) async {
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'your_channel_id',
+      'your_channel_name',
+      channelDescription: 'Descrição do canal',
+      importance: Importance.max,
+      priority: Priority.high,
+      ticker: 'ticker',
+    );
 
-    if (dataNotificacao.isBefore(tz.TZDateTime.now(tz.local))) {
-      print('Horário da notificação está no passado.');
-      return;
-    }
+    const NotificationDetails notificationDetails =
+        NotificationDetails(android: androidDetails);
 
-    await _notificationsPlugin.zonedSchedule(
+    await flutterLocalNotificationsPlugin.show(
       id,
       titulo,
       corpo,
-      dataNotificacao,
-      detalhes,
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      notificationDetails,
+      payload: payload,
     );
   }
+
+  Future<void> agendarNotificacao({
+  required String titulo,
+  required String corpo,
+  required DateTime horario,
+  int id = 0,
+  String? payload,
+}) async {
+  tzi.initializeTimeZones();
+
+  final String timeZoneName = await tz.local.name; // pega o timezone atual
+  tz.setLocalLocation(tz.getLocation(timeZoneName));
+
+  final tzScheduledDate = tz.TZDateTime.from(horario, tz.local);
+
+  await flutterLocalNotificationsPlugin.zonedSchedule(
+    id,
+    titulo,
+    corpo,
+    tzScheduledDate,
+    const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'your_channel_id',
+        'your_channel_name',
+        channelDescription: 'Descrição do canal',
+        importance: Importance.max,
+        priority: Priority.high,
+      ),
+    ),
+    payload: payload,
+    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+  );
+}
+}
+
+void onDidReceiveNotificationResponse(NotificationResponse notificationResponse) async {
+  final String? payload = notificationResponse.payload;
+  if (payload != null) {
+    print('Notification payload: $payload');
+  }
+
+  await navigatorKey.currentState?.push(
+    MaterialPageRoute(builder: (_) => MyHomePage()),
+  );
 }

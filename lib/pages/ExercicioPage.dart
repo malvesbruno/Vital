@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../app_data.dart';
 import '../models/ExercicioModel.dart';
 import '../pages/ConfigurarTreinoPageState.dart';
+import '../app_data_service.dart';
+
 
 
 class ExerciciosPage extends StatefulWidget {
@@ -34,7 +36,8 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
           .toList(),
     );
 
-    await AppData.salvarDados();
+
+    await AppDataService.salvarTudo();
     if (!mounted) return;
     Navigator.push(
       context,

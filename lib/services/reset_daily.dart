@@ -1,4 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vital/app_data.dart';
+import '../models/AtividadeModel.dart';
+import '../models/TreinoModel.dart';
+import '../app_data_service.dart';
+import '../models/DailyStatsModel.dart';
 
 class DailyResetService {
   static Future<void> verificarEDefinirNovoDia() async {
@@ -9,22 +14,27 @@ class DailyResetService {
     if (hoje != ultimoDia) {
       await prefs.setString('ultimo_dia_geral', hoje);
 
-      // Resetar dados de água
-      prefs.setInt('waterConsumed', 0);
+      // 🔹 Salvar os dados do dia anterior
+      await AppDataService.salvarStats();
 
-      // Resetar Treinos Diários
-      prefs.setInt('treinosDiarios', 0);
+      // 🔹 Resetar histórico diário
+      if (AppData.historicoStats.isNotEmpty){
+      AppData.historicoStats[0] = DailyStats.empty();
+      }
 
-      // Resetar atividades concluídas
-      prefs.setDouble('bmi', 0);
+      // 🔹 Resetar status de atividades
+      for (AtividadeModel atividade in AppData.listaAtividades) {
+        atividade.completed = false;
+        await AppDataService.atualizarAtividade(atividade); // Atualiza no SQLite
+      }
 
-      prefs.setInt('completedActivities', 0);
-
-      prefs.setDouble('progress', 0.0);
-
-      prefs.setDouble('horasDormidas', 0.0);
-      
-
+      // 🔹 Resetar status de treinos
+      for (TreinoModel treino in AppData.treinos) {
+        for (var exercicio in treino.exercicios) {
+          exercicio.completed = false;
+        }
+        await AppDataService.atualizarTreino(treino); // Atualiza no SQLite
+      }
 
       print('Dados do dia resetados com sucesso!');
     }

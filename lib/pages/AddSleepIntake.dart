@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../app_data.dart';
+import '../app_data_service.dart';
+
 
 
 class AddSleepIntakePage extends StatefulWidget {
@@ -52,8 +54,9 @@ class _AddSleepIntakePageState extends State<AddSleepIntakePage>{
     child: InkWell(
       onTap: () async{
         AppData.horasDormidas += value;
+        AppData.ativoHoje = true;
         AppData.atualizarDailyStats(horasDormidas: value);
-        await AppData.salvarDados();
+        await AppDataService.salvarTudo();
         if (!mounted) return;
         Navigator.pop(context, true);
 },
@@ -117,6 +120,7 @@ Widget buildCardPersonalizado() {
             onPressed: () {
               if (customHours != null && customHours! > 0) {
                 AppData.horasDormidas += customHours!;
+                AppData.ativoHoje = true;
                 AppData.atualizarDailyStats(horasDormidas: customHours?.toDouble());
                 Navigator.pop(context); // Fecha o dialog
                 Navigator.pop(context, true); // Volta para a tela anterior

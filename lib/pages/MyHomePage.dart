@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:vital/themeNotifier.dart';
 import '../app_data.dart';
 import 'AddQuickActionPage.dart';
 import '../models/DailyChallenge.dart';
 import '../widgets/ChangeTile.dart';
 import '../pages/menuShop.dart';
+import 'package:provider/provider.dart';
+import '../pages/AmigosPage.dart';
+import '../widgets/stepsCounterCard.dart';
+import '../pages/ActivityRoutinePage.dart';
+import '../pages/TreinoRoutinePage.dart';
 
 
 class MyHomePage extends StatefulWidget {
@@ -34,8 +41,30 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
+    return 
+    Scaffold(
+      body: 
+      Stack(children: [
+        Consumer<ThemeNotifier>(builder: (context, themeNotifier, child){
+        if (!AppData.isExclusiveTheme) {
+      return const SizedBox.shrink(); // Não mostra nada
+    }
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(themeNotifier.currentTheme.imagePath),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            Colors.black.withOpacity(0.7), // 👈 escurece a imagem
+            BlendMode.darken,
+          ),
+        ),
+      ),
+    );
+    },),
+        SingleChildScrollView(
+      child: 
+      Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
            Padding(
@@ -53,10 +82,19 @@ class _MyHomePageState extends State<MyHomePage> {
           AppData.waterConsumed < 1000 ? _buildCard(Icons.water_drop, "Água", '${AppData.waterConsumed} ml') : _buildCard(Icons.water_drop, "Água", '${AppData.waterConsumed/1000} L'),
           _buildCard(Icons.medication, "VitalTrack", "${AppData.listaAtividades.where((el) => el.categoria == 'Saúde' && el.completed).toList().length}/${AppData.listaAtividades.where((el) => el.categoria == 'Saúde' && isHojeNaLista(el.dias)).toList().length}"),
           _dailyCard(AppData.dailyChallenges),
-          SizedBox(height: 20,),
-          _buildAddQuickAction()
+          RotinaCard(Icons.calendar_month, "Rotina"),
+          StepCounterPage(),
+          FriendsCard(FontAwesomeIcons.peopleGroup, 'Amigos'),
+          SizedBox(height: 200,),
         ],
       ),
+    ),
+    Positioned(
+      bottom: 20,
+      right: 20,
+      left: 20,
+      child: _buildAddQuickAction())
+      ],),
     );
   }
 
@@ -82,6 +120,125 @@ class _MyHomePageState extends State<MyHomePage> {
               Padding(
                 padding: const EdgeInsets.only(top: 10),
                 child: Text(value, style:  TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 40, fontFamily: 'Montserrat')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget RotinaCard(IconData icon, String title){
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Card(
+        color: Theme.of(context).primaryColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        elevation: 0,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Icon(icon, color: Theme.of(context).textTheme.bodyLarge?.color, size: 30.0),
+                  const SizedBox(width: 20),
+                  Text(title, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 25, fontFamily: 'Montserrat')),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Row(children: [
+                  Spacer(),
+                  ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+                    onPressed: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Activityroutinepage()));
+                    },
+                   child: Padding(padding: EdgeInsets.all(5),
+                   child: Row(children: [
+                    Column(children: [
+                      Icon(Icons.directions_run, color:Theme.of(context).scaffoldBackgroundColor, size: 40,),
+                      SizedBox(height: 10,),
+                    Text('Atividades', style: TextStyle(color: Theme.of(context).scaffoldBackgroundColor, fontSize: 12),),
+                    ],)
+                   ],),),
+                   ),
+                  Spacer(),
+                  ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+                    onPressed: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Workoutroutinepage()));
+                    },
+                   child: Padding(padding: EdgeInsets.all(5),
+                   child: Row(children: [
+                    Column(children: [
+                      Icon(Icons.fitness_center, color:Theme.of(context).scaffoldBackgroundColor, size: 40,),
+                      SizedBox(height: 10,),
+                    Text('treinos', style: TextStyle(color: Theme.of(context).scaffoldBackgroundColor, fontSize: 12),),
+                    ],)
+                   ],),),
+                   ), 
+                   Spacer(),
+                ],) 
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  Widget FriendsCard(IconData icon, String title) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Card(
+        color: Theme.of(context).primaryColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        elevation: 0,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Icon(icon, color: Theme.of(context).textTheme.bodyLarge?.color, size: 30.0),
+                  const SizedBox(width: 20),
+                  Text(title, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 25, fontFamily: 'Montserrat')),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Row(children: [
+                  Spacer(),
+                  ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+                    onPressed: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => AmigoPage()));
+                    },
+                   child: Padding(padding: EdgeInsets.all(10),
+                   child: Row(children: [
+                    Column(children: [
+                      Icon(FontAwesomeIcons.rankingStar, color:Theme.of(context).scaffoldBackgroundColor, size: 30,),
+                      SizedBox(height: 10,),
+                    Text('Veja o Ranking dos seus amigos', style: TextStyle(color: Theme.of(context).scaffoldBackgroundColor),),
+                    ],)
+                   ],),),
+                   ),
+                  Spacer(),
+                ],) 
               ),
             ],
           ),
@@ -151,10 +308,13 @@ class _MyHomePageState extends State<MyHomePage> {
             color: Theme.of(context).primaryColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(15),
-              side: BorderSide.none, // 🔥 Remove qualquer borda
+              side: BorderSide(
+  color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.4),
+  width: 5,
+), 
             ),
-            shadowColor: const Color.fromARGB(0, 205, 223, 0),
-            elevation: 2,
+            shadowColor: const Color.fromARGB(221, 0, 0, 0),
+            elevation: 20,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
               child: Text(
@@ -253,7 +413,7 @@ Widget _buildAvatar() {
       child: CircleAvatar(
         radius: 25,
         backgroundImage: AssetImage(AppData.avatars.firstWhere((el) => el.name == AppData.currentAvatar).imagePath), // substitua pelo avatar atual do usuário
-        backgroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+        backgroundColor: AppData.avatars.firstWhere((el) => el.name == AppData.currentAvatar).exclusive ? Colors.amber : Theme.of(context).textTheme.bodyLarge?.color,
       ),
     ),
     )

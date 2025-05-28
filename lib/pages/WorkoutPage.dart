@@ -8,6 +8,10 @@ import 'SetTreinoPage.dart';
 import 'EditarTreinoPage.dart';
 import 'dart:ui' as ui;
 import '../app_data.dart';
+import 'package:vital/themeNotifier.dart';
+import 'package:provider/provider.dart';
+import '../app_data_service.dart';
+
 
 
 class WorkoutPage extends StatefulWidget {
@@ -44,6 +48,7 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
   void initState() {
     super.initState();
 
+
     exerciciosDoDia = widget.treinosDoDia.where((e) => !e.completed).toList();
     exerciciosDoDia.isNotEmpty ? treinoAtual = getTreinoDoExercicio(exerciciosDoDia[currentExerciseIndex]): null;
 
@@ -66,6 +71,8 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
     _audioPlayer = AudioPlayer();
     _audioPlayer.setVolume(1.0);
   }
+
+
 
   void toggleTimer() {
     setState(() => isTimerRunning = !isTimerRunning);
@@ -133,41 +140,36 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
 
     if (exercise.completedSets >= exercise.sets) {
       exercise.completed = true;
-      exerciciosDoDia.removeAt(currentExerciseIndex);
+      AppData.atualizarDailyStats(treinoConcluido: true);
+      AppData.treinosDiarios++;
 
-      if (currentExerciseIndex >= exerciciosDoDia.length) {
-        currentExerciseIndex = exerciciosDoDia.length - 1;
-      }
-
-      if (exerciciosDoDia.isEmpty) {
-        AppData.salvarDados();
-        AppData.atualizarDailyStats(treinoConcluido: true);
+      if (exerciciosDoDia.every((e) => e.completed)) {
+        // acabou tudo
+        AppDataService.salvarTudo();
+         AppData.ativoHoje = true;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => WorkoutCompletePage()),
         );
         return;
+      } else if (currentExerciseIndex >= exerciciosDoDia.length) {
+        // Ajusta o índice se removemos o último da lista
+        currentExerciseIndex = exerciciosDoDia.length - 1;
       }
     }
 
     // Atualiza o exercício atual e reinicia o timer
-    if (exerciciosDoDia.isNotEmpty) {
-      final nextExercise = exerciciosDoDia[currentExerciseIndex];
-      treinoAtual = getTreinoDoExercicio(nextExercise);
-      timerDuration = Duration(minutes: nextExercise.duration);
-      _remainingTime = timerDuration;
-
-      // Só reinicia automaticamente se ainda tem sets pra esse exercício
-      if (nextExercise.completedSets < nextExercise.sets) {
-        isTimerRunning = false; // espera o usuário clicar de novo
-        _pulseController.stop();
-        _pulseController.value = 1.0;
-        _countdownTimer?.cancel();
-      }
-    }
+    final nextExercise = exerciciosDoDia[currentExerciseIndex];
+    treinoAtual = getTreinoDoExercicio(nextExercise);
+    timerDuration = Duration(minutes: nextExercise.duration);
+    _remainingTime = timerDuration;
+    isTimerRunning = false;
+    _pulseController.stop();
+    _pulseController.value = 1.0;
+    _countdownTimer?.cancel();
   });
 
-  await AppData.salvarDados();
+  await AppDataService.salvarTudo();
 }
 
 
@@ -213,15 +215,36 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     
     if (exerciciosDoDia.isEmpty) {
-      return Scaffold(
+      return 
+      Scaffold(
+        extendBodyBehindAppBar: true,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
   automaticallyImplyLeading: false,
   title: Text("Workouts", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30, fontFamily: 'Poppins', fontWeight: FontWeight.w700)),
-  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+  backgroundColor: AppData.isExclusiveTheme ? Colors.transparent : Theme.of(context).scaffoldBackgroundColor,
   elevation: 0,
 ),
-        body: Center(
+        body: 
+        Stack(children: [
+          Consumer<ThemeNotifier>(builder: (context, themeNotifier, child){
+        if (!AppData.isExclusiveTheme) {
+      return const SizedBox.shrink(); // Não mostra nada
+    }
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(themeNotifier.currentTheme.imagePath),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            Colors.black.withOpacity(0.7), // 👈 escurece a imagem
+            BlendMode.darken,
+          ),
+        ),
+      ),
+    );
+    },),
+          Center(
           child: Column(
             children: [
               Spacer(),
@@ -249,6 +272,8 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
             ],
           ),
         ),
+        ],)
+        
       );
     }
 
@@ -260,7 +285,7 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
       appBar: AppBar(
   automaticallyImplyLeading: false,
   title: Text("${treinoAtual.nome}", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 30, fontFamily: 'Poppins', fontWeight: FontWeight.w700)),
-  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+  backgroundColor: AppData.isExclusiveTheme ? Colors.transparent : Theme.of(context).scaffoldBackgroundColor,
   elevation: 0,
   actions: [
     IconButton(
@@ -305,13 +330,32 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
     }
   });
 
-  await AppData.salvarDados();
+  await AppDataService.salvarTudo();
   }
 },
     )
   ],
 ),
-      body: Padding(
+      body: 
+      Stack(children: [
+        Consumer<ThemeNotifier>(builder: (context, themeNotifier, child){
+        if (!AppData.isExclusiveTheme) {
+      return const SizedBox.shrink(); // Não mostra nada
+    }
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(themeNotifier.currentTheme.imagePath),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            Colors.black.withOpacity(0.8), // 👈 escurece a imagem
+            BlendMode.darken,
+          ),
+        ),
+      ),
+    );
+    },),
+        Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,18 +393,31 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
               ),
             ),
             SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(exercise.sets, (index) {
-                return IconButton(
-                  icon: Icon(
-                    index < exercise.completedSets ? Icons.check_circle : Icons.radio_button_unchecked,
-                    color: Theme.of(context).colorScheme.secondary,
-                  ),
-                  onPressed: completeSet,
-                );
-              }),
-            ),
+            Wrap(
+  spacing: 8, // espaçamento horizontal entre os botões
+  runSpacing: 8, // espaçamento vertical entre as linhas
+  children: List.generate(exercise.sets, (index) {
+    final isCompleted = index < exercise.completedSets;
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          if (!isCompleted) {
+            exercise.completedSets++;
+            if (exercise.completedSets >= exercise.sets) {
+              completeSet();
+            }
+          }
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isCompleted ? Colors.green : Theme.of(context).primaryColor,
+        shape: const CircleBorder(),
+        padding: const EdgeInsets.all(5),
+      ),
+      child: isCompleted? Icon(Icons.check, color: Theme.of(context).textTheme.bodyLarge?.color,) : Text(''),
+    );
+  }),
+),
             SizedBox(height: 20,),
             Center(
               child: Column(
@@ -394,6 +451,7 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
           ],
         ),
       ),
+      ],)
     );
   }
 }
