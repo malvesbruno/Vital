@@ -3,6 +3,8 @@ import '../app_data.dart';
 import '../main.dart';
 import '../models/TreinoModel.dart';
 import '../app_data_service.dart';
+import '../cloud_service.dart';
+import 'dart:convert';
 
 
 class EditarTreinoPage extends StatefulWidget {
@@ -99,6 +101,19 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
     widget.treino.diasSemana = formatarDias(diasSelecionados);
     widget.treino.exercicios = List.from(AppData.treinosSelecionados);
     widget.treino.horario = horarioSelecionado as TimeOfDay;
+    if (AppData.ultimate){
+        final treinosJson = AppData.treinos.map((t) => t.toJson()).toList();
+        final statsJson = AppData.historicoStats.map((t) => t.toJson()).toList();
+        BackupService cloud = BackupService();
+        await cloud.updateUser(AppData.id, {
+          'treinos': jsonEncode(treinosJson),
+          'stats': jsonEncode(statsJson),
+          'current_avatar': AppData.currentAvatar,
+          'current_theme': AppData.currentTheme,
+          'nivel': AppData.level,
+          'coins': AppData.coins,
+        });
+      }
     await AppDataService.salvarTudo();
     if (!mounted) return;
     Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage())); // volta para tela anterior

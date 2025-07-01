@@ -1,4 +1,4 @@
-package com.example.vital
+package com.malves.vital
 
 import android.content.Intent
 import android.os.Build

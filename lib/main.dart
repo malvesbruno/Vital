@@ -16,6 +16,8 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import '../services/navigation_service.dart';
 import '../app_data_service.dart';
 import 'package:firebase_core/firebase_core.dart';
+import '../firebase_options.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 
 
@@ -23,11 +25,15 @@ void main() async {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
 
+    await MobileAds.instance.initialize();
     tz.initializeTimeZones();
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
     final themeName = AppData.currentTheme;
     final initialTheme = AppData.themes.firstWhere((t) => t.name == themeName);
+
     
     runApp(
       ChangeNotifierProvider(

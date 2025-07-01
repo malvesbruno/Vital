@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../app_data.dart';
 import '../services/challenge_service.dart';
 import '../app_data_service.dart';
-import '../cloud_service.dart';
 
 
 
@@ -56,10 +55,6 @@ class _AddWaterIntakePageState extends State<AddWaterIntakePage>{
           AppData.atualizarDailyStats(agua: value.toDouble());
           ChallengeService.verificarDesafiosAutomaticos();
           await AppDataService.salvarTudo();
-          BackupService cloud = BackupService();
-          cloud.createUser(AppData.id, {
-            'nome': 'bruno'
-          });
     if (!mounted) return;
           Navigator.pop(context, true);
         }, // ação ao tocar no card

@@ -1,11 +1,11 @@
 // splash_screen.dart
+import 'dart:async'; // Para Completer
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import '../main.dart'; // ou '../pages/MainPage.dart', conforme organização
 import '../app_data.dart';
 import '../app_data_service.dart';
-
-
+import '../services/add_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -16,17 +16,22 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   String? errorMessage;
+  final AppOpenAdManager appOpenAdManager = AppOpenAdManager();
 
   @override
   void initState() {
     super.initState();
-    
+    appOpenAdManager.loadAd();
     _startApp();
   }
 
   Future<void> _startApp() async {
     try {
-      await Future.delayed(const Duration(seconds: 5)); // mostra a animação por 2s mínimo
+      await Future.delayed(const Duration(seconds: 3));
+
+      if (appOpenAdManager.isAdAvailable) {
+        await appOpenAdManager.showAd();
+      }
 
       await AppDataService.carregarTudo();
       await AppData.verificarSePrecisaSalvarHoje();

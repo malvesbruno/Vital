@@ -4,6 +4,8 @@ import '../app_data.dart';
 import '../main.dart';
 import '../models/TreinoModel.dart';
 import '../app_data_service.dart';
+import '../cloud_service.dart';
+import 'dart:convert';
 
 
 class ConfigurarTreinoPage extends StatefulWidget {
@@ -90,6 +92,19 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
     ),
   );
   AppData.treinosSelecionados.clear();
+  if (AppData.ultimate){
+        final treinosJson = AppData.treinos.map((t) => t.toJson()).toList();
+        final statsJson = AppData.historicoStats.map((t) => t.toJson()).toList();
+        BackupService cloud = BackupService();
+        await cloud.updateUser(AppData.id, {
+          'treinos': jsonEncode(treinosJson),
+          'stats': jsonEncode(statsJson),
+          'current_avatar': AppData.currentAvatar,
+          'current_theme': AppData.currentTheme,
+          'nivel': AppData.level,
+          'coins': AppData.coins,
+        });
+      }
   await AppDataService.salvarTudo();
   if (!mounted) return;
   Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage()));
@@ -99,6 +114,8 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
   Widget build(BuildContext context) {
     final bool configurandoTreino =
         indexAtual < AppData.treinosSelecionados.length;
+    final Set<int> modificadosSets = {};
+    final Set<int> modificadosDuracoes = {};
 
 
     return Scaffold(
@@ -161,10 +178,19 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
                     elevation: 0,
                     dropdownColor: Theme.of(context).primaryColor,
                     onChanged: (int? value) {
-                      setState(() {
-                        AppData.treinosSelecionados[indexAtual].sets = value!;
-                      });
-                    },
+                    setState(() {
+                      AppData.treinosSelecionados[indexAtual].sets = value!;
+                      if (indexAtual == 0) {
+                        for (int i = 1; i < AppData.treinosSelecionados.length; i++) {
+                          if (!modificadosSets.contains(i)) {
+                            AppData.treinosSelecionados[i].sets = value;
+                          }
+                        }
+                      } else {
+                        modificadosSets.add(indexAtual);
+                      }
+                    });
+                  },
                     items: List.generate(10, (i) => i + 1)
                         .map(
                           (e) => DropdownMenuItem(
@@ -198,17 +224,26 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
                     ),
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
-                      setState(() {
-                        try {
-                          AppData.treinosSelecionados[indexAtual].duration =
-                              int.parse(value);
-                          erroMensagem = null; // limpa erro se deu certo
-                        } catch (e) {
-                          erroMensagem =
-                              'O texto deve ser um número inteiro, ex: "20"';
+                    setState(() {
+                      try {
+                        int duracao = int.parse(value);
+                        AppData.treinosSelecionados[indexAtual].duration = duracao;
+                        if (indexAtual == 0) {
+                          for (int i = 1; i < AppData.treinosSelecionados.length; i++) {
+                            if (!modificadosDuracoes.contains(i)) {
+                              AppData.treinosSelecionados[i].duration = duracao;
+                            }
+                          }
+                        } else {
+                          modificadosDuracoes.add(indexAtual);
                         }
-                      });
-                    },
+                        erroMensagem = null;
+                      } catch (e) {
+                        erroMensagem = 'O texto deve ser um número inteiro, ex: "20"';
+                      }
+                    });
+                  },
+
                   ),
                   if (erroMensagem != null)
                     Text(
@@ -326,6 +361,7 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
 
                 const SizedBox(height: 30),
 
+                if (!configurandoTreino)
                 ElevatedButton(
                   onPressed: _salvarTreino,
                   child: Text(

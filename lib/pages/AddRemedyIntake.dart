@@ -16,6 +16,26 @@ String timeOfDayToString(TimeOfDay time) {
   return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 }
 
+bool isHojeNaLista(List<int> diasDaSemana) {
+  int weekday = DateTime.now().weekday;
+  return diasDaSemana.contains(weekday);
+}
+
+void _updateProgressBar() {
+    final atividadesHoje = AppData.listaAtividades.where((el) => isHojeNaLista(el.dias));
+    if (atividadesHoje.isEmpty){
+      AppData.progress = 0;
+    }
+
+    final concluidas = atividadesHoje.where((el) => el.completed).length;
+    if (concluidas > 0 || atividadesHoje.isNotEmpty){
+      AppData.progress = concluidas / atividadesHoje.length;
+    } else{
+      AppData.progress = 0;
+    }
+
+  }
+
 class _AddRemedyIntakePageState extends State<AddRemdyIntakePage>{
   
   bool isHojeNaLista(List<int> diasDaSemana) {
@@ -62,6 +82,7 @@ class _AddRemedyIntakePageState extends State<AddRemdyIntakePage>{
         remedio.completed = true;
         AppData.ativoHoje = true;
         AppData.completedActivities++;
+        _updateProgressBar();
         AppData.atualizarDailyStats(atividadeConcluida: true);
         ChallengeService.verificarDesafiosAutomaticos();
         await AppDataService.salvarTudo();  // First do the async work

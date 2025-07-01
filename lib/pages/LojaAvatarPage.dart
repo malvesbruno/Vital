@@ -5,6 +5,8 @@ import '../widgets/zeldaBackground.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../pages/DeluxePage.dart';
 import '../app_data_service.dart';
+import '../cloud_service.dart';
+import 'dart:convert';
 
 
 
@@ -170,11 +172,24 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
                         });
                       // você pode disparar uma animação ou som aqui;
                       _showZeldaUnlockAnimation(context, updatedAvatar);
+                      if (AppData.ultimate){
+                        final avatarsOwnedJson = AppData.themes.where((t) => t.owned).map((el) => el.toJson()).toList();
+                        final statsJson = AppData.historicoStats.map((t) => t.toJson()).toList();
+                        BackupService cloud = BackupService();
+                        await cloud.updateUser(AppData.id, {
+                          'avatares_comprados': jsonEncode(avatarsOwnedJson),
+                          'stats': jsonEncode(statsJson),
+                          'current_avatar': AppData.currentAvatar,
+                          'current_theme': AppData.currentTheme,
+                          'nivel': AppData.level,
+                          'coins': AppData.coins,
+                        });
+                      }
                       await AppDataService.salvarTudo(); // força rebuild pra atualizar moedas
                     } else if (!isSelected) {
                       AppData.currentAvatar = updatedAvatar.name;
                       setState(() {});
-                      await AppDataService.salvarTudo();;
+                      await AppDataService.salvarTudo();
                     }
                   }
                 }

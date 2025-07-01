@@ -74,7 +74,9 @@ await db.execute('''
 await db.execute('''
   CREATE TABLE amigos (
     id TEXT PRIMARY KEY,
-    dados TEXT
+    nome TEXT,
+    avatar TEXT,
+    level INTEGER
   )
 ''');
 

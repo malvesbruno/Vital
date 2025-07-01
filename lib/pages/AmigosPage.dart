@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:vital/app_data_service.dart';
 import 'package:vital/models/AmigoModel.dart';
 import '../app_data.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -7,6 +10,7 @@ import 'package:flutter/services.dart';
 import '../services/camera_service.dart';
 import '../pages/qrCodeScanner.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../cloud_service.dart';
 
 class AmigoPage extends StatefulWidget {
   const AmigoPage({super.key});
@@ -37,6 +41,17 @@ class _AmigoPageState extends State<AmigoPage>{
     MaterialPageRoute(builder: (_) => QRViewExample()),
   );
   return result as String?;
+}
+
+
+void recarregarRanking() {
+  setState(() {
+    ranking = [
+      ...AppData.amigos,
+      AmigoModel(nome: AppData.name, avatar: AppData.currentAvatar, level: AppData.level, id: AppData.id),
+    ];
+    ranking.sort((a, b) => b.level.compareTo(a.level));
+  });
 }
 
   @override
@@ -112,6 +127,56 @@ class _AmigoPageState extends State<AmigoPage>{
     );
   }
 
+  Future<String?> showSelectWorkoutDialog(BuildContext context) async {
+  String? selectedWorkout = 'Peito'; // valor padrão
+  final workouts = ['Peito', 'Costas', 'Ombro', 'Perna', 'Braços'];
+
+  return showDialog<String>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Escolha o treino para convidar', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),),
+        backgroundColor: Theme.of(context).primaryColor,
+        content: StatefulBuilder(
+          builder: (context, setState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: workouts.map((workout) {
+                return RadioListTile<String>(
+                  title: Text(workout, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),),
+                  value: workout,
+                  groupValue: selectedWorkout,
+                  activeColor: Theme.of(context).colorScheme.secondary,
+                  fillColor: MaterialStateProperty.all(Theme.of(context).colorScheme.secondary),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedWorkout = value;
+                    });
+                  },
+                );
+              }).toList(),
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, null), // cancelar
+            child: Text('Cancelar', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, selectedWorkout), // confirmar
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.secondary),
+            ),
+            child: Text('Confirmar', style: TextStyle(color: Theme.of(context).scaffoldBackgroundColor)),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
   Widget buildCard(String nome, int level, String avatar, String id){
     return Padding(
       padding: EdgeInsets.only(left: 30, right: 30, top: 10),
@@ -136,12 +201,142 @@ class _AmigoPageState extends State<AmigoPage>{
                   children: [
                     if(AppData.id == id) Text(
                       "Você",
-                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.5), fontSize:13, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
+                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.5), fontSize:13, fontWeight: FontWeight.bold),),
+                    
+                    Row(children: [
+                      Text(
                       nome,
                       style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 20, fontWeight: FontWeight.bold),
                     ),
+                    if(AppData.id == id) IconButton(
+    icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.secondary, size: 20,),
+    onPressed: () {
+      showDialog(
+        context: context,
+        builder: (context) {
+          final controller = TextEditingController(text: nome);
+          return AlertDialog(
+            title: Text("Alterar nome", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),),
+            backgroundColor: Theme.of(context).primaryColor,
+            content: TextField(
+              controller: controller,
+              decoration: InputDecoration(hintText: "Novo nome"),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("Cancelar"),
+              ),
+              TextButton(
+                onPressed: () async {
+                  // Atualiza no Firebase
+                  BackupService backup = BackupService();
+                  backup.updateUser(AppData.id, {
+                    'name': controller.text,
+                  });
+
+                  setState(() {
+                    ranking.firstWhere((e) => e.id == AppData.id).nome = controller.text;
+                  });
+
+                  Navigator.pop(context);
+                },
+                child: Text("Salvar"),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  ),
+                    ],),
+                    if (AppData.id != id)
+  ElevatedButton(
+    onPressed: () {
+      // Aqui você pode enviar notificação, marcar no banco, etc.
+      showGeneralDialog(
+  context: context,
+  barrierDismissible: true,
+  barrierLabel: '',
+  pageBuilder: (_, __, ___) => Center(
+    child: Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 40,
+              backgroundColor: AppData.avatars.firstWhere((el) => el.name == avatar).exclusive
+                ? Colors.amber
+                : Theme.of(context).textTheme.bodyLarge?.color,
+              backgroundImage: AssetImage(AppData.avatars.firstWhere((e) => e.name == avatar).imagePath),
+            ),
+            SizedBox(height: 10),
+            Text(nome, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            SizedBox(height: 5),
+            Text("Nível $level", style: TextStyle(fontSize: 18)),
+            SizedBox(height: 20),
+            Text(
+              "Você deseja convidar $nome para treinar hoje?",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Cancelar"),
+                ),
+                ElevatedButton(
+                  onPressed: ()  async {
+                  final treinoEscolhido = await showSelectWorkoutDialog(context);
+                  if (treinoEscolhido == null) return; // Se o usuário cancelar
+                  Navigator.pop(context);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Convite enviado para $nome! Treino: $treinoEscolhido")),
+                  );
+
+                  BackupService backupService = BackupService();
+                  backupService.sendWorkoutInvite(
+                    senderId: AppData.id,
+                    receiverId: id,
+                    workoutSuggestion: treinoEscolhido.toLowerCase(), // formata para minúsculas se quiser
+                  );
+                },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                  ),
+                  child: Text(
+                    "Enviar convite",
+                    style: TextStyle(color: Theme.of(context).scaffoldBackgroundColor),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    ),
+  ),
+);
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Theme.of(context).colorScheme.secondary,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    ),
+    child: Text("Convidar", style: TextStyle(color: Theme.of(context).scaffoldBackgroundColor)),
+  ),
+                    
                   ],
                 ),
                 Spacer(),
@@ -217,8 +412,100 @@ class _AmigoPageState extends State<AmigoPage>{
                   ),
                     SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: () {
-                      },
+                      onPressed: () async {
+                        BackupService backupService = BackupService();
+  final data = await backupService.getUser(_idController.text);
+
+  if (data == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Usuário não encontrado.")),
+    );
+    return;
+  }
+
+  final amigoId = _idController.text;
+
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: '',
+    pageBuilder: (_, __, ___) => Center(
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          width: MediaQuery.of(context).size.width * 0.8,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: 40,
+                backgroundColor: AppData.avatars.firstWhere((el) => el.name == data["current_avatar"]).exclusive ? Colors.amber : Theme.of(context).textTheme.bodyLarge?.color,
+                backgroundImage: AssetImage(
+                  AppData.avatars.firstWhere((e) => e.name == data["current_avatar"]).imagePath,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(data["name"], style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              SizedBox(height: 5),
+              Text("Nível ${data["level"]}", style: TextStyle(fontSize: 18)),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+
+                  AppData.amigos.add(
+                   AmigoModel(nome: data['name'], avatar: data['current_avatar'] ?? 'Deafult', level: data['level'], id: amigoId)
+                  );
+                  final amigosJson = AppData.amigos.map((t) => t.toJson()).toList();
+
+                  AppDataService.salvarTudo();
+
+                  backupService.updateUser(AppData.id, {
+                    'amigos': jsonEncode(amigosJson),
+                  });
+
+
+                  List<dynamic> parseList(dynamic data) {
+                    if (data is String) return jsonDecode(data);
+                    return data ?? [];
+                  }
+
+                  var friends_of_amigos = parseList(data['amigos'])
+          .map((a) => AmigoModel.fromJson(a))
+          .toList();
+
+                  friends_of_amigos.add(
+                    AmigoModel(nome: AppData.name, avatar: AppData.currentAvatar, level: AppData.level, id: AppData.id)
+                  );
+                  final friends_of_amigosJson = friends_of_amigos.map((t) => t.toJson()).toList();
+
+                  backupService.updateUser(id, {
+                    'amigos': jsonEncode(friends_of_amigosJson),
+                  });
+
+                  recarregarRanking();
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("${data["name"]} adicionado com sucesso!")),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                ),
+                child: Text("Adicionar", style: TextStyle(color: Theme.of(context).scaffoldBackgroundColor)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.secondary,
                         shape: RoundedRectangleBorder(

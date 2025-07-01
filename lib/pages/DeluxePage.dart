@@ -1,9 +1,19 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import '../widgets/deluxeAvataresPreview.dart';
 import '../widgets/deluxeThemePreview.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../pages/SignUpPage.dart';
+import '../pages/LogInPage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../in_app_purchase.dart';
+import '../app_data.dart';
+import '../app_data_service.dart';
+import '../cloud_service.dart';
+import '../pages/MyHomePage.dart';
+
 
 class Deluxepage extends StatefulWidget{
   const Deluxepage({super.key});
@@ -13,6 +23,107 @@ class Deluxepage extends StatefulWidget{
 }
 
 class _DeluxePageState extends State<Deluxepage>{
+    late InAppPurchaseService _purchaseService;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _purchaseService = InAppPurchaseService();
+    _initializePurchaseService();
+  }
+
+  Future<void> _initializePurchaseService() async {
+    await _purchaseService.initialize();
+  }
+
+  @override
+  void dispose() {
+    _purchaseService.dispose();
+    super.dispose();
+  }
+
+  Future<void> _purchaseProduct(String productId) async {
+  setState(() => _isLoading = true);
+  
+  try {
+    // Carrega os produtos disponíveis
+    final products = await _purchaseService.loadProducts();
+    
+    // Encontra o produto específico que o usuário quer comprar
+    final product = products.firstWhere(
+      (p) => p.id == productId,
+      orElse: () => throw Exception('Produto não encontrado')
+    );
+    
+    // Realiza a compra
+    await _purchaseService.buyProduct(product);
+    
+    // Verifica se a compra foi bem sucedida
+    final hasActive = await _purchaseService.hasActivePurchase();
+    if (hasActive) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Compra realizada com sucesso!')),
+      );
+      // Aqui você pode liberar os recursos premium
+      try{
+      AppData.ultimate = true;
+      await AppDataService.salvarTudo();
+      final user = FirebaseAuth.instance.currentUser;
+       final treinosJson = AppData.treinos.map((t) => t.toJson()).toList();
+       final atividadeJson = AppData.listaAtividades.map((t) => t.toJson()).toList();
+       final statsJson = AppData.historicoStats.map((t) => t.toJson()).toList();
+       final amigosJson = AppData.amigos.map((t) => t.toJson()).toList();
+       final themesOwnedJson = AppData.themes.where((t) => t.owned).map((el) => el.toJson()).toList();
+       final avatarsOwnedJson = AppData.themes.where((t) => t.owned).map((el) => el.toJson()).toList();
+      BackupService cloud = BackupService();
+          await cloud.createUser(AppData.id, {
+            'mail': user?.email ?? '',
+            'uid': AppData.id,
+            'treinos': jsonEncode(treinosJson),
+            'atividades': jsonEncode(atividadeJson),
+            'stats': jsonEncode(statsJson),
+            'amigos': jsonEncode(amigosJson),
+            'current_avatar': AppData.currentAvatar,
+            'current_theme': AppData.currentTheme,
+            'temas_comprados': jsonEncode(themesOwnedJson),
+            'avatares_comprados': jsonEncode(avatarsOwnedJson),
+            'data_compra': DateTime.now().toIso8601String(),
+            'nivel': AppData.level,
+            'coins': AppData.coins,
+            'plano': productId,
+          });
+          Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => MyHomePage()), // Substitua pelo nome real da sua tela inicial
+          (route) => false,
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro no Banco de Dados: ${e.toString()}')),
+        );
+      }
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Erro na compra: ${e.toString()}')),
+    );
+  } finally {
+    setState(() => _isLoading = false);
+  }
+}
+
+  Future<void> _checkActiveSubscription() async {
+  final hasActive = await _purchaseService.hasActivePurchase();
+  if (hasActive) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Você já tem uma assinatura ativa!')),
+    );
+    // Aqui você pode redirecionar para a tela premium ou liberar os recursos
+  }
+}
+
+
     @override
     Widget build(BuildContext context) {
     return Scaffold(
@@ -35,43 +146,87 @@ class _DeluxePageState extends State<Deluxepage>{
           children: [
             Text(
               'Escolha um plano para ter acesso aos benefícios',
-              style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.7)),
+              style: TextStyle(fontSize: 14, color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.7)),
               textAlign: TextAlign.center,
             ),
 
-            SizedBox(height: 32),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: ()async{
+                final user = FirebaseAuth.instance.currentUser;
+                if (user == null){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => LogInScreen())); 
+                } else{
+                  await _checkActiveSubscription();
+                }
+
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.secondary, // Cor de fundo // Cor do texto/ícone
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+              ),
+              child: Text('Já tem um plano ativo? Faça LogIn', style: TextStyle(color: Theme.of(context).scaffoldBackgroundColor),),
+            ),
+            SizedBox(height: 16),
 
             _PlanCard(
-              title: 'Mensal',
-              price: 'R\$14,90 / mês',
-              description: 'Acesso total enquanto estiver ativo.',
-              isUtimate: false,
-              onTap: () {
-                // TODO: Integrar com sistema de pagamento mensal
-              },
-            ),
-            const SizedBox(height: 16),
+            title: 'Mensal',
+            price: 'R\$14,90 / mês',
+            description: 'Acesso total enquanto estiver ativo.',
+            isUtimate: false,
+            onTap: () async {
+              final user = FirebaseAuth.instance.currentUser;
+              if (user == null) {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SignupScreen()));
+              } else {
+                await _purchaseProduct('mensal');
+              }
+            },
+          ),
 
-            _PlanCard(
-              title: 'Anual',
-              price: 'R\$99,90 / ano',
-              description: 'Acesso total enquanto estiver ativo.',
-              isUtimate: true,
-              onTap: () {
-                // TODO: Integrar com sistema de pagamento único
-              },
-            ),
-            const SizedBox(height: 16),
+          _PlanCard(
+            title: 'Anual',
+            price: 'R\$99,90 / ano',
+            description: 'Acesso total enquanto estiver ativo.',
+            isUtimate: true,
+            onTap: () async {
+              final user = FirebaseAuth.instance.currentUser;
+              if (user == null) {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SignupScreen()));
+              } else {
+                await _purchaseProduct('anual');
+              }
+            },
+          ),
 
-            _PlanCard(
-              title: 'Vitalício',
-              price: 'R\$179,90',
-              description: 'Acesso permanente + 2 avatares épicos exclusivos!',
-              isUtimate: true,
-              onTap: () {
-                // TODO: Integrar com sistema de pagamento único
-              },
+          _PlanCard(
+            title: 'Vitalício',
+            price: 'R\$179,90',
+            description: 'Acesso permanente + 2 avatares épicos exclusivos!',
+            isUtimate: true,
+            onTap: () async {
+              final user = FirebaseAuth.instance.currentUser;
+              if (user == null) {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SignupScreen()));
+              } else {
+                await _purchaseProduct('plano_vitalicio');
+              }
+            },
+          ),
+
+          _isLoading ? BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+          child: Container(
+            color: Colors.black.withOpacity(0.3),
+            child: Center(
+              child: CircularProgressIndicator(),
             ),
+          ),
+        ) : SizedBox(height: 1,),
+
             const SizedBox(height: 32),
             cardBenefits(),
             SizedBox(height: 50,)

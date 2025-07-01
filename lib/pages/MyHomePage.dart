@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:vital/cloud_service.dart';
 import 'package:vital/themeNotifier.dart';
 import '../app_data.dart';
 import 'AddQuickActionPage.dart';
@@ -11,6 +12,7 @@ import '../pages/AmigosPage.dart';
 import '../widgets/stepsCounterCard.dart';
 import '../pages/ActivityRoutinePage.dart';
 import '../pages/TreinoRoutinePage.dart';
+import '../pages/ConvitesPage.dart';
 
 
 class MyHomePage extends StatefulWidget {
@@ -21,6 +23,31 @@ class MyHomePage extends StatefulWidget {
 
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool temConvitesPendentes = false;
+  bool temRespostasPendentes = false;
+
+  @override
+void initState() {
+  super.initState();
+  if (AppData.ultimate){
+    verificarConvitesPendentes();
+  }
+}
+
+  Future<void> verificarConvitesPendentes() async {
+    BackupService backupService = BackupService();
+  final convites = await backupService.getReceivedWorkoutInvites(uid: AppData.id);
+  final respostas = await backupService.getResponsesToWorkoutInvites(AppData.id);
+  print(AppData.id);
+  print(convites);
+  setState(() {
+    temConvitesPendentes = convites.any((c) => c['status'] == 'pending');
+    temRespostasPendentes = respostas.isNotEmpty;
+  });
+  backupService.deleteOldPendingInvites();
+}
+
+
 
 
   void navigateToQuickAction() async {
@@ -67,6 +94,30 @@ class _MyHomePageState extends State<MyHomePage> {
       Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
+          if (temConvitesPendentes)
+          Padding(
+            padding: const EdgeInsets.only(top: 60.0),
+            child: Text(
+              "📨 Existem convites para você!",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.secondary,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          if (temRespostasPendentes)
+          Padding(
+            padding: const EdgeInsets.only(top: 60.0),
+            child: Text(
+              "📨 Existem respostas para você!",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.secondary,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
            Padding(
             padding: EdgeInsets.only(top: 80.0),
             child: Text('Dashboard', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: 40.0, fontFamily: 'Poppins', fontWeight: FontWeight.w700)),
@@ -83,8 +134,8 @@ class _MyHomePageState extends State<MyHomePage> {
           _buildCard(Icons.medication, "VitalTrack", "${AppData.listaAtividades.where((el) => el.categoria == 'Saúde' && el.completed).toList().length}/${AppData.listaAtividades.where((el) => el.categoria == 'Saúde' && isHojeNaLista(el.dias)).toList().length}"),
           _dailyCard(AppData.dailyChallenges),
           RotinaCard(Icons.calendar_month, "Rotina"),
-          StepCounterPage(),
-          FriendsCard(FontAwesomeIcons.peopleGroup, 'Amigos'),
+          if (AppData.ultimate) StepCounterPage(),
+          if (AppData.ultimate) FriendsCard(FontAwesomeIcons.peopleGroup, 'Amigos'),
           SizedBox(height: 200,),
         ],
       ),
@@ -375,48 +426,86 @@ Widget _buildAvatar() {
   return Padding(
     padding: const EdgeInsets.only(top: 10, bottom: 10),
     child: _AvatarPulse(
-      child: GestureDetector(
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          backgroundColor: Theme.of(context).primaryColor,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          GestureDetector(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Theme.of(context).primaryColor,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (BuildContext context) {
+                  return Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          leading: Icon(Icons.mail, color: Theme.of(context).textTheme.bodyLarge?.color),
+                          title: Text("Convites", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
+                          onTap: () async {
+                            var result = await Navigator.push(context, MaterialPageRoute(builder: (_) => ConvitesPage()));
+                            result == null? result = false : result = true;
+                            if (result) {
+                              setState(() {});
+                            } else {
+                              Navigator.pop(context);
+                            }
+                          },
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.store, color: Theme.of(context).textTheme.bodyLarge?.color),
+                          title: Text("Loja", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
+                          onTap: () async {
+                            var result = await Navigator.push(context, MaterialPageRoute(builder: (_) => MenushopPage()));
+                            result == null? result = false : result = true;
+                            if (result) {
+                              setState(() {});
+                            } else {
+                              Navigator.pop(context);
+                            }
+                          },
+                        ),
+                        SizedBox(height: 40),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+            child: CircleAvatar(
+              radius: 25,
+              backgroundImage: AssetImage(AppData.avatars.firstWhere((el) => el.name == AppData.currentAvatar).imagePath),
+              backgroundColor: AppData.avatars.firstWhere((el) => el.name == AppData.currentAvatar).exclusive
+                  ? Colors.amber
+                  : Theme.of(context).textTheme.bodyLarge?.color,
+            ),
           ),
-          builder: (BuildContext context) {
-            return Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ListTile(
-                    leading: Icon(Icons.store, color: Theme.of(context).textTheme.bodyLarge?.color),
-                    title: Text("Loja", style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
-                    onTap: () async{
-                      final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => MenushopPage()));
-                      // Navegar para tela da loja
-                      if(result){
-                        setState(() {
-                        });
-                      } else {
-                        Navigator.pop(context);
-                      }
-                    },
+
+          // 🔔 Bolinha de notificação
+          if (temConvitesPendentes || temRespostasPendentes || AppData.avatars.map((el) => el.requiredLevel).toList().contains(AppData.level) || AppData.themes.map((el) => el.requiredLevel).toList().contains(AppData.level))
+            Positioned(
+              top: -2,
+              right: -2,
+              child: Container(
+                width: 14,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: Colors.greenAccent[400],
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    width: 2,
                   ),
-                  SizedBox(height: 40,)
-                ],
+                ),
               ),
-            );
-          },
-        );
-      },
-      child: CircleAvatar(
-        radius: 25,
-        backgroundImage: AssetImage(AppData.avatars.firstWhere((el) => el.name == AppData.currentAvatar).imagePath), // substitua pelo avatar atual do usuário
-        backgroundColor: AppData.avatars.firstWhere((el) => el.name == AppData.currentAvatar).exclusive ? Colors.amber : Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+        ],
       ),
     ),
-    )
   );
 }
 }

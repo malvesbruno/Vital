@@ -8,6 +8,8 @@ import '../pages/EditActivityPage.dart';
 import '../models/AtividadeModel.dart';
 import '../app_data.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
+import '../cloud_service.dart';
 
 class ActivityPage extends StatefulWidget {
   final List<AtividadeModel> lista;
@@ -283,8 +285,21 @@ void _updateProgressBar() {
     );
 
     if (confirmar == true) {
-      setState(() {
+      setState(() async{
         widget.lista.remove(atividade);
+        if (AppData.ultimate){
+      final atividadeJson = AppData.listaAtividades.map((t) => t.toJson()).toList();
+      final statsJson = AppData.historicoStats.map((t) => t.toJson()).toList();
+      BackupService cloud = BackupService();
+          await cloud.updateUser(AppData.id, {
+            'atividades': jsonEncode(atividadeJson),
+            'stats': jsonEncode(statsJson),
+            'current_avatar': AppData.currentAvatar,
+            'current_theme': AppData.currentTheme,
+            'nivel': AppData.level,
+            'coins': AppData.coins,
+          });
+    }
         _updateProgressBar();
       });
     }

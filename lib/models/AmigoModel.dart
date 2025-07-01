@@ -1,7 +1,7 @@
 class AmigoModel {
-  final String nome;
-  final String avatar;
-  final int level;
+  String nome;
+  String avatar;
+  int level;
   final String id;
 
   AmigoModel({

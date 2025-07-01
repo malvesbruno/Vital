@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:vital/themeNotifier.dart';
 import '../pages/DeluxePage.dart';
 import '../app_data_service.dart';
+import '../cloud_service.dart';
+import 'dart:convert';
 
 
 
@@ -173,6 +175,19 @@ class _ColorsStorePageState extends State<ColorsStorePage> {
                         });
                       // você pode disparar uma animação ou som aqui;
                       _showZeldaUnlockAnimation(context, updateColor);
+                      if (AppData.ultimate){
+                        final themesOwnedJson = AppData.themes.where((t) => t.owned).map((el) => el.toJson()).toList();
+                        final statsJson = AppData.historicoStats.map((t) => t.toJson()).toList();
+                        BackupService cloud = BackupService();
+                        await cloud.updateUser(AppData.id, {
+                          'temas_comprados': jsonEncode(themesOwnedJson),
+                          'stats': jsonEncode(statsJson),
+                          'current_avatar': AppData.currentAvatar,
+                          'current_theme': AppData.currentTheme,
+                          'nivel': AppData.level,
+                          'coins': AppData.coins,
+                        });
+                      }
                       await AppDataService.salvarTudo(); // força rebuild pra atualizar moedas
                     } else if (!isSelected) {
                       Provider.of<ThemeNotifier>(context, listen: false).currentTheme = updateColor;

@@ -8,7 +8,7 @@ import '../app_data_service.dart';
 
 class ExerciciosPage extends StatefulWidget {
   final String categoria;
-  final List<String> exercicios;
+  final Map<String, List<String>> exercicios;
 
   const ExerciciosPage({required this.categoria, required this.exercicios, super.key});
 
@@ -22,8 +22,10 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
   @override
   void initState() {
     super.initState();
-    for (var exercicio in widget.exercicios) {
-      _selecionados[exercicio] = false;
+    for (var subgrupo in widget.exercicios.values) {
+      for (var exercicio in subgrupo) {
+        _selecionados[exercicio] = false;
+      }
     }
   }
 
@@ -45,9 +47,103 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
     );
   }
 
+  Widget _buildExercicioTile(String exercicio) {
+  return Padding(
+    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    child: Card(
+      elevation: 0,
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Checkbox(
+              value: AppData.treinosSelecionados.any((e) => e.name == exercicio),
+              onChanged: (bool? value) {
+                setState(() {
+                  if (value == true) {
+                    if (!_selecionados.containsKey(exercicio)) {
+                      _selecionados[exercicio] = true;
+                    }
+                    AppData.treinosSelecionados.add(
+                      ExercicioModel(name: exercicio, sets: 1, duration: 1),
+                    );
+                  } else {
+                    AppData.treinosSelecionados.removeWhere((e) => e.name == exercicio);
+                    _selecionados[exercicio] = false;
+                  }
+                });
+              },
+              activeColor: Theme.of(context).colorScheme.secondary,
+              checkColor: Theme.of(context).scaffoldBackgroundColor,
+              side: BorderSide(
+                color: Theme.of(context).colorScheme.secondary.withAlpha(100),
+                width: 2,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                exercicio,
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+void _mostrarDialogoNovoExercicio() {
+  final controller = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      backgroundColor: Theme.of(context).primaryColor,
+      title: Text("Novo exercício", style: TextStyle(color: Theme.of(context).colorScheme.secondary),),
+      content: TextField(
+        controller: controller,
+        decoration: InputDecoration(hintText: 'Nome do exercício', fillColor: Theme.of(context).textTheme.bodyLarge?.color, iconColor: Theme.of(context).textTheme.bodyLarge?.color, hintStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancelar', style: TextStyle(color: Theme.of(context).colorScheme.secondary),),
+        ),
+        TextButton(
+          onPressed: () {
+            final nome = controller.text.trim();
+            if (nome.isNotEmpty) {
+              setState(() {
+                _selecionados[nome] = true;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Treino ${nome} adicionado com sucesso')),
+                );
+              });
+              Navigator.pop(context);
+            }
+          },
+          child: Text('Adicionar', style: TextStyle(color: Theme.of(context).colorScheme.secondary),),
+        ),
+      ],
+    ),
+  );
+}
+
+
+
   @override
   Widget build(BuildContext context) {
-    bool algumSelecionado = AppData.treinosSelecionados.isNotEmpty;
+    bool algumSelecionado = _selecionados.values.any((v) => v) || AppData.treinosSelecionados.isNotEmpty;
 
     bool isSelecionado(String exercicio) {
   return AppData.treinosSelecionados.any((e) => e.name == exercicio);
@@ -55,65 +151,42 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.categoria, style: TextStyle(fontSize: 25, fontWeight:FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color),),
+        title: Text("Adicione outro grupo muscular", style: TextStyle(fontSize: 20, fontWeight:FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color),),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
       ),
       body: ListView(
-        children: widget.exercicios.map((exercicio) {
-          return Padding(padding: EdgeInsets.all(10),
-          child: Card(
-            elevation: 0,
-            color: Theme.of(context).scaffoldBackgroundColor,
-            child:
-            Column(children: [
-              SizedBox(height: 1,),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                shape: BoxShape.rectangle, // ou BoxShape.circle pra deixar redondo
-                borderRadius: BorderRadius.circular(12), // só funciona se for rectangle
-                border: Border.all(color: const Color.fromARGB(0, 255, 153, 0), width: 2),
-                ),
-                child: Row(
-                children: [
-                  Checkbox(
-                    value: isSelecionado(exercicio),
-                    onChanged: (bool? value) {
-                      if (value == true) {
-                        if (!isSelecionado(exercicio)) {
-                          AppData.treinosSelecionados.add(
-                            ExercicioModel(name: exercicio, sets: 1, duration: 1),
-                          );
-                        }
-                      } else {
-                        AppData.treinosSelecionados.removeWhere((e) => e.name == exercicio);
-                      }
-                      setState(() {});
-                    },
-                    activeColor: Theme.of(context).colorScheme.secondary,
-                    checkColor: Theme.of(context).scaffoldBackgroundColor,
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.4,), // muda a borda sem Theme!
-                      width: 2,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(
-                    exercicio,
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                      fontSize: 20,
-                    ),
-                  ),)
-                ],
-              ),
-              ),
-            ],) 
-          ),); 
-        }).toList(),
-      ),
+  children:
+    [
+   ...widget.exercicios.entries.map((entry) {
+    final subgrupo = entry.key;
+    final exercicios = entry.value;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+          child: Text(subgrupo, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        ),
+        ...exercicios.map((exercicio) => _buildExercicioTile(exercicio)).toList(),
+      ],
+    );
+  }).toList(),
+  SizedBox(height: 20,),
+  ElevatedButton.icon(
+  onPressed: _mostrarDialogoNovoExercicio,
+  icon: Icon(Icons.add),
+  style: ButtonStyle(
+    backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.secondary),
+    foregroundColor: MaterialStateProperty.all(Theme.of(context).scaffoldBackgroundColor),
+
+  ),
+  label: Text('Adicionar exercício personalizado'),
+),
+SizedBox(height: 50,)
+    ]
+),
       floatingActionButton: algumSelecionado
           ? FloatingActionButton(
             elevation: 0,

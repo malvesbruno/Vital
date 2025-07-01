@@ -3,6 +3,8 @@ import '../app_data.dart';
 import '../main.dart';
 import '../models/AtividadeModel.dart';
 import '../app_data_service.dart';
+import '../cloud_service.dart';
+import 'dart:convert';
 
 
 class EditActivityPage extends StatefulWidget {
@@ -57,6 +59,19 @@ class _EditActivityPageState extends State<EditActivityPage> {
     AppData.listaAtividades[widget.index] = novaAtividade;
 
     await AppDataService.salvarTudo();
+    if (AppData.ultimate){
+      final atividadeJson = AppData.listaAtividades.map((t) => t.toJson()).toList();
+      final statsJson = AppData.historicoStats.map((t) => t.toJson()).toList();
+      BackupService cloud = BackupService();
+          await cloud.updateUser(AppData.id, {
+            'atividades': jsonEncode(atividadeJson),
+            'stats': jsonEncode(statsJson),
+            'current_avatar': AppData.currentAvatar,
+            'current_theme': AppData.currentTheme,
+            'nivel': AppData.level,
+            'coins': AppData.coins,
+          });
+    }
     if (!mounted) return;
 
     Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage()));

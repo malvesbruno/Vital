@@ -74,7 +74,7 @@ static Future<void> carregarDesafiosDoDia() async {
 
   static int waterConsumed = 0;
   static bool ultimate = false;
-  static String name = 'bruno';
+  static String name = 'Deafult_Name';
   static int coins = 0;
   static int exp = 0;
   static int level = 1;
@@ -90,9 +90,6 @@ static Future<void> carregarDesafiosDoDia() async {
   static String id = Uuid().v4();
 
   static List<AmigoModel> amigos = [
-    AmigoModel(nome: 'Bruno', avatar: 'Mr. Vega', level: 150, id: '12219911'),
-    AmigoModel(nome: 'Vitor', avatar: 'King of Pirates', level: 130, id: '12334221'),
-    AmigoModel(nome: 'Matheus', avatar: 'Red Rebellion', level: 120, id: '11244911')
   ];
   static int completedActivities = 0;
   static double progress = 0.0;

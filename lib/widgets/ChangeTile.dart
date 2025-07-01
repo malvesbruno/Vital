@@ -42,15 +42,10 @@ class _ChallengeTileState extends State<ChallengeTile> {
         ),
       ),
       onTap: () async {
-  final wasCompleted = widget.challenge.completed; // Guarda o estado anterior
-  
+        if (widget.challenge.completed) return;
   setState(() {
-    widget.challenge.completed = !wasCompleted; // Inverte o estado
-    if (widget.challenge.completed) {
+    widget.challenge.completed = true; // Inverte o estado
       AppData.coins += widget.challenge.reward;
-    } else {
-      AppData.coins -= widget.challenge.reward;
-    }
   });
 
   try {

@@ -46,7 +46,9 @@ class AppDataService {
       batch.insert('treinos', {
         'id': treino.nome,
         'dados': jsonEncode(treino.toJson()),
-      });
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+);
     }
     await batch.commit(noResult: true);
   }
@@ -289,7 +291,8 @@ class AppDataService {
       'ultimaDataSalva': AppData.ultimaDataSalva.toIso8601String(),
       'idUser': AppData.id,
       'horasDormidas': "${AppData.horasDormidas}",
-    });
+    },
+    conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   static Future<void> _carregarConfiguracoes() async {

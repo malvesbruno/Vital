@@ -62,4 +62,37 @@ class AppTheme {
       cardColor: primaryColor,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'backgroundColor': backgroundColor,
+      'primaryColor': primaryColor,
+      'secondaryColor': secondaryColor,
+      'accentColor': accentColor,
+      'textColor': textColor,
+      'imagePath': imagePath,
+      'price': price,
+      'requiredLevel': requiredLevel,
+      'exclusive': exclusive,
+      'owned': owned,
+    };
+  }
+
+  factory AppTheme.fromJson(Map<String, dynamic> json) {
+    return AppTheme(
+      name: json['name'],
+      backgroundColor: json['backgroundColor'],
+      primaryColor: json['primaryColor'],
+      secondaryColor: json['secondaryColor'],
+      accentColor: json['accentColor'],
+      textColor: json['textColor'],
+      imagePath: json['imagePath'],
+      price: json['price'],
+      requiredLevel: json['requiredLevel'],
+      exclusive: json['exclusive'],
+      owned: json['owned']
+    );
+  }
+  
 }

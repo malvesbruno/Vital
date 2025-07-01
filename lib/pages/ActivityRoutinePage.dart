@@ -12,6 +12,19 @@ class Activityroutinepage extends StatefulWidget{
 }
 
 class _ActivityRoutinePageState extends State<Activityroutinepage>{
+  final ScrollController _tabScrollController = ScrollController();
+
+
+    @override
+  void initState() {
+    super.initState();
+    // Espera o layout ser montado antes de rolar
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _tabScrollController.jumpTo(55); // ajuste esse valor como quiser
+    });
+  }
+
+
   @override
 Widget build(BuildContext context) {
   return DefaultTabController(
@@ -31,21 +44,28 @@ Widget build(BuildContext context) {
             fontWeight: FontWeight.bold,
           ),
         ),
-        bottom: TabBar(
-          isScrollable: true,
-          labelColor: Theme.of(context).colorScheme.secondary,
-          unselectedLabelColor: Theme.of(context).textTheme.bodyLarge?.color,
-          indicatorColor: Theme.of(context).colorScheme.secondary,
-          tabs: const [
-            Tab(text: 'Seg'),
-            Tab(text: 'Ter'),
-            Tab(text: 'Qua'),
-            Tab(text: 'Qui'),
-            Tab(text: 'Sex'),
-            Tab(text: 'Sáb'),
-            Tab(text: 'Dom'),
-          ],
-        ),
+        bottom: PreferredSize(
+  preferredSize: const Size.fromHeight(kToolbarHeight),
+  child: SingleChildScrollView(
+    controller: _tabScrollController,
+    scrollDirection: Axis.horizontal,
+    child: TabBar(
+      isScrollable: true,
+      labelColor: Theme.of(context).colorScheme.secondary,
+      unselectedLabelColor: Theme.of(context).textTheme.bodyLarge?.color,
+      indicatorColor: Theme.of(context).colorScheme.secondary,
+      tabs: const [
+        Tab(text: 'Seg'),
+        Tab(text: 'Ter'),
+        Tab(text: 'Qua'),
+        Tab(text: 'Qui'),
+        Tab(text: 'Sex'),
+        Tab(text: 'Sáb'),
+        Tab(text: 'Dom'),
+      ],
+    ),
+  ),
+),
       ),
       body: TabBarView(
         children: List.generate(7, (index) {

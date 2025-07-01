@@ -14,4 +14,27 @@ class AvatarModel {
     this.owned = false,
     required this.exclusive
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'imagePath': imagePath,
+      'price': price,
+      'requiredLevel': requiredLevel,
+      'exclusive': exclusive,
+      'owned': owned,
+    };
+  }
+
+  factory AvatarModel.fromJson(Map<String, dynamic> json) {
+    return AvatarModel(
+      name: json['name'],
+      imagePath: json['imagePath'],
+      price: json['price'],
+      requiredLevel: json['requiredLevel'],
+      exclusive: json['exclusive'],
+      owned: json['owned']
+    );
+  }
+
 }

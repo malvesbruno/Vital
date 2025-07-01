@@ -12,74 +12,82 @@ class SetTreinoPage extends StatefulWidget {
 
 class _SetTreinoPageState extends State<SetTreinoPage>{
   // 🟥 Exercícios para Peito
-List<String> chestExercises = [
-  'Supino reto com barra',
-  'Supino reto com halteres',
-  'Supino inclinado com halteres',
-  'Crucifixo reto com halteres',
-  'Crucifixo inclinado com halteres',
-  'Crossover no cabo',
-  'Flexão com peso nas costas',
-  'Flexão usando halteres como apoio',
-  'Supino declinado com barra',
-  'Pressão de peito na máquina',
-];
+final Map<String, List<String>> chestExercises = {
+  'Peitoral': [
+    'Supino reto com barra',
+    'Supino reto com halteres',
+    'Supino inclinado com halteres',
+    'Crucifixo reto com halteres',
+    'Crucifixo inclinado com halteres',
+    'Crossover no cabo',
+    'Flexão com peso nas costas',
+    'Flexão usando halteres como apoio',
+    'Supino declinado com barra',
+    'Pressão de peito na máquina',
+  ]
+};
 
-// 🟦 Exercícios para Costas
-List<String> backExercises = [
-  'Pulley frente',
-  'Remada baixa',
-  'Remada unilateral com halteres',
-  'Remada curvada com barra',
-  'Puxada na barra guiada',
-  'Levantamento terra com barra',
-  'Remada cavalinho (T-bar)',
-  'Encolhimento de ombros com halteres',
-  'Pull-over com halteres',
-  'Barra fixa (assistida ou não)',
-];
+final Map<String, List<String>> backExercises = {
+  'Costas': [
+    'Pulley frente',
+    'Remada baixa',
+    'Remada unilateral com halteres',
+    'Remada curvada com barra',
+    'Puxada na barra guiada',
+    'Levantamento terra com barra',
+    'Remada cavalinho (T-bar)',
+    'Encolhimento de ombros com halteres',
+    'Pull-over com halteres',
+    'Barra fixa (assistida ou não)',
+  ]
+};
 
-// 🟨 Exercícios para Braços
-List<String> armExercises = [
-  'Rosca direta com barra',
-  'Rosca martelo com halteres',
-  'Rosca alternada com halteres',
-  'Rosca Scott na máquina',
-  'Tríceps testa com barra EZ',
-  'Tríceps pulley',
-  'Tríceps banco com peso no colo',
-  'Tríceps francês com halteres',
-  'Rosca concentrada',
-  'Rosca no cabo',
-];
+final Map<String, List<String>> armExercises = {
+  'Bíceps': [
+    'Rosca direta com barra',
+    'Rosca martelo com halteres',
+    'Rosca alternada com halteres',
+    'Rosca Scott na máquina',
+    'Rosca concentrada',
+    'Rosca no cabo',
+  ],
+  'Tríceps': [
+    'Tríceps testa com barra EZ',
+    'Tríceps pulley',
+    'Tríceps banco com peso no colo',
+    'Tríceps francês com halteres',
+  ]
+};
 
-// 🟩 Exercícios para Abdômen
-List<String> absExercises = [
-  'Abdominal na máquina',
-  'Abdominal com anilha no peito',
-  'Elevação de pernas na barra fixa',
-  'Abdominal oblíquo com halteres',
-  'Prancha com peso nas costas',
-  'Flexão de tronco ajoelhado na polia alta',
-  'Russian twist com anilha',
-  'Prancha com remada unilateral',
-  'Canivete com anilha',
-  'Rollout com roda abdominal',
-];
+final Map<String, List<String>> absExercises = {
+  'Abdômen': [
+    'Abdominal na máquina',
+    'Abdominal com anilha no peito',
+    'Elevação de pernas na barra fixa',
+    'Abdominal oblíquo com halteres',
+    'Prancha com peso nas costas',
+    'Flexão de tronco ajoelhado na polia alta',
+    'Russian twist com anilha',
+    'Prancha com remada unilateral',
+    'Canivete com anilha',
+    'Rollout com roda abdominal',
+  ]
+};
 
-// 🟪 Exercícios para Pernas
-List<String> legExercises = [
-  'Agachamento com barra',
-  'Agachamento com halteres',
-  'Afundo com halteres',
-  'Leg press',
-  'Cadeira extensora',
-  'Mesa flexora',
-  'Elevação de panturrilha em máquina',
-  'Stiff com halteres',
-  'Step-up com halteres',
-  'Agachamento búlgaro com halteres',
-];
+final Map<String, List<String>> legExercises = {
+  'Pernas': [
+    'Agachamento com barra',
+    'Agachamento com halteres',
+    'Afundo com halteres',
+    'Leg press',
+    'Cadeira extensora',
+    'Mesa flexora',
+    'Elevação de panturrilha em máquina',
+    'Stiff com halteres',
+    'Step-up com halteres',
+    'Agachamento búlgaro com halteres',
+  ]
+};
 
   bool algumSelecionado = AppData.treinosSelecionados.isNotEmpty;
 
@@ -108,11 +116,21 @@ List<String> legExercises = [
       body: Center(
         child: Column(
           children: [
-            buildCard('Peito', chestExercises.length, Image.asset('assets/images/peito.png'), false, chestExercises),
-            buildCard('Costas', backExercises.length, Image.asset('assets/images/costas.png'), false, backExercises),
-            buildCard('Braços', armExercises.length, Image.asset('assets/images/braços.png'), false, armExercises),
-            buildCard('Abdômen', absExercises.length, Image.asset('assets/images/abdomen.png'), false, absExercises),
-            buildCard('Pernas', legExercises.length, Image.asset('assets/images/pernas.png'), false, legExercises),
+            buildCard('Peito', chestExercises.values
+  .map((lista) => lista.length)
+  .fold(0, (a, b) => a + b), Image.asset('assets/images/peito.png'), false, chestExercises),
+            buildCard('Costas', backExercises.values
+  .map((lista) => lista.length)
+  .fold(0, (a, b) => a + b), Image.asset('assets/images/costas.png'), false, backExercises),
+            buildCard('Braços', armExercises.values
+  .map((lista) => lista.length)
+  .fold(0, (a, b) => a + b), Image.asset('assets/images/braços.png'), false, armExercises),
+            buildCard('Abdômen', absExercises.values
+  .map((lista) => lista.length)
+  .fold(0, (a, b) => a + b), Image.asset('assets/images/abdomen.png'), false, absExercises),
+            buildCard('Pernas', legExercises.values
+  .map((lista) => lista.length)
+  .fold(0, (a, b) => a + b), Image.asset('assets/images/pernas.png'), false, legExercises),
             
           ],
         ),
@@ -141,7 +159,7 @@ List<String> legExercises = [
   }
 
 
-  Widget buildCard(String title, int qtd, Image image, bool personalizado, List<String> lista) {
+  Widget buildCard(String title, int qtd, Image image, bool personalizado, Map<String, List<String>> lista) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
     child: InkWell(

@@ -11,6 +11,8 @@ import '../app_data.dart';
 import 'package:vital/themeNotifier.dart';
 import 'package:provider/provider.dart';
 import '../app_data_service.dart';
+import '../cloud_service.dart';
+import 'dart:convert';
 
 
 
@@ -88,7 +90,6 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
           _pulseController.value = 1.0;
           _audioPlayer.play(AssetSource('sounds/retro_game.mp3'));
           setState(() => isTimerRunning = false);
-          completeSet();
         }
       });
     } else {
@@ -329,7 +330,19 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
       currentExerciseIndex = exerciciosDoDia.length - 1;
     }
   });
-
+  if (AppData.ultimate){
+      final treinosJson = AppData.treinos.map((t) => t.toJson()).toList();
+      final statsJson = AppData.historicoStats.map((t) => t.toJson()).toList();
+      BackupService cloud = BackupService();
+      await cloud.updateUser(AppData.id, {
+        'treinos': jsonEncode(treinosJson),
+        'stats': jsonEncode(statsJson),
+        'current_avatar': AppData.currentAvatar,
+        'current_theme': AppData.currentTheme,
+        'nivel': AppData.level,
+        'coins': AppData.coins,
+      });
+      }
   await AppDataService.salvarTudo();
   }
 },
@@ -364,13 +377,6 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
             SizedBox(height: 10),
             Text("${exercise.sets} sets", style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.4))),
             SizedBox(height: 20),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Clique para descansar", style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.4))),
-            ],),
-            SizedBox(height: 10),
             Center(
               child: GestureDetector(
                 onTap: toggleTimer,
@@ -393,30 +399,48 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
               ),
             ),
             SizedBox(height: 20),
-            Wrap(
-  spacing: 8, // espaçamento horizontal entre os botões
-  runSpacing: 8, // espaçamento vertical entre as linhas
-  children: List.generate(exercise.sets, (index) {
-    final isCompleted = index < exercise.completedSets;
-    return ElevatedButton(
-      onPressed: () {
-        setState(() {
-          if (!isCompleted) {
-            exercise.completedSets++;
-            if (exercise.completedSets >= exercise.sets) {
-              completeSet();
-            }
-          }
-        });
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isCompleted ? Colors.green : Theme.of(context).primaryColor,
-        shape: const CircleBorder(),
-        padding: const EdgeInsets.all(5),
-      ),
-      child: isCompleted? Icon(Icons.check, color: Theme.of(context).textTheme.bodyLarge?.color,) : Text(''),
-    );
-  }),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Clique abaixo para finalizar set", style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.4))),
+            ],),
+            SizedBox(height: 10,),
+            Center(
+  child: Wrap(
+    alignment: WrapAlignment.center,
+    spacing: 8,
+    runSpacing: 8,
+    children: List.generate(exercise.sets, (index) {
+      final isCompleted = index < exercise.completedSets;
+      return ElevatedButton(
+        onPressed: () {
+          if (!isTimerRunning && !isCompleted) {
+            setState(() {
+      exercise.completedSets++;
+      final isLastSet = exercise.completedSets >= exercise.sets;
+
+      if (isLastSet) {
+        completeSet(); // finaliza o exercício
+      } else {
+        // Inicia o timer automaticamente após concluir o set
+        _remainingTime = Duration(minutes: exercise.duration);
+        toggleTimer(); // inicia o timer
+      }
+    });
+  }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isCompleted ? Colors.green : Theme.of(context).primaryColor,
+          shape: const CircleBorder(),
+          padding: const EdgeInsets.all(5),
+        ),
+        child: isCompleted
+            ? Icon(Icons.check, color: Theme.of(context).textTheme.bodyLarge?.color)
+            : Text(''),
+      );
+    }),
+  ),
 ),
             SizedBox(height: 20,),
             Center(

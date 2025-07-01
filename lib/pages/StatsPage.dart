@@ -129,12 +129,12 @@ void _showBmiDialog() {
           TextButton(
             child: const Text("Calcular", style: TextStyle(color: Colors.greenAccent)),
             onPressed: () {
-              final altura = double.tryParse(alturaController.text.replaceAll(RegExp(r','), '.'));
-              final peso = double.tryParse(pesoController.text.replaceAll(RegExp(r','), '.'));
+              final altura = double.tryParse(alturaController.text.trim().replaceAll(',', '.'));
+              final peso = double.tryParse(pesoController.text.trim().replaceAll(',', '.'));
 
               if (altura != null && peso != null && altura > 0) {
                 final bmi = peso / (altura * altura);
-                AppData.setBmi(bmi); // Crie esse método em AppData, explico abaixo.
+                AppData.setBmi(bmi); 
                 Navigator.pop(context);
                 setState(() {}); // Atualiza a UI
               }
@@ -207,6 +207,11 @@ String _getPeriodLabel(String value) {
   Widget _buildStatCard(StatsModel stat) {
     late final String bmiText;
     late final Color bmiColor;
+    final isLitros = stat.goal == 2000.0;
+    final isHours = stat.goal == 8;
+    final valorAtual = isLitros ? stat.data.first / 1000 : stat.data.first;
+    final valorMeta = isLitros ? stat.goal / 1000 : stat.goal;
+    final unidade = isLitros ? 'L' : isHours ? 'H' : '';
     if (stat.data.isNotEmpty){
       final bmi = _getBmiLabel(stat.data.first);
       bmiText = bmi.key;  
@@ -242,7 +247,9 @@ String _getPeriodLabel(String value) {
           InkWell(
             onTap: () {
               if (stat.data.isEmpty || stat.data.last == 0.0) {
-                _showBmiDialog();
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showBmiDialog();
+      });
               }
             },
             child: Card(
@@ -284,7 +291,9 @@ String _getPeriodLabel(String value) {
 
       
     ] else ...[
-        SizedBox(
+      Stack(alignment: Alignment.center,
+      children: [
+          SizedBox(
           height: 150,
           child: selectedPeriod == 'day'
               ? PieChart(
@@ -372,9 +381,30 @@ String _getPeriodLabel(String value) {
                     ],
                   ),
                 ),
-        ),]
-      ],
-    ),
+        ),
+        if (selectedPeriod == 'day' && stat.goal > 0)
+        if (stat.title == 'Dias Ativos')
+        Text(
+        '${stat.data.first == stat.goal? "Ativo" : "Inativo"}',
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).textTheme.bodyLarge?.color,
+        ),
+      ),
+      if (stat.title != 'Dias Ativos')
+      Text(
+        '${valorAtual.toStringAsFixed(1)} $unidade / ${valorMeta.toStringAsFixed(0)} $unidade',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Theme.of(context).textTheme.bodyLarge?.color,
+        ),
+      )
+    ]),
+        ]
+        ],
+  ),
   );
 }
 }
