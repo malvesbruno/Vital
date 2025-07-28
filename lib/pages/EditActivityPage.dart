@@ -5,6 +5,7 @@ import '../models/AtividadeModel.dart';
 import '../app_data_service.dart';
 import '../cloud_service.dart';
 import 'dart:convert';
+import '../services/intersticial_service_add.dart';
 
 
 class EditActivityPage extends StatefulWidget {
@@ -73,8 +74,15 @@ class _EditActivityPageState extends State<EditActivityPage> {
           });
     }
     if (!mounted) return;
-
+    if(!AppData.ultimate){
+    InterstitialAdService.showAd(onAdClosed: () {
+      // Executar ação após o anúncio, se quiser
+      Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage()));
+    });
+  }
+  else{
     Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage()));
+  } 
   }
 
   @override

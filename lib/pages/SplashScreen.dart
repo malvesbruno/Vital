@@ -29,11 +29,11 @@ class _SplashScreenState extends State<SplashScreen> {
     try {
       await Future.delayed(const Duration(seconds: 3));
 
+      await AppDataService.carregarTudo();
+      if(!AppData.ultimate){
       if (appOpenAdManager.isAdAvailable) {
         await appOpenAdManager.showAd();
-      }
-
-      await AppDataService.carregarTudo();
+      }}
       await AppData.verificarSePrecisaSalvarHoje();
       await AppData.carregarDesafiosDoDia();
       await AppData.loadOwnedAvatars();

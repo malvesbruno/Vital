@@ -7,6 +7,7 @@ import '../pages/DeluxePage.dart';
 import '../app_data_service.dart';
 import '../cloud_service.dart';
 import 'dart:convert';
+import '../services/intersticial_service_add.dart';
 
 
 
@@ -82,7 +83,15 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.secondary),
               onPressed: () {
-                Navigator.pop(context);
+                if (!AppData.ultimate){
+                InterstitialAdService.showAd(onAdClosed: () {
+      // Executar ação após o anúncio, se quiser
+                  Navigator.pop(context);
+                });
+                } else{
+                  Navigator.pop(context);
+                }
+                
               },
               child: Text('Continuar', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
             ),

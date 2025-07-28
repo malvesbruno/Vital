@@ -22,7 +22,38 @@ class _StepCounterPageState extends State<StepCounterPage> {
   void initState() {
     super.initState();
     initPlatformState();
+    startMidnightTimer();
   }
+
+  Timer? _midnightTimer;
+
+void startMidnightTimer() {
+  final now = DateTime.now();
+  final tomorrow = DateTime(now.year, now.month, now.day + 1);
+  final durationUntilMidnight = tomorrow.difference(now);
+
+  _midnightTimer = Timer(durationUntilMidnight, () async {
+    final prefs = await SharedPreferences.getInstance();
+    final currentSteps = prefs.getInt('lastKnownSteps') ?? 0;
+
+    await prefs.setString('lastSavedDate', _formattedDate(DateTime.now()));
+    await prefs.setInt('stepsAtMidnight', currentSteps);
+
+    setState(() {
+      _stepsAtMidnight = currentSteps;
+      _dailySteps = 0;
+    });
+
+    // Reinicia o timer para o próximo dia
+    startMidnightTimer();
+  });
+}
+
+@override
+void dispose() {
+  _midnightTimer?.cancel();
+  super.dispose();
+}
 
   Future<void> initPlatformState() async {
     if (await Permission.activityRecognition.request().isGranted) {
@@ -99,7 +130,6 @@ class _StepCounterPageState extends State<StepCounterPage> {
 
   @override
   Widget build(BuildContext context) {
-    _checkDateChange();
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Card(

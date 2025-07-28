@@ -182,7 +182,7 @@ class _DeluxePageState extends State<Deluxepage>{
               if (user == null) {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => SignupScreen()));
               } else {
-                await _purchaseProduct('mensal');
+                await _purchaseProduct('premium_acess_month');
               }
             },
           ),
@@ -197,7 +197,7 @@ class _DeluxePageState extends State<Deluxepage>{
               if (user == null) {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => SignupScreen()));
               } else {
-                await _purchaseProduct('anual');
+                await _purchaseProduct('premium_acess');
               }
             },
           ),
@@ -205,14 +205,14 @@ class _DeluxePageState extends State<Deluxepage>{
           _PlanCard(
             title: 'Vitalício',
             price: 'R\$179,90',
-            description: 'Acesso permanente + 2 avatares épicos exclusivos!',
+            description: 'Acesso permanente',
             isUtimate: true,
             onTap: () async {
               final user = FirebaseAuth.instance.currentUser;
               if (user == null) {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => SignupScreen()));
               } else {
-                await _purchaseProduct('plano_vitalicio');
+                await _purchaseProduct('vitalicio');
               }
             },
           ),

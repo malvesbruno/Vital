@@ -4,6 +4,7 @@ import '../app_data.dart';
 import '../app_data_service.dart';
 import '../cloud_service.dart';
 import 'dart:convert';
+import '../services/intersticial_service_add.dart';
 
 
 class AddActivityPage extends StatefulWidget {
@@ -76,7 +77,14 @@ class _AddActivityPageState extends State<AddActivityPage> {
           });
     }
     if (!mounted) return;
-    Navigator.pop(context);
+    if (!AppData.ultimate){
+    InterstitialAdService.showAd(onAdClosed: () {
+      // Executar ação após o anúncio, se quiser
+      Navigator.pop(context);
+    });
+    } else{
+      Navigator.pop(context);
+    }
   }
 
   String DiaSemana(int id){

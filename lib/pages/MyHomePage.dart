@@ -136,15 +136,36 @@ void initState() {
           RotinaCard(Icons.calendar_month, "Rotina"),
           if (AppData.ultimate) StepCounterPage(),
           if (AppData.ultimate) FriendsCard(FontAwesomeIcons.peopleGroup, 'Amigos'),
-          SizedBox(height: 200,),
+          SizedBox(height: 50,),
         ],
       ),
     ),
     Positioned(
-      bottom: 20,
-      right: 20,
-      left: 20,
-      child: _buildAddQuickAction())
+  bottom: 20,
+  right: 20,
+  child: SizedBox(
+    width: 55, // ⬅️ Aumente esse valor pra ajustar o tamanho
+    height: 55,
+    child: FloatingActionButton(
+      backgroundColor: Theme.of(context).colorScheme.secondary,
+      shape: const CircleBorder(), // 🔵 Garante que ele seja redondo
+      onPressed: () {
+        showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(100)),
+          ),
+          builder: (_) => Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _buildAddQuickAction(),
+          ),
+        );
+      },
+      child: Icon(Icons.add, color: Colors.black, size: 35),
+    ),
+  ),
+),
       ],),
     );
   }
@@ -486,7 +507,7 @@ Widget _buildAvatar() {
           ),
 
           // 🔔 Bolinha de notificação
-          if (temConvitesPendentes || temRespostasPendentes || AppData.avatars.map((el) => el.requiredLevel).toList().contains(AppData.level) || AppData.themes.map((el) => el.requiredLevel).toList().contains(AppData.level))
+          if (temConvitesPendentes || temRespostasPendentes || AppData.avatars.map((el) => el.requiredLevel > 1).toList().contains(AppData.level) || AppData.themes.map((el) => el.requiredLevel > 1).toList().contains(AppData.level))
             Positioned(
               top: -2,
               right: -2,

@@ -5,6 +5,7 @@ import '../models/TreinoModel.dart';
 import '../app_data_service.dart';
 import '../cloud_service.dart';
 import 'dart:convert';
+import '../services/intersticial_service_add.dart';
 
 
 class EditarTreinoPage extends StatefulWidget {
@@ -116,7 +117,15 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
       }
     await AppDataService.salvarTudo();
     if (!mounted) return;
-    Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage())); // volta para tela anterior
+    if(!AppData.ultimate){
+    InterstitialAdService.showAd(onAdClosed: () {
+      // Executar ação após o anúncio, se quiser
+      Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage()));
+    });
+  }
+  else{
+    Navigator.push(context, MaterialPageRoute(builder: (context) => MainPage()));
+  }  // volta para tela anterior
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Treino editado com sucesso!")),
     );

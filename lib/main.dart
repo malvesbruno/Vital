@@ -18,6 +18,7 @@ import '../app_data_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import '../firebase_options.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../services/intersticial_service_add.dart';
 
 
 
@@ -26,6 +27,7 @@ void main() async {
     WidgetsFlutterBinding.ensureInitialized();
 
     await MobileAds.instance.initialize();
+    InterstitialAdService.loadAd();
     tz.initializeTimeZones();
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,

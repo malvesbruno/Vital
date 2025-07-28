@@ -246,11 +246,7 @@ String _getPeriodLabel(String value) {
           child: 
           InkWell(
             onTap: () {
-              if (stat.data.isEmpty || stat.data.last == 0.0) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
         _showBmiDialog();
-      });
-              }
             },
             child: Card(
             color: Colors.transparent,

@@ -30,6 +30,7 @@ class WorkoutCompletePage extends StatelessWidget {
               SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () {
+                  
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (context) => MainPage()), // substitua pelo nome da sua home

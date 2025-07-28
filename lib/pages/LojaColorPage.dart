@@ -9,6 +9,7 @@ import '../pages/DeluxePage.dart';
 import '../app_data_service.dart';
 import '../cloud_service.dart';
 import 'dart:convert';
+import '../services/intersticial_service_add.dart';
 
 
 
@@ -84,7 +85,15 @@ class _ColorsStorePageState extends State<ColorsStorePage> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.secondary),
               onPressed: () {
+                if (!AppData.ultimate){
+                  InterstitialAdService.showAd(onAdClosed: () {
+      // Executar ação após o anúncio, se quiser
+      Navigator.pop(context);
+    });
+                }
+                else{
                 Navigator.pop(context);
+                }
               },
               child: const Text('Continuar', style: TextStyle(color: Colors.black)),
             ),

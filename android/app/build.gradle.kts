@@ -36,8 +36,8 @@ android {
         applicationId = "com.malves.vital"
         minSdk = 23
         targetSdk = flutter.targetSdkVersion
-        versionCode = 8
-        versionName = "1.1.6"
+        versionCode = 14
+        versionName = "1.2.2"
     }
 
     signingConfigs {
