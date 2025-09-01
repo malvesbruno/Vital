@@ -14,7 +14,7 @@ import '../pages/ActivityRoutinePage.dart';
 import '../pages/TreinoRoutinePage.dart';
 import '../pages/ConvitesPage.dart';
 
-
+// HomePage
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
   @override
@@ -23,17 +23,18 @@ class MyHomePage extends StatefulWidget {
 
 
 class _MyHomePageState extends State<MyHomePage> {
-  bool temConvitesPendentes = false;
-  bool temRespostasPendentes = false;
+  bool temConvitesPendentes = false; // tem convites pendentes
+  bool temRespostasPendentes = false; //  tem repostas pendentes
 
   @override
 void initState() {
   super.initState();
   if (AppData.ultimate){
-    verificarConvitesPendentes();
+    verificarConvitesPendentes(); // verifica se há convites pendentes se o user for exclusive
   }
 }
 
+  // verifica convites pendentes
   Future<void> verificarConvitesPendentes() async {
     BackupService backupService = BackupService();
   final convites = await backupService.getReceivedWorkoutInvites(uid: AppData.id);
@@ -49,7 +50,7 @@ void initState() {
 
 
 
-
+  // navega para quick actions
   void navigateToQuickAction() async {
     final result = await Navigator.push(
       context,
@@ -61,6 +62,7 @@ void initState() {
     }
   }
 
+  // verifica se hoje está na lista
   bool isHojeNaLista(List<int> diasDaSemana) {
   int weekday = DateTime.now().weekday;
   return diasDaSemana.contains(weekday);

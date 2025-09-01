@@ -15,6 +15,8 @@ import '../cloud_service.dart';
 import '../pages/MyHomePage.dart';
 
 
+// Tela que permite a compra de planos
+
 class Deluxepage extends StatefulWidget{
   const Deluxepage({super.key});
 
@@ -23,8 +25,8 @@ class Deluxepage extends StatefulWidget{
 }
 
 class _DeluxePageState extends State<Deluxepage>{
-    late InAppPurchaseService _purchaseService;
-  bool _isLoading = false;
+    late InAppPurchaseService _purchaseService; // váriavel da compra in-app
+  bool _isLoading = false; // está carregando
 
   @override
   void initState() {
@@ -33,6 +35,7 @@ class _DeluxePageState extends State<Deluxepage>{
     _initializePurchaseService();
   }
 
+  // inicia o compra in-app
   Future<void> _initializePurchaseService() async {
     await _purchaseService.initialize();
   }
@@ -43,6 +46,7 @@ class _DeluxePageState extends State<Deluxepage>{
     super.dispose();
   }
 
+  // comprar produto 
   Future<void> _purchaseProduct(String productId) async {
   setState(() => _isLoading = true);
   
@@ -113,6 +117,7 @@ class _DeluxePageState extends State<Deluxepage>{
   }
 }
 
+  //verifica se tem um plano ativo
   Future<void> _checkActiveSubscription() async {
   final hasActive = await _purchaseService.hasActivePurchase();
   if (hasActive) {

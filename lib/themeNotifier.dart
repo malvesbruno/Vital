@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/ColorsModel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// serviço que auxilia na atualização de cores no app
+
 class ThemeNotifier extends ChangeNotifier {
   AppTheme _currentTheme;
 

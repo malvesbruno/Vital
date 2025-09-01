@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+
+//modelo de atividade
 class AtividadeModel {
   final String title;
   final String categoria;

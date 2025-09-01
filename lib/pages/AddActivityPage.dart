@@ -7,6 +7,8 @@ import 'dart:convert';
 import '../services/intersticial_service_add.dart';
 
 
+// adicionar atividades
+
 class AddActivityPage extends StatefulWidget {
   final Function(AtividadeModel) onAdd;
 
@@ -17,13 +19,14 @@ class AddActivityPage extends StatefulWidget {
 }
 
 class _AddActivityPageState extends State<AddActivityPage> {
-  final _titleController = TextEditingController();
-  String? _categoriaSelecionada;
-  TimeOfDay? _horarioSelecionado;
-  List<int> diasSelecionados = [];
+  final _titleController = TextEditingController(); // controle de texto para o nome da atividade
+  String? _categoriaSelecionada; // categoria da atividade
+  TimeOfDay? _horarioSelecionado; // horário selecionado para atividade
+  List<int> diasSelecionados = []; // lista que será populada por quais serão os dias da semana 
 
-  final List<int> diasDaSemana = [1,2,3,4,5,6,7];
+  final List<int> diasDaSemana = [1,2,3,4,5,6,7]; // lista auxiliar 
 
+  // dá a opção para o user selecionar um horário
   void _selecionarHorario() async {
     TimeOfDay? time = await showTimePicker(
       context: context,
@@ -34,11 +37,13 @@ class _AddActivityPageState extends State<AddActivityPage> {
     }
   }
 
+  // verifica se hoje está na lista
   bool isHojeNaLista(List<int> diasDaSemana) {
   int weekday = DateTime.now().weekday;
   return diasDaSemana.contains(weekday);
 }
 
+  // atualiza a barra de progresso
   void _updateProgressBar() {
     final atividadesHoje = AppData.listaAtividades.where((el) => isHojeNaLista(el.dias));
     if (atividadesHoje.isEmpty){
@@ -50,6 +55,7 @@ class _AddActivityPageState extends State<AddActivityPage> {
 
   }
 
+  // salva a atividade caso todos os campos estejam preenchidos
   void _salvarAtividade() async{
     if (_titleController.text.isEmpty || _categoriaSelecionada == null || _horarioSelecionado == null || diasSelecionados.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -63,6 +69,7 @@ class _AddActivityPageState extends State<AddActivityPage> {
     widget.onAdd(novaAtividade);
     _updateProgressBar();
     await AppDataService.salvarTudo();
+    // se for ultimate, atualiza na nuvem tbm
     if (AppData.ultimate){
       final atividadeJson = AppData.listaAtividades.map((t) => t.toJson()).toList();
       final statsJson = AppData.historicoStats.map((t) => t.toJson()).toList();
@@ -87,6 +94,7 @@ class _AddActivityPageState extends State<AddActivityPage> {
     }
   }
 
+  // define qual o dia da semana baseado no número
   String DiaSemana(int id){
     switch (id){
       case(1):{

@@ -6,6 +6,8 @@ import '../pages/AddRemedyIntake.dart';
 import 'SetTreinoRapidoPage.dart';
 import '../pages/AddSleepIntake.dart';
 
+//Pagina intermediária para ações rápidas
+
 class AddQuickActionPage extends StatefulWidget {
   const AddQuickActionPage({super.key});
 
@@ -18,6 +20,7 @@ class _AddQuickActionPageState extends State<AddQuickActionPage> with SingleTick
   late AnimationController _controller;
   late Animation<double> _animation;
 
+  // navega para consumo de água
   void _navigateToWaterIntake() async{
           final result = await Navigator.push(
                 context,
@@ -29,6 +32,7 @@ class _AddQuickActionPageState extends State<AddQuickActionPage> with SingleTick
         }
 }
 
+  // navega para consumo de remédios
   void _navigateToRemedyIntake() async {
   final result = await Navigator.push(
     context,
@@ -42,6 +46,7 @@ class _AddQuickActionPageState extends State<AddQuickActionPage> with SingleTick
   }
 }
 
+// navega para treino rápido
 void _navigateToSetTreino() async {
   final result = await Navigator.push(
     context,
@@ -55,6 +60,7 @@ void _navigateToSetTreino() async {
   }
 }
 
+// navega para adicionar horas de sono
   void _navigateToSleepLog() async {
   final result = await Navigator.push(
     context,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
+// Tela para ler QrCode
+
 class QRViewExample extends StatefulWidget {
   @override
   State<QRViewExample> createState() => _QRViewExampleState();

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+
+//TO DO: adicionar notificação
 class ExactAlarmAlert extends StatelessWidget {
   const ExactAlarmAlert({super.key});
 

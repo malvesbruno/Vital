@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 import 'package:audioplayers/audioplayers.dart';
 
+
+// Level Up Page
 class LevelUpPage extends StatefulWidget {
   final int newLevel;
   final List<String> unlockedItems;
@@ -13,14 +15,16 @@ class LevelUpPage extends StatefulWidget {
 }
 
 class _LevelUpPageState extends State<LevelUpPage> {
-  late ConfettiController _confettiController;
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  late ConfettiController _confettiController; //váriavel de confetti
+  final AudioPlayer _audioPlayer = AudioPlayer(); // variável que toca áudios
 
   @override
   void initState() {
     super.initState();
+    // configura o confetti
     _confettiController = ConfettiController(duration: const Duration(seconds: 3));
     _confettiController.play();
+    // toca áudios 
     _playVictorySound();
   }
 

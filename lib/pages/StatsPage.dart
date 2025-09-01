@@ -6,6 +6,8 @@ import '../models/StatsModel.dart';
 import 'package:vital/themeNotifier.dart';
 import 'package:provider/provider.dart';
 
+// tela de stats
+
 class StatsPage extends StatefulWidget {
   const StatsPage({super.key});
 
@@ -14,7 +16,9 @@ class StatsPage extends StatefulWidget {
 }
 
 class _StatsPageState extends State<StatsPage> {
-  String selectedPeriod = 'day';
+  String selectedPeriod = 'day'; // periodo selecionado
+  
+  // seleciona o periodo 
   int _getDaysFromPeriod() {
   switch (selectedPeriod) {
     case 'day': return 1;
@@ -76,6 +80,7 @@ class _StatsPageState extends State<StatsPage> {
     );
   }
 
+  // calcula o imc
   MapEntry<String, Color> _getBmiLabel(double bmi) {
   if (bmi < 10) return MapEntry("Não Calculado", Colors.grey);
   if (bmi < 18.5) return MapEntry("Abaixo do peso", Colors.orangeAccent);

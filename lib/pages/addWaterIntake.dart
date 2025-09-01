@@ -5,7 +5,7 @@ import '../services/challenge_service.dart';
 import '../app_data_service.dart';
 
 
-
+// pagina que auxilia no consumo de água
 class AddWaterIntakePage extends StatefulWidget {
   const AddWaterIntakePage({super.key});
 

@@ -10,10 +10,10 @@ import 'dart:convert';
 import '../services/intersticial_service_add.dart';
 
 
-
+// Loja de avatar
 class AvatarStorePage extends StatefulWidget {
-  final List<AvatarModel> avatars;
-  final int userLevel;
+  final List<AvatarModel> avatars; // lista de avatares
+  final int userLevel; // nível do player
 
   const AvatarStorePage({
     super.key,
@@ -26,12 +26,13 @@ class AvatarStorePage extends StatefulWidget {
 }
 
 class _AvatarStorePageState extends State<AvatarStorePage> {
-  int coins = AppData.coins;
+  int coins = AppData.coins; //moedas do user
 
+  // mostra uma animação quando se compra um avatar
   void _showZeldaUnlockAnimation(BuildContext context, AvatarModel avatar) async{
-    final player = AudioPlayer();
-    await player.setVolume(1.0);
-    player.play(AssetSource('sounds/buyItem.mp3'));
+    final player = AudioPlayer(); // váriavel que toca áudio
+    await player.setVolume(1.0); // define o volume
+    player.play(AssetSource('sounds/buyItem.mp3')); // seleciona o áudio
 
   showGeneralDialog(
     context: context,
@@ -107,40 +108,47 @@ class _AvatarStorePageState extends State<AvatarStorePage> {
 }
 
 
+  // mostrar o dialog 
   void _showAvatarDialog(BuildContext context, AvatarModel avatar) {
   setState(() {}); // força rebuild antes do diálogo, só pra garantir
-  final updatedAvatar = widget.avatars.firstWhere((a) => a.name == avatar.name);
-  final isUnlocked = widget.userLevel >= updatedAvatar.requiredLevel;
-  final hasCoins = AppData.coins >= updatedAvatar.price;
-  final alreadyOwned = updatedAvatar.owned;
-  final isSelected = AppData.currentAvatar == updatedAvatar.name;
+  final updatedAvatar = widget.avatars.firstWhere((a) => a.name == avatar.name); // update os dados do avatar
+  final isUnlocked = widget.userLevel >= updatedAvatar.requiredLevel; // verifica se o avatar está desbloquado
+  final hasCoins = AppData.coins >= updatedAvatar.price; // tem moedas suficientes para comprar o avatar
+  final alreadyOwned = updatedAvatar.owned; // já comprou
+  final isSelected = AppData.currentAvatar == updatedAvatar.name; // foi selecionados
 
-  String buttonText = '';
-  bool isButtonEnabled = false;
-  Color buttonColor = Colors.grey;
+  String buttonText = ''; // texto do botão
+  bool isButtonEnabled = false; // botão pode ser clicado?
+  Color buttonColor = Colors.grey; // cor do botão
 
+  // se não foi desbloqueado, não pode comprar
   if (!isUnlocked) {
     buttonText = 'Nível ${updatedAvatar.requiredLevel} necessário';
     isButtonEnabled = false;
     buttonColor = Colors.grey.shade700;
   } 
+  // se não comprou, o avatar não for ultimate 
   else if(!alreadyOwned && !AppData.ultimate && avatar.exclusive){
     buttonText = 'Comprar avatar\n(${updatedAvatar.price} moedas)';
     isButtonEnabled = true;
     buttonColor = Colors.amber;
   }
+  // se ainda não comprou e não tem moedas suficientes
   else if (!alreadyOwned && !hasCoins) {
     buttonText = '${updatedAvatar.price}\nmoedas (insuficiente)';
     isButtonEnabled = false;
     buttonColor = Colors.red.shade300;
+    // se ainda não comprou e tem moedas, pode comprar
   } else if (!alreadyOwned && hasCoins) {
     buttonText = 'Comprar avatar\n(${updatedAvatar.price} moedas)';
     isButtonEnabled = true;
     buttonColor = Colors.green;
+    // se já comprou, mas não foi selecionado
   } else if (alreadyOwned && !isSelected) {
     buttonText = 'Usar avatar';
     isButtonEnabled = true;
     buttonColor = Colors.blue;
+    // se já selecionou
   } else if (isSelected) {
     buttonText = 'Já está usando';
     isButtonEnabled = false;

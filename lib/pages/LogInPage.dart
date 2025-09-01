@@ -12,6 +12,7 @@ import '../models/AtividadeModel.dart';
 import '../models/DailyStatsModel.dart';
 import '../app_data_service.dart';
 
+// Página de login
 
 class LogInScreen extends StatefulWidget {
   const LogInScreen({super.key});
@@ -21,15 +22,16 @@ class LogInScreen extends StatefulWidget {
 }
 
 class _LogInScreenState extends State<LogInScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _isLoading = false;
-  final _auth = FirebaseAuth.instance;
+  final _emailController = TextEditingController(); // váriavel que controla o input email
+  final _passwordController = TextEditingController(); // váriavel que controla o input password
+  bool _isLoading = false; // está carregando 
+  final _auth = FirebaseAuth.instance; // instancia o firebase
 
+  // realiza o login
   void _logIn() async {
   setState(() {
     _isLoading = true;
-  });
+  }); // seta o loading para true
 
   try {
     final userCredential = await _auth.signInWithEmailAndPassword(
@@ -55,10 +57,11 @@ class _LogInScreenState extends State<LogInScreen> {
     bool temAcesso = false;
     final plano = user_info['plano'];
 
+    // verifica o plano e se o user tem o deluxe
     if (plano == 'mensal' && diferenca.inDays <= 37) temAcesso = true;
     if (plano == 'anual' && diferenca.inDays <= 379) temAcesso = true;
     if (plano == 'vitalicio') temAcesso = true;
-
+    // se tem acesso, carrega as informações
     if (temAcesso) {
       AppData.ultimate = true;
       AppData.id = user_info['uid'];

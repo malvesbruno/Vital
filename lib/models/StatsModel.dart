@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+
+//modelo de status
 class StatsModel {
   final DateTime date;
   final String title;

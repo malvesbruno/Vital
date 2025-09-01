@@ -7,7 +7,7 @@ import '../cloud_service.dart';
 import 'dart:convert';
 import '../services/intersticial_service_add.dart';
 
-
+//Pagina que permite editar o treino
 class EditarTreinoPage extends StatefulWidget {
   final TreinoModel treino;
 
@@ -18,14 +18,14 @@ class EditarTreinoPage extends StatefulWidget {
 }
 
 class _EditarTreinoPageState extends State<EditarTreinoPage> {
-  int indexAtual = 0;
-  TimeOfDay? horarioSelecionado;
-  List<String> diasSelecionados = [];
-  String nomeTreino = '';
-  bool erro = false;
-  String? erroMensagem;
+  int indexAtual = 0; //index do treino
+  TimeOfDay? horarioSelecionado; // horario selecionado
+  List<String> diasSelecionados = []; // dias selecionados
+  String nomeTreino = ''; // nome do treino
+  bool erro = false; // erro 
+  String? erroMensagem; // mensagem de erro
   
-
+  // lista auxiliar para dias selecionados
   final List<String> diasDaSemana = [
     "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"
   ];
@@ -33,12 +33,14 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
   @override
   void initState() {
     super.initState();
+    // inicia o treino com os valores já existentes 
     nomeTreino = widget.treino.nome;
     diasSelecionados = desformatarDias(widget.treino.diasSemana);
     AppData.treinosSelecionados = List.from(widget.treino.exercicios);
     horarioSelecionado = widget.treino.horario;
   }
 
+  // desformatar dias
   List<String> desformatarDias(List<int> numeros) {
     Map<int, String> mapa = {
       1: "Seg",
@@ -52,6 +54,7 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
     return numeros.map((n) => mapa[n] ?? "").where((e) => e.isNotEmpty).toList();
   }
 
+  // formatar dias
   List<int> formatarDias(List<String> lista) {
     Map<String, int> mapaDias = {
       "Seg": 1, "Ter": 2, "Qua": 3, "Qui": 4, "Sex": 5, "Sáb": 6, "Dom": 7
@@ -59,6 +62,7 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
     return lista.map((el) => mapaDias[el] ?? 0).where((el) => el != 0).toList();
   }
 
+  // retira o dia, caso ele esteja na lista. Caso não, adiciona
   void _toggleDia(String dia) {
     setState(() {
       if (diasSelecionados.contains(dia)) {
@@ -69,6 +73,7 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
     });
   }
 
+  // seleciona o horário
   void _selecionarHorario() async {
     TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -81,6 +86,7 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
     }
   }
 
+  // exercicio anterior
   void _anterior() {
     if (indexAtual > 0) {
       setState(() {
@@ -89,6 +95,7 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
     }
   }
 
+ //próximo exercicio 
   void _proximo() {
     if (indexAtual < AppData.treinosSelecionados.length) {
       setState(() {
@@ -97,6 +104,7 @@ class _EditarTreinoPageState extends State<EditarTreinoPage> {
     }
   }
 
+  // salva os dados atualizados
   void _salvarEdicao() async{
     widget.treino.nome = nomeTreino;
     widget.treino.diasSemana = formatarDias(diasSelecionados);

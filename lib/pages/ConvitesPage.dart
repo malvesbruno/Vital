@@ -4,6 +4,9 @@ import '../app_data.dart';
 import '../cloud_service.dart';
 import '../pages/DeluxePage.dart';
 
+
+// Pagina que mostra os convites recebidos pelo user
+
 class ConvitesPage extends StatefulWidget {
   const ConvitesPage({super.key});
 
@@ -12,18 +15,19 @@ class ConvitesPage extends StatefulWidget {
 }
 
 class _ConvitesPageState extends State<ConvitesPage> {
-  List<Map<String, dynamic>> convites = [];
-  List<Map<String, dynamic>> respostas = [];
-  bool isLoading = true;
+  List<Map<String, dynamic>> convites = []; // lista de convites
+  List<Map<String, dynamic>> respostas = []; // lista de respostas
+  bool isLoading = true; // está carregando 
   @override
   void initState() {
     super.initState();
-    buscarConvites();
+    buscarConvites(); // busca convites
     WidgetsBinding.instance.addPostFrameCallback((_) {
-    isUltimate(AppData.ultimate);
+    isUltimate(AppData.ultimate);  //verifica se o player é ultimate
   });
   }
 
+  // busca todos os convites no banco de dados
   Future<void> buscarConvites() async {
     final snapshot = await FirebaseFirestore.instance
         .collection('invites')
@@ -49,6 +53,7 @@ class _ConvitesPageState extends State<ConvitesPage> {
     });
   }
 
+  // atualiza o status do convite
   Future<void> atualizarStatus(String id, String status) async {
     await FirebaseFirestore.instance
         .collection('invites')
@@ -72,16 +77,19 @@ class _ConvitesPageState extends State<ConvitesPage> {
     buscarConvites();
   }
 
+  // busca nome do sender
   Future<String> BuscarNome(String id) async {
     final sender = await BackupService().getUser(id);
     return sender?['name'] ?? 'Usuário';
   }
 
+  // apaga a resposta
   Future<void> deletarResposta(String id) async {
     await FirebaseFirestore.instance.collection('invites').doc(id).delete();
     buscarConvites();
   }
 
+  // verifica se o player é ultimate
   void isUltimate(ultimate){
     if (!ultimate){
       Navigator.push(context, MaterialPageRoute(builder: (context) => Deluxepage()));

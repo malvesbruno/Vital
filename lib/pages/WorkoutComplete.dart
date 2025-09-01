@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import 'dart:ui' as ui;
 
+// tela mostrada se o workout foi completo
+
 class WorkoutCompletePage extends StatelessWidget {
   const WorkoutCompletePage({super.key});
 

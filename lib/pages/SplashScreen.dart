@@ -7,6 +7,7 @@ import '../app_data.dart';
 import '../app_data_service.dart';
 import '../services/add_service.dart';
 
+// Tela de SplashScreen
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -15,16 +16,17 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  String? errorMessage;
-  final AppOpenAdManager appOpenAdManager = AppOpenAdManager();
+  String? errorMessage; // mensagem de erro
+  final AppOpenAdManager appOpenAdManager = AppOpenAdManager(); // gerencia de abrir o app 
 
   @override
   void initState() {
     super.initState();
-    appOpenAdManager.loadAd();
-    _startApp();
+    appOpenAdManager.loadAd(); // carrega o anuncio
+    _startApp(); // inicia o app
   }
 
+  // inicia o app
   Future<void> _startApp() async {
     try {
       await Future.delayed(const Duration(seconds: 3));
@@ -32,8 +34,9 @@ class _SplashScreenState extends State<SplashScreen> {
       await AppDataService.carregarTudo();
       if(!AppData.ultimate){
       if (appOpenAdManager.isAdAvailable) {
-        await appOpenAdManager.showAd();
+        await appOpenAdManager.showAd(); // mostra anuncio
       }}
+      // faz verificações para inciar o app
       await AppData.verificarSePrecisaSalvarHoje();
       await AppData.carregarDesafiosDoDia();
       await AppData.loadOwnedAvatars();

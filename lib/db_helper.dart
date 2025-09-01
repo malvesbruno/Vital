@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-
+// auxilia na criação de banco de dados
 class DBHelper {
   static Database? _db;
 

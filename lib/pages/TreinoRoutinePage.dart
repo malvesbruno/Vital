@@ -6,7 +6,7 @@ import '../app_data_service.dart';
 import '../cloud_service.dart';
 import 'dart:convert';
 
-
+// rotina de treino
 class Workoutroutinepage extends StatefulWidget{
   const Workoutroutinepage({super.key});
 
@@ -15,7 +15,7 @@ class Workoutroutinepage extends StatefulWidget{
 }
 
 class _WorkoutRoutinePageState extends State<Workoutroutinepage>{
-  final ScrollController _tabScrollController = ScrollController();
+  final ScrollController _tabScrollController = ScrollController(); // controle de scroll
 
 
     @override

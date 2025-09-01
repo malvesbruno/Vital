@@ -5,6 +5,7 @@ import '../services/challenge_service.dart';
 import '../app_data_service.dart';
 
 
+// pagina que auxilia no consumo de remédios
 class AddRemdyIntakePage extends StatefulWidget {
   const AddRemdyIntakePage({super.key});
 
@@ -12,15 +13,20 @@ class AddRemdyIntakePage extends StatefulWidget {
   State<AddRemdyIntakePage> createState() => _AddRemedyIntakePageState();
 }
 
+// transforma o dado da hora do dia em string
 String timeOfDayToString(TimeOfDay time) {
   return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 }
 
+
+// verifica se hoje está na lista de dias da atividade do remédio
 bool isHojeNaLista(List<int> diasDaSemana) {
   int weekday = DateTime.now().weekday;
   return diasDaSemana.contains(weekday);
 }
 
+
+// atualiza a barra de progresso
 void _updateProgressBar() {
     final atividadesHoje = AppData.listaAtividades.where((el) => isHojeNaLista(el.dias));
     if (atividadesHoje.isEmpty){

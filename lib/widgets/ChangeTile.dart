@@ -4,6 +4,8 @@ import '../app_data.dart';
 import '../models/DailyChallenge.dart';
 import 'package:audioplayers/audioplayers.dart';
 
+// item que mostra os desafios
+
 class ChallengeTile extends StatefulWidget {
   final DailyChallengeModel challenge;
   final VoidCallback onCoinsChanged;

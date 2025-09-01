@@ -1,3 +1,5 @@
+
+// modelo de IMC
 class BmiEntry {
   final double weight; // em kg
   final double height; // em metros

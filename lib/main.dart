@@ -24,22 +24,22 @@ import '../services/intersticial_service_add.dart';
 
 void main() async {
   runZonedGuarded(() async {
-    WidgetsFlutterBinding.ensureInitialized();
+    WidgetsFlutterBinding.ensureInitialized(); // garante que todas as dependências foram inicializadas
 
-    await MobileAds.instance.initialize();
-    InterstitialAdService.loadAd();
-    tz.initializeTimeZones();
+    await MobileAds.instance.initialize(); // incia os adds
+    InterstitialAdService.loadAd(); // carrega o add
+    tz.initializeTimeZones(); // inicializa o controle de tempo
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
-    );
+    ); // inicializa o firebase
 
-    final themeName = AppData.currentTheme;
+    final themeName = AppData.currentTheme; // pega o tema atual
     final initialTheme = AppData.themes.firstWhere((t) => t.name == themeName);
 
     
     runApp(
       ChangeNotifierProvider(
-        create: (_) => ThemeNotifier(initialTheme),
+        create: (_) => ThemeNotifier(initialTheme), // cria o app com o tema atual
         child: const MyApp(),
       ),
     );
@@ -62,9 +62,9 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    ChallengeService.inicializarDesafios();
-    DailyResetService.verificarEDefinirNovoDia();
-    ChallengeService.verificarDesafiosAutomaticos();
+    ChallengeService.inicializarDesafios(); // incia os desafios diários
+    DailyResetService.verificarEDefinirNovoDia(); // verifica se precisa atualizar
+    ChallengeService.verificarDesafiosAutomaticos(); // verifica desafios automaticos
   }
 
   @override

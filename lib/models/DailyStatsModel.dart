@@ -1,4 +1,6 @@
 
+
+//modelo de status diário
 class DailyStats {
   final DateTime date;
   final double waterLiters;

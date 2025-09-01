@@ -14,11 +14,11 @@ import '../app_data_service.dart';
 import '../cloud_service.dart';
 import 'dart:convert';
 
-
+// página de treino
 
 class WorkoutPage extends StatefulWidget {
-  final List<ExercicioModel> treinosDoDia;
-  final List<TreinoModel> treino;
+  final List<ExercicioModel> treinosDoDia; // treino do dia
+  final List<TreinoModel> treino; // lista de treinos
 
   const WorkoutPage({Key? key, required this.treinosDoDia, required this.treino}) : super(key: key);
 
@@ -27,7 +27,8 @@ class WorkoutPage extends StatefulWidget {
 }
 
 class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStateMixin {
-
+ 
+  // pega o treino dos exericícios 
   TreinoModel getTreinoDoExercicio(ExercicioModel exercicio) {
   return widget.treino.firstWhere(
     (t) => t.exercicios.contains(exercicio),
@@ -35,26 +36,26 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
   );
 }
 
-  int currentExerciseIndex = 0;
-  bool isTimerRunning = false;
-  Timer? _countdownTimer;
-  Duration _remainingTime = Duration(minutes: 1);
-  Duration timerDuration = Duration(minutes: 1);
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-  late final AudioPlayer _audioPlayer;
-  late List<ExercicioModel> exerciciosDoDia;
-  late TreinoModel treinoAtual;
+  int currentExerciseIndex = 0; // index atual
+  bool isTimerRunning = false; // o tempo está correndo
+  Timer? _countdownTimer; // desce o timer
+  Duration _remainingTime = Duration(minutes: 1); // tempo que sobra
+  Duration timerDuration = Duration(minutes: 1); // tempo de duração
+  late AnimationController _pulseController; // controle de animação de pulso
+  late Animation<double> _pulseAnimation; // animação de pulso
+  late final AudioPlayer _audioPlayer; // váriavel de player de audio
+  late List<ExercicioModel> exerciciosDoDia; // exercicio do dia
+  late TreinoModel treinoAtual; //  treino atual
 
   @override
   void initState() {
     super.initState();
 
-
+    // carrega os exercícios do dia
     exerciciosDoDia = widget.treinosDoDia.where((e) => !e.completed).toList();
     exerciciosDoDia.isNotEmpty ? treinoAtual = getTreinoDoExercicio(exerciciosDoDia[currentExerciseIndex]): null;
 
-
+    //
     if (exerciciosDoDia.isNotEmpty) {
       final currentExercise = exerciciosDoDia[currentExerciseIndex];
       timerDuration = Duration(minutes: currentExercise.duration);
@@ -75,7 +76,7 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
   }
 
 
-
+  // ativa e desativa o timer 
   void toggleTimer() {
     setState(() => isTimerRunning = !isTimerRunning);
 
@@ -98,7 +99,8 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
       _countdownTimer?.cancel();
     }
   }
-
+  
+  // vai para o próxima exercicio 
   void nextExercise() {
     if (currentExerciseIndex < exerciciosDoDia.length - 1) {
       setState(() {
@@ -115,7 +117,8 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
       _pulseController.stop();
     }
   }
-
+ 
+  // volta para o exercicio anterior
   void previousExercise() {
     if (currentExerciseIndex > 0) {
       setState(() {
@@ -132,7 +135,9 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
       _pulseController.stop();
     }
   }
+ 
 
+  // completa um set
   void completeSet() async {
   final exercise = exerciciosDoDia[currentExerciseIndex];
 
@@ -173,7 +178,7 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
   await AppDataService.salvarTudo();
 }
 
-
+  // gera uma frase motivacional
   String gerarFraseMotivacional(int reps) {
   final frases = [
     "Foco total! Complete as $reps reps e suba de nível!",
@@ -186,6 +191,7 @@ class _WorkoutPageState extends State<WorkoutPage> with SingleTickerProviderStat
   return frases.first;
 }
 
+  // pega quantas repetições são necessárias
   int getReps(int intensidade){
     switch(intensidade){
       case(1):{

@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
 
+
+// contador de passos
 class StepCounterPage extends StatefulWidget {
   const StepCounterPage({super.key});
 
@@ -27,6 +29,7 @@ class _StepCounterPageState extends State<StepCounterPage> {
 
   Timer? _midnightTimer;
 
+// recarrega os dados à meia noite
 void startMidnightTimer() {
   final now = DateTime.now();
   final tomorrow = DateTime(now.year, now.month, now.day + 1);

@@ -5,6 +5,8 @@ import 'package:vital/app_data.dart';
 import '../pages/LojaAvatarPage.dart';
 import '../pages/LojaColorPage.dart';
 
+
+// menu do shop
 class MenushopPage extends StatefulWidget {
   const MenushopPage({super.key});
 
@@ -16,6 +18,7 @@ class _MenushopPageState extends State<MenushopPage> with SingleTickerProviderSt
 
   late AnimationController _controller;
 
+  // leva para o avatar page
  void _navigateToavatarPage() async{
     await Navigator.push(
           context,
@@ -23,52 +26,13 @@ class _MenushopPageState extends State<MenushopPage> with SingleTickerProviderSt
         );
 }
 
+// leva para color page
 void _navigateToColorPage() async{
     await Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => ColorsStorePage(colors: AppData.themes, userLevel: AppData.level)),
         );
 }
-
-//  void _navigateToRemedyIntake() async {
-//  final result = await Navigator.push(
-//    context,
-//    MaterialPageRoute(builder: (_) => {}),
-//  );
-
-  // Se já deu pop lá dentro, não precisa repetir aqui
-//  if (result == true) {
-    // Aqui só age com base no retorno, não fecha de novo
-    // Só faz algo se quiser, tipo mostrar um SnackBar ou atualizar estado
-//  }
-//}
-
-//void _navigateToSetTreino() async {
-//  final result = await Navigator.push(
-//    context,
-//    MaterialPageRoute(builder: (_) => {}),
-//  );
-
-  // Se já deu pop lá dentro, não precisa repetir aqui
-//  if (result == true) {
-    // Aqui só age com base no retorno, não fecha de novo
-    // Só faz algo se quiser, tipo mostrar um SnackBar ou atualizar estado
-//  }
-//}
-
-//  void _navigateToSleepLog() async {
-//  final result = await Navigator.push(
-//    context,
-//    MaterialPageRoute(builder: (_) => {}),
-//  );
-
-  // Se já deu pop lá dentro, não precisa repetir aqui
-//  if (result == true) {
-    // Aqui só age com base no retorno, não fecha de novo
-    // Só faz algo se quiser, tipo mostrar um SnackBar ou atualizar estado
-//  }
-//}
-
 
   @override
   void initState() {

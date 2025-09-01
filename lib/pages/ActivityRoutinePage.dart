@@ -4,6 +4,8 @@ import '../app_data.dart';
 import '../pages/EditActivityPage.dart';
 import '../app_data_service.dart';
 
+
+// mostra a rotina de atividades
 class Activityroutinepage extends StatefulWidget{
   const Activityroutinepage({super.key});
 
@@ -12,7 +14,7 @@ class Activityroutinepage extends StatefulWidget{
 }
 
 class _ActivityRoutinePageState extends State<Activityroutinepage>{
-  final ScrollController _tabScrollController = ScrollController();
+  final ScrollController _tabScrollController = ScrollController(); //define um scroller
 
 
     @override
@@ -83,7 +85,7 @@ Widget build(BuildContext context) {
   if (activities.isEmpty) {
     return Center(child: Text("Nenhuma atividade para este dia."));
   }
-
+  // mostrar as atividades por dias da semana
   return ListView.builder(
     padding: EdgeInsets.all(16),
     itemCount: activities.length,

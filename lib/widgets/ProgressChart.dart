@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
+
+// barra de progresso
 class ProgressChart extends StatelessWidget {
   final List<double> values;
 

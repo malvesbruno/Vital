@@ -1,3 +1,5 @@
+
+//modelo de avatar
 class AvatarModel {
   final String name;
   final String imagePath;

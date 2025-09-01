@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../pages/DeluxePage.dart';
 
+
+// SignUp Page
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -10,14 +12,16 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _isLoading = false;
-  final _auth = FirebaseAuth.instance;
+  final _emailController = TextEditingController(); // váriavel de input de email
+  final _passwordController = TextEditingController(); // váriavel de input de senha
+  bool _isLoading = false; // carregando 
+  final _auth = FirebaseAuth.instance; // instância a firebase
 
+
+  // faz signup
   void _signup() async {
   setState(() {
-    _isLoading = true;
+    _isLoading = true;  // carregando 
   });
 
   try {
@@ -35,8 +39,6 @@ class _SignupScreenState extends State<SignupScreen> {
     );
     Navigator.push(context, MaterialPageRoute(builder: (context) => Deluxepage()));
 
-    // Exemplo de navegação segura
-    // Navigator.pushReplacementNamed(context, '/home');
 
   } on FirebaseAuthException catch (e) {
     if (!mounted) return;

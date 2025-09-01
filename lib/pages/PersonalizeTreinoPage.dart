@@ -3,7 +3,7 @@ import 'WorkoutPagePersonalizada.dart';
 import 'dart:ui' as ui;
 import '../app_data_service.dart';
 
-
+// tela de personalização de treino
 class PersonalizeTreinoPage extends StatefulWidget{
   const PersonalizeTreinoPage({super.key});
 
@@ -11,6 +11,7 @@ class PersonalizeTreinoPage extends StatefulWidget{
   State<PersonalizeTreinoPage> createState() => _PersonalizeTreinoPageState(); 
 }
 
+// formata a duração para mm:ss
 String formatDuration(Duration duration) {
   String twoDigits(int n) => n.toString().padLeft(2, '0');
   final minutes = twoDigits(duration.inMinutes.remainder(60));
@@ -19,6 +20,7 @@ String formatDuration(Duration duration) {
 }
 
 class _PersonalizeTreinoPageState extends State<PersonalizeTreinoPage>{
+  // exercícios 
   final excercicios = [
   {'name': 'Polichinelo', 'duration': 1, 'sets': 2, 'completedSets': 0, 'escolhido': false},
   {'name': 'Agachamento com salto', 'duration': 2, 'sets': 2, 'completedSets': 0, 'escolhido': false},

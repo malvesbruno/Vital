@@ -1,4 +1,6 @@
 
+
+// modelo de exercício 
 class ExercicioModel {
   String name;
   int sets;

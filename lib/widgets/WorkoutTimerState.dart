@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-
+// timer da pagina de treino
 class WorkoutTimer extends StatefulWidget {
   final int duration; // Tempo total em segundos
 

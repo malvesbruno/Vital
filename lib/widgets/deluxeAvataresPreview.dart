@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+// preview de avatar
+
 class DeluxeAvatarsPreview extends StatelessWidget {
   final List<String> deluxeAvatars = [
     'assets/avatares/mr_vega.png',

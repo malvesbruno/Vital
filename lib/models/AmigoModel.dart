@@ -1,3 +1,5 @@
+
+// modelo de amigo
 class AmigoModel {
   String nome;
   String avatar;

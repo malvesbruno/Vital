@@ -5,6 +5,7 @@ import '../models/TreinoModel.dart';
 import '../app_data_service.dart';
 import '../models/DailyStatsModel.dart';
 
+// reseta os dados diariamente 
 class DailyResetService {
   static Future<void> verificarEDefinirNovoDia() async {
     final prefs = await SharedPreferences.getInstance();

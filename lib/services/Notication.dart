@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../services/navigation_service.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+// TO DO: adicionar notificação
+
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;

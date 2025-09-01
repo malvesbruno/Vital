@@ -1,3 +1,5 @@
+// Modelo de ação rápida
+
 class QuickAction {
   final String name;
   final DateTime timestamp;

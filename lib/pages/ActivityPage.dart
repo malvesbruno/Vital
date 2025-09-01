@@ -11,10 +11,12 @@ import 'package:provider/provider.dart';
 import 'dart:convert';
 import '../cloud_service.dart';
 
+//Tela que mostra as atividades a serem feitas e o progresso delas
+
 class ActivityPage extends StatefulWidget {
-  final List<AtividadeModel> lista;
-  final Function(String) onComplete;
-  final double progresso;
+  final List<AtividadeModel> lista;  // recebe a lista de atividades
+  final Function(String) onComplete; // recebe uma função para realizar
+  final double progresso; // recebe o progresso atual
 
   const ActivityPage({super.key, required this.lista, required this.progresso, required this.onComplete});
 
@@ -29,15 +31,18 @@ class _ActivityPageState extends State<ActivityPage> {
     super.initState();
   }
 
+  // transforma o dados de horário atual em uma string 
   String timeOfDayToString(TimeOfDay time) {
   return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 }
 
+// verifica se um dia em especifico está na lista de dias da Semana da atividade
 bool isHojeNaLista(List<int> diasDaSemana) {
   int weekday = DateTime.now().weekday;
   return diasDaSemana.contains(weekday);
 }
 
+// atualiza o barra de progresso
 void _updateProgressBar() {
     final atividadesHoje = AppData.listaAtividades.where((el) => isHojeNaLista(el.dias));
     if (atividadesHoje.isEmpty){

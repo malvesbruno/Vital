@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'ExercicioModel.dart';
 
 
-
+//modelo de treino
 class TreinoModel {
   String nome;
   List<int> diasSemana;
-  List<ExercicioModel> exercicios;
+  List<ExercicioModel> exercicios; //treino possui uma lista de exercícios
   TimeOfDay horario;
   int intensidade;
 

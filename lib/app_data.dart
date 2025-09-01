@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vital/app_data_service.dart';
+import 'package:vital/services/reset_daily.dart';
 
 import 'models/ExercicioModel.dart';
 import 'models/TreinoModel.dart';
@@ -19,6 +20,7 @@ import 'package:uuid/uuid.dart';
 
 
 class AppData {
+  // inicia os dados
   static List<TreinoModel> treinos = [];
   static List<ExercicioModel> treinosSelecionados = [];
   static List<QuickAction> quickActions = [];
@@ -30,10 +32,12 @@ class AppData {
   static DateTime ultimaDataSalva = DateTime.now();
   static List<DailyStats> historicoStats = [];
 
+  // verifica se precisa salvar hoje
   static Future<void> verificarSePrecisaSalvarHoje() async {
   final hoje = DateTime.now();
   if (!ehMesmoDia(ultimaDataSalva, hoje)) {
     await salvarStatsDoDia();
+    DailyResetService.verificarEDefinirNovoDia();
     resetarDadosDoDia();
     ultimaDataSalva = hoje;
     await AppDataService.salvarTudo();
@@ -44,6 +48,7 @@ static bool ehMesmoDia(DateTime a, DateTime b) {
   return a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
+// salvar os status do dia
 static Future<void> salvarStatsDoDia() async {
   final stats = DailyStats(
     date: ultimaDataSalva,
@@ -58,6 +63,7 @@ static Future<void> salvarStatsDoDia() async {
   historicoStats.add(stats);
 }
 
+// resetar os dados do dia
 static void resetarDadosDoDia() {
   waterConsumed = 0;
   completedActivities = 0;
@@ -67,6 +73,7 @@ static void resetarDadosDoDia() {
 
   static List<DailyChallengeModel> dailyChallenges = [];
 
+// carrega os desafios do dia
 static Future<void> carregarDesafiosDoDia() async {
   await ChallengeService.inicializarDesafios();
   dailyChallenges = await ChallengeService.carregarDesafiosDoDia();
@@ -97,8 +104,8 @@ static Future<void> carregarDesafiosDoDia() async {
   static List<double> lista = [10, 8, 9, 10, 4, 0, 10];
   static bool ativoHoje = false;
 
+// adiciona experiência 
   static void addExperience(BuildContext context, int xp) {
-    print("[DEBUG] Adding EXP: $xp | Current EXP: $exp | Level: $level"); // ✅ Debug
     exp += xp * multiplicador;
 
     int xpNeeded = 100 + (level - 1) * 50;
@@ -106,7 +113,6 @@ static Future<void> carregarDesafiosDoDia() async {
       exp -= xpNeeded;
       level++;
       xpNeeded = 100 + (level - 1) * 50;
-      print("[DEBUG] Level Up! New Level: $level | EXP Left: $exp"); // ✅ Debug
       AvatarModel? avatar = avatars.firstWhere((el) => el.requiredLevel == level, orElse: () => AvatarModel(name: 'Desconhecido', imagePath: '', requiredLevel: 0, price: 0, exclusive: false));
       late List<String> lista_levelUp;
       if (avatar.name != 'Desconhecido'){
@@ -120,6 +126,7 @@ static Future<void> carregarDesafiosDoDia() async {
     }
 }
 
+  // salva avatares comprados
   static Future<void> saveOwnedAvatars() async {
     final prefs = await SharedPreferences.getInstance();
     final ownedNames = avatars
@@ -129,6 +136,7 @@ static Future<void> carregarDesafiosDoDia() async {
     await prefs.setStringList('Owned Avatars', ownedNames);
   }
 
+  // salva temas comprados
   static Future<void> saveOwnedColors() async {
     final prefs = await SharedPreferences.getInstance();
     final ownedColorNames = themes
@@ -138,6 +146,7 @@ static Future<void> carregarDesafiosDoDia() async {
     await prefs.setStringList('Owned Colors', ownedColorNames);
   }
 
+  // carrega avatares comprados
   static Future<void> loadOwnedAvatars() async {
   final prefs = await SharedPreferences.getInstance();
   final ownedNames = prefs.getStringList('Owned Avatars') ?? [];
@@ -152,6 +161,7 @@ static Future<void> carregarDesafiosDoDia() async {
   }
 }
 
+// carrega temas comprados
 static Future<void> loadOwnedColors() async {
   final prefs = await SharedPreferences.getInstance();
   final ownedNames = prefs.getStringList('Owned Colors') ?? [];
@@ -165,7 +175,7 @@ static Future<void> loadOwnedColors() async {
   }
 }
 
-
+  // lista de avatares
   static List<AvatarModel> avatars = [
   AvatarModel(name: 'Default', imagePath: 'assets/avatares/default.png', price: 0, requiredLevel: 1, owned: true, exclusive: false),
   AvatarModel(name: 'Nerd', imagePath: 'assets/avatares/nerd.png', price: 30, requiredLevel: 3, exclusive: false),
@@ -200,7 +210,7 @@ static Future<void> loadOwnedColors() async {
   AvatarModel(name: 'Dex', imagePath: 'assets/avatares/dex.png', price: 1850, requiredLevel: 185,exclusive: false),
   AvatarModel(name: 'Robô', imagePath: 'assets/avatares/robo.png', price: 2000, requiredLevel: 200, exclusive: false),
 ];
-
+  // lista de cores
   static List<AppTheme> themes = [
   // Sempre começa com o padrão
   AppTheme(
@@ -427,7 +437,7 @@ static Future<void> loadOwnedColors() async {
 ];
 
 
-
+  // comprar avatar
   static void buyAvatar(String name) async{
     final avatar = avatars.firstWhere((a) => a.name == name);
     if (!avatar.owned && coins >= avatar.price && level >= avatar.requiredLevel) {
@@ -436,7 +446,7 @@ static Future<void> loadOwnedColors() async {
       await saveOwnedAvatars();
     }
   }
-
+  // comprar cores
   static void buyColor(String name) async{
     final color = themes.firstWhere((a) => a.name == name);
     if (!color.owned && coins >= color.price && level >= color.requiredLevel) {
@@ -446,7 +456,7 @@ static Future<void> loadOwnedColors() async {
     }
   }
   
-
+  // pega stats dos útimos dias
   static List<StatsModel> getStatsOfLastDays(int n) {
   final today = DateTime.now();
   final startDate = DateTime(today.year, today.month, today.day).subtract(Duration(days: n - 1));
@@ -620,7 +630,7 @@ static Future<void> loadOwnedColors() async {
   }
 }
 
-
+// seta o imc
 static void setBmi(double bmiImput){
   bmi = bmiImput;
   atualizarDailyStats(bmi: bmiImput);

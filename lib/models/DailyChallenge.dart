@@ -1,4 +1,6 @@
 
+
+// modelo de desafio diário
 class DailyChallengeModel {
   final String title;
   final String description;

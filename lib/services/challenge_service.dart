@@ -2,6 +2,9 @@ import '../models/DailyChallenge.dart';
 import '../services/challenge_completed.dart';
 import '../db_helper.dart';
 
+
+// Serviço que atualiza os desafio diários 
+
 class ChallengeService {
   static final List<DailyChallengeModel> _todosDesafios = [
     DailyChallengeModel(
@@ -165,7 +168,9 @@ class ChallengeService {
       assignedDate: '',
     ),
   ];
+ 
 
+  // inicia os desafios
   static Future<void> inicializarDesafios() async {
     final db = await DBHelper.database;
     final hoje = DateTime.now().toIso8601String().substring(0, 10);
@@ -198,6 +203,7 @@ class ChallengeService {
     }
   }
 
+  // carrega os desafios
   static Future<List<DailyChallengeModel>> carregarDesafiosDoDia() async {
     final db = await DBHelper.database;
     final hoje = DateTime.now().toIso8601String().substring(0, 10);
@@ -215,7 +221,9 @@ class ChallengeService {
 
     return resultados.map((e) => DailyChallengeModel.fromMap(e)).toList();
   }
+ 
 
+  //marcar como concluído 
   static Future<void> marcarComoConcluido(DailyChallengeModel desafio) async {
     final db = await DBHelper.database;
     final hoje = DateTime.now().toIso8601String().substring(0, 10);
@@ -227,6 +235,8 @@ class ChallengeService {
       whereArgs: [desafio.title, hoje],
     );
   }
+
+  // verificar desafios automaticamente
 
   static Future<void> verificarDesafiosAutomaticos() async {
     final desafios = await carregarDesafiosDoDia();

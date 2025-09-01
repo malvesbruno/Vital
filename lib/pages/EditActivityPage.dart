@@ -8,8 +8,9 @@ import 'dart:convert';
 import '../services/intersticial_service_add.dart';
 
 
+// Pagina que permite editar as atividades
 class EditActivityPage extends StatefulWidget {
-  final int index;
+  final int index; // index da atividade
 
 
   const EditActivityPage({super.key, required this.index,});
@@ -19,16 +20,18 @@ class EditActivityPage extends StatefulWidget {
 }
 
 class _EditActivityPageState extends State<EditActivityPage> {
-  final _titleController = TextEditingController();
-  String? _categoriaSelecionada;
-  TimeOfDay? _horarioSelecionado;
-  List<int> diasSelecionados = [];
+  final _titleController = TextEditingController(); // controla o input do title da atividade
+  String? _categoriaSelecionada; // categoria selecionada
+  TimeOfDay? _horarioSelecionado; // horario selecionado
+  List<int> diasSelecionados = []; // dias da semana
 
+  //lista auxiliar para dias da semana
   final List<int> diasDaSemana = [1,2,3,4,5,6,7];
 
   @override
     void initState() {
       super.initState();
+      //inicia a atividade com o valor que já existiam na atividade
       final atividade = AppData.listaAtividades[widget.index];
       _titleController.text = atividade.title;
       _categoriaSelecionada = atividade.categoria;
@@ -36,6 +39,7 @@ class _EditActivityPageState extends State<EditActivityPage> {
       diasSelecionados = List<int>.from(atividade.dias);
     }
 
+  // seleciona horário
   void _selecionarHorario() async {
     TimeOfDay? time = await showTimePicker(
       context: context,
@@ -46,6 +50,7 @@ class _EditActivityPageState extends State<EditActivityPage> {
     }
   }
 
+  // salva a atividade
   void _salvarAtividade() async{
     if (_titleController.text.isEmpty || _categoriaSelecionada == null || _horarioSelecionado == null || diasSelecionados.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -4,11 +4,11 @@ import '../models/ExercicioModel.dart';
 import '../pages/ConfigurarTreinoPageState.dart';
 import '../app_data_service.dart';
 
-
+// Página que mostra todos os exercícios de uma categoria
 
 class ExerciciosPage extends StatefulWidget {
-  final String categoria;
-  final Map<String, List<String>> exercicios;
+  final String categoria; // categoria
+  final Map<String, List<String>> exercicios; // exercícios da categoria
 
   const ExerciciosPage({required this.categoria, required this.exercicios, super.key});
 
@@ -17,11 +17,12 @@ class ExerciciosPage extends StatefulWidget {
 }
 
 class _ExerciciosPageState extends State<ExerciciosPage> {
-  final Map<String, bool> _selecionados = {};
+  final Map<String, bool> _selecionados = {}; // exercícios selecionados
 
   @override
   void initState() {
     super.initState();
+    // verifica quais foram selecionados  
     for (var subgrupo in widget.exercicios.values) {
       for (var exercicio in subgrupo) {
         _selecionados[exercicio] = false;
@@ -29,6 +30,7 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
     }
   }
 
+  // confirma quais foram selecionados
   void _confirmarSelecionados() async{
     AppData.treinosSelecionados.addAll(
       _selecionados.entries
@@ -47,6 +49,7 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
     );
   }
 
+  // tile personalizado para os exercícios 
   Widget _buildExercicioTile(String exercicio) {
   return Padding(
     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -102,6 +105,7 @@ class _ExerciciosPageState extends State<ExerciciosPage> {
   );
 }
 
+// mostra dialogo novo exercícios 
 void _mostrarDialogoNovoExercicio() {
   final controller = TextEditingController();
 

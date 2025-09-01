@@ -3,6 +3,9 @@ import '../app_data.dart';
 import 'ExercicioPage.dart';
 import 'ConfigurarTreinoPageState.dart';
 
+
+
+// tela de menu do treino
 class SetTreinoPage extends StatefulWidget {
   const SetTreinoPage({super.key});
 
@@ -26,7 +29,7 @@ final Map<String, List<String>> chestExercises = {
     'Pressão de peito na máquina',
   ]
 };
-
+// 🟥 Exercícios para Costas
 final Map<String, List<String>> backExercises = {
   'Costas': [
     'Pulley frente',
@@ -41,7 +44,7 @@ final Map<String, List<String>> backExercises = {
     'Barra fixa (assistida ou não)',
   ]
 };
-
+// 🟥 Exercícios para Braço
 final Map<String, List<String>> armExercises = {
   'Bíceps': [
     'Rosca direta com barra',
@@ -58,7 +61,7 @@ final Map<String, List<String>> armExercises = {
     'Tríceps francês com halteres',
   ]
 };
-
+// 🟥 Exercícios para Abdomen 
 final Map<String, List<String>> absExercises = {
   'Abdômen': [
     'Abdominal na máquina',
@@ -73,7 +76,7 @@ final Map<String, List<String>> absExercises = {
     'Rollout com roda abdominal',
   ]
 };
-
+// 🟥 Exercícios para Perna
 final Map<String, List<String>> legExercises = {
   'Pernas': [
     'Agachamento com barra',
@@ -89,9 +92,9 @@ final Map<String, List<String>> legExercises = {
   ]
 };
 
-  bool algumSelecionado = AppData.treinosSelecionados.isNotEmpty;
+  bool algumSelecionado = AppData.treinosSelecionados.isNotEmpty; // verifica se algum foi selecionado 
 
-
+  // transforma o dia em String
   String timeOfDayToString(TimeOfDay time) {
   return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 }

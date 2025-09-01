@@ -7,6 +7,8 @@ import '../services/Notication.dart';
 import 'package:flutter/services.dart';
 
 
+// TO DO: adicionar notificação
+
 class Verificaragendamento {
   static Future<void> verficarAgendamento() async {
     final notificationService = NotificationService();

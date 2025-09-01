@@ -12,6 +12,8 @@ import '../pages/qrCodeScanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../cloud_service.dart';
 
+
+// página mostra ranking de amigos
 class AmigoPage extends StatefulWidget {
   const AmigoPage({super.key});
 
@@ -20,9 +22,9 @@ class AmigoPage extends StatefulWidget {
 }
 
 class _AmigoPageState extends State<AmigoPage>{
-  late List<AmigoModel> ranking;
-  late String id;
-  final TextEditingController _idController = TextEditingController();
+  late List<AmigoModel> ranking; // cria a lista de ranking
+  late String id; // cria a veriável do id a ser buscado
+  final TextEditingController _idController = TextEditingController(); // controle do input para adicionar amigos
 
   @override
   void initState() {
@@ -31,10 +33,11 @@ class _AmigoPageState extends State<AmigoPage>{
     ranking = [
     ...AppData.amigos,
     AmigoModel(nome: AppData.name, avatar: AppData.currentAvatar, level: AppData.level, id: AppData.id)
-  ];
-  ranking.sort((a, b) => b.level.compareTo(a.level));
+  ]; // te adiciona no ranking
+  ranking.sort((a, b) => b.level.compareTo(a.level)); // ordena o ranking
   }
 
+  // leva para a página que escaneia o qrCode
   Future<String?> scanQRCode(BuildContext context) async {
   final result = await Navigator.push(
     context,
@@ -43,7 +46,7 @@ class _AmigoPageState extends State<AmigoPage>{
   return result as String?;
 }
 
-
+//recarrega o ranking
 void recarregarRanking() {
   setState(() {
     ranking = [

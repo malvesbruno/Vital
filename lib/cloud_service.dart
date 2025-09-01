@@ -1,22 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// serviço na nuvem
+
 class BackupService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  //cria o user
   Future<void> createUser(String uid, Map<String, dynamic> data) async {
     await _firestore.collection('users').doc(uid).set(data);
   }
 
+  // atualiza o user
   Future<void> updateUser(String uid, Map<String, dynamic> data) async {
     await _firestore.collection('users').doc(uid).update(data);
   }
 
+  //pega informações do user
   Future<Map<String, dynamic>?> getUser(String uid) async {
     final doc = await _firestore.collection('users').doc(uid).get();
     if (doc.exists) return doc.data() as Map<String, dynamic>;
     return null;
   }
 
+  // pega informações do user pelo email
   Future<Map<String, dynamic>?> getUserByEmail(String email) async {
   final query = await _firestore
       .collection('users')
@@ -31,7 +37,7 @@ class BackupService {
   return null;
 }
 
-
+  // manda convite de treino
   Future<void> sendWorkoutInvite({
   required String senderId,
   required String receiverId,
@@ -47,6 +53,7 @@ class BackupService {
   });
 }
 
+// responde convite de treino
 Future<void> respondToWorkoutInvite({
   required String originalSenderId,
   required String responderId,
@@ -63,6 +70,8 @@ Future<void> respondToWorkoutInvite({
   });
 }
 
+
+// deleta convites antigos
 Future<void> deleteOldPendingInvites() async {
   final now = DateTime.now();
 
@@ -82,6 +91,8 @@ Future<void> deleteOldPendingInvites() async {
   }
 }
 
+
+// deleta o convite
 Future<void> deleteInvite(String senderId, String receiverId, String workoutSuggestion) async {
   final snapshot = await FirebaseFirestore.instance
       .collection('invites')
@@ -106,6 +117,8 @@ Future<void> deleteInvite(String senderId, String receiverId, String workoutSugg
   return invitesSnapshot.docs.map((doc) => doc.data()).toList();
 }
 
+
+// recebe as respostas dos convites
 Future<List<Map<String, dynamic>>> getResponsesToWorkoutInvites(String uid) async {
   final snapshot = await FirebaseFirestore.instance
       .collection('invites')

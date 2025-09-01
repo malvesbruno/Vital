@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+
+// preview de cores
 class DeluxeThemePreview extends StatelessWidget {
   final List<String> deluxeTheme = [
     'assets/colors/themes/sea.png',

@@ -3,6 +3,9 @@ import 'dart:io';
 import 'dart:async';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+
+// serviço de anúncio 
+
 class AppOpenAdManager {
   final String adUnitId = Platform.isAndroid
       ? 'ca-app-pub-3137295951622134/9776666054' // teste Android

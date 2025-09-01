@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+
+//Modelo de tema
 class AppTheme {
   final String name;
   final Color backgroundColor;

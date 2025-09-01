@@ -8,7 +8,7 @@ import '../cloud_service.dart';
 import 'dart:convert';
 import '../services/intersticial_service_add.dart';
 
-
+// Pagina que configura os treinos
 class ConfigurarTreinoPage extends StatefulWidget {
   const ConfigurarTreinoPage({super.key});
 
@@ -17,18 +17,20 @@ class ConfigurarTreinoPage extends StatefulWidget {
 }
 
 class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
-  int indexAtual = 0;
-  TimeOfDay? horarioSelecionado;
-  List<String> diasSelecionados = [];
-  String nomeTreino = '';
-  bool erro = false;
-  String? erroMensagem;
-  int intensidadeSelecionada = 1;
+  int indexAtual = 0; // index de exercício 
+  TimeOfDay? horarioSelecionado; // horario selecionado
+  List<String> diasSelecionados = []; // dias selecionados
+  String nomeTreino = ''; // nome do treino
+  bool erro = false; // tem algum erro?
+  String? erroMensagem; // mensagem de erro
+  int intensidadeSelecionada = 1; // intensidade do treino
 
+  // lista auxiliar para diasSelecionados
   final List<String> diasDaSemana = [
     "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"
   ];
 
+  // se o dia estiver selecionado, desmarca. Se não, marca
   void _toggleDia(String dia) {
     setState(() {
       if (diasSelecionados.contains(dia)) {
@@ -39,6 +41,7 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
     });
   }
 
+  // seleciona o horário do treino
   void _selecionarHorario() async {
     TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -51,6 +54,7 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
     }
   }
 
+  // volta para o exercício anterior
   void _anterior() {
     if (indexAtual > 0) {
       setState(() {
@@ -59,6 +63,7 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
     }
   }
 
+  // vai para o próximo exercício 
   void _proximo() {
     if (indexAtual < AppData.treinosSelecionados.length) {
       setState(() {
@@ -67,6 +72,7 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
     }
   }
 
+  // formata os dias da semana baseada no número 
   List<int> formatar_dia(List<String> lista){
     Map<String, int> mapaDias = {
       "Seg": 1, "Segunda": 1,
@@ -80,6 +86,7 @@ class _ConfigurarTreinoPageState extends State<ConfigurarTreinoPage> {
     return lista.map((el) => mapaDias[el] ?? 0).where((el) => el != 0).toList();
   }
 
+  // salvar treino
   void _salvarTreino() async {
   if (horarioSelecionado == null) return;
 

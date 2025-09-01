@@ -1,6 +1,9 @@
 import '../models/TreinoModel.dart';
 import '../app_data.dart';
 
+
+// verifica se os desafios diários foram completos 
+
 bool verificarTreino(){
   for (TreinoModel treino in AppData.treinos){
     bool completed = treino.exercicios.every((ex) => ex.completed);

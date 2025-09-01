@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+//anuncio intersticial
+
 class InterstitialAdService {
   static final String adUnitId = Platform.isAndroid
       ? 'ca-app-pub-3137295951622134/5974215471' // seu ID real do intersticial

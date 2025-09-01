@@ -14,8 +14,8 @@ import '../services/intersticial_service_add.dart';
 
 
 class ColorsStorePage extends StatefulWidget {
-  final List<AppTheme> colors;
-  final int userLevel;
+  final List<AppTheme> colors; // lista de cores
+  final int userLevel; // nível do player
 
   const ColorsStorePage({
     super.key,
@@ -28,13 +28,14 @@ class ColorsStorePage extends StatefulWidget {
 }
 
 class _ColorsStorePageState extends State<ColorsStorePage> {
-  int coins = AppData.coins;
+  int coins = AppData.coins; // define a quantidade de moedas do player
 
   void _showZeldaUnlockAnimation(BuildContext context, AppTheme color) async{
-    final player = AudioPlayer();
-    await player.setVolume(1.0);
-    player.play(AssetSource('sounds/buyItem.mp3'));
+    final player = AudioPlayer(); //  váriavel que toca áudios
+    await player.setVolume(1.0);// define o volume
+    player.play(AssetSource('sounds/buyItem.mp3')); // seleciona o áudio
 
+  // mostra o dialog
   showGeneralDialog(
     context: context,
     barrierDismissible: true,
@@ -111,40 +112,48 @@ class _ColorsStorePageState extends State<ColorsStorePage> {
 
   void _showColorDialog(BuildContext context, AppTheme color) {
   setState(() {}); // força rebuild antes do diálogo, só pra garantir
-  final updateColor = widget.colors.firstWhere((a) => a.name == color.name);
-  final isUnlocked = widget.userLevel >= updateColor.requiredLevel;
-  final hasCoins = AppData.coins >= updateColor.price;
-  final alreadyOwned = updateColor.owned;
-  final isExclusive = updateColor.exclusive;
-  final isSelected = AppData.currentTheme == updateColor.name;
+  final updateColor = widget.colors.firstWhere((a) => a.name == color.name); // atualiza a cor 
+  final isUnlocked = widget.userLevel >= updateColor.requiredLevel; //  verifica se já foi desbloqueado
+  final hasCoins = AppData.coins >= updateColor.price; // verifica se tem moedas para comprar
+  final alreadyOwned = updateColor.owned; // verifica se já foi comprado
+  final isExclusive = updateColor.exclusive; // verifica se a cor é exclusiva
+  final isSelected = AppData.currentTheme == updateColor.name; // verifica se já foi selecionada
 
-  String buttonText = '';
-  bool isButtonEnabled = false;
-  Color buttonColor = Colors.grey;
+  String buttonText = ''; // texto do botão
+  bool isButtonEnabled = false; // botão clicável?
+  Color buttonColor = Colors.grey; // cor do botão
 
+  // Se já foi desbloqueado 
   if (!isUnlocked) {
     buttonText = 'Nível ${updateColor.requiredLevel} necessário';
     isButtonEnabled = false;
     buttonColor = Colors.grey.shade700;
   } 
+  // Se ainda não foi comprado, o user não é utimate, mas o tema é exclusivo
    else if(!alreadyOwned && !AppData.ultimate && color.exclusive){
     buttonText = 'Tema Exclusivo';
     isButtonEnabled = true;
     buttonColor = Colors.amber;
   }
+  // se foi desbloquado, mas não tem moedas suficientes
   else if (!alreadyOwned && !hasCoins) {
     buttonText = '${updateColor.price}\nmoedas (insuficiente)';
     isButtonEnabled = false;
     buttonColor = Colors.red.shade300;
-  } else if (!alreadyOwned && hasCoins) {
+  } // se não comprou, mas tem moedas suficientes 
+  else if (!alreadyOwned && hasCoins) {
     buttonText = 'Comprar Cor\n(${updateColor.price} moedas)';
     isButtonEnabled = true;
     buttonColor = Colors.green;
-  } else if (alreadyOwned && !isSelected) {
+  }
+  // se já comprou, mas não está usando 
+  else if (alreadyOwned && !isSelected) {
     buttonText = 'Usar Cor';
     isButtonEnabled = true;
     buttonColor = Colors.blue;
-  } else if (isSelected) {
+  } 
+  // se está usando 
+  else if (isSelected) {
     buttonText = 'Já está usando';
     isButtonEnabled = false;
     buttonColor = Colors.grey.shade500;
@@ -165,7 +174,7 @@ class _ColorsStorePageState extends State<ColorsStorePage> {
         children: [
           CircleAvatar(
         radius: 80,
-        backgroundImage: AssetImage(updateColor.imagePath), // substitua pelo avatar atual do usuário
+        backgroundImage: AssetImage(updateColor.imagePath), // substitua pelo tema atual do usuário
         backgroundColor: const Color.fromARGB(108, 255, 255, 255),
       ),
           const SizedBox(height: 20),
@@ -182,7 +191,6 @@ class _ColorsStorePageState extends State<ColorsStorePage> {
                       setState(() {
                           coins = AppData.coins; // <- aqui atualiza a interface com o novo valor
                         });
-                      // você pode disparar uma animação ou som aqui;
                       _showZeldaUnlockAnimation(context, updateColor);
                       if (AppData.ultimate){
                         final themesOwnedJson = AppData.themes.where((t) => t.owned).map((el) => el.toJson()).toList();

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
+
+//Animação de level up
 class ZeldaBackground extends StatefulWidget {
   const ZeldaBackground({super.key});
 

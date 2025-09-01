@@ -6,9 +6,11 @@ import 'WorkoutComplete.dart';
 import '../app_data_service.dart';
 
 
+// página de treino rápido
+
 class WorkoutPagePersonalizado extends StatefulWidget {
-  final List<Map<String, dynamic>> excercicios;
-  final String title;
+  final List<Map<String, dynamic>> excercicios; // exercícios
+  final String title; // título
 
   const WorkoutPagePersonalizado({super.key, required this.excercicios, required this.title});
 
@@ -17,15 +19,16 @@ class WorkoutPagePersonalizado extends StatefulWidget {
 }
 
 class _WorkoutPagePersonalizadoState extends State<WorkoutPagePersonalizado> with SingleTickerProviderStateMixin  {
-  int currentExerciseIndex = 0;
-  bool isTimerRunning = false;
-  Timer? _countdownTimer;
-  Duration _remainingTime = Duration(minutes: 1);
-  Duration timerDuration = Duration(minutes: 1);
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-  late final AudioPlayer _audioPlayer;
+  int currentExerciseIndex = 0; // index do exercício atual
+  bool isTimerRunning = false; // tempo rodando? 
+  Timer? _countdownTimer; // diminui o tempo
+  Duration _remainingTime = Duration(minutes: 1); // tempo restante
+  Duration timerDuration = Duration(minutes: 1); // duração
+  late AnimationController _pulseController; // controle de animação de pulso
+  late Animation<double> _pulseAnimation; //  animação de pulos
+  late final AudioPlayer _audioPlayer; // player de audio
 
+  // ativa e desativa o timer 
   void toggleTimer() {
   setState(() {
     isTimerRunning = !isTimerRunning;
@@ -55,6 +58,8 @@ class _WorkoutPagePersonalizadoState extends State<WorkoutPagePersonalizado> wit
     _countdownTimer?.cancel();
   }
 }
+
+  // vai para o próximo exercício
   void nextExercise() {
   if (currentExerciseIndex < widget.excercicios.length - 1) {
     setState(() {
@@ -70,7 +75,7 @@ class _WorkoutPagePersonalizadoState extends State<WorkoutPagePersonalizado> wit
     _pulseController.stop();
   }
 }
-
+  // volta para o exercício anterior
   void previousExercise() {
   if (currentExerciseIndex > 0) {
     setState(() {
@@ -87,7 +92,7 @@ class _WorkoutPagePersonalizadoState extends State<WorkoutPagePersonalizado> wit
   }
 }
 
-
+ // completa um set
   void completeSet() async {
   final exercise = widget.excercicios[currentExerciseIndex];
 
