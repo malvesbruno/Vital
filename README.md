@@ -47,7 +47,7 @@ flutter run
 ```
 
 ## 📌 Roadmap (Missões futuras)
-[] adicionar notificações
+[ ] adicionar notificações
 
 ## 📜 Licença
 - Este projeto está licenciado sob a MIT License - veja o arquivo LICENSE
