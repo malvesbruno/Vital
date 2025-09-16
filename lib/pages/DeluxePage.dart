@@ -80,10 +80,11 @@ class _DeluxePageState extends State<Deluxepage>{
        final amigosJson = AppData.amigos.map((t) => t.toJson()).toList();
        final themesOwnedJson = AppData.themes.where((t) => t.owned).map((el) => el.toJson()).toList();
        final avatarsOwnedJson = AppData.themes.where((t) => t.owned).map((el) => el.toJson()).toList();
+       String? id =  FirebaseAuth.instance.currentUser?.uid ?? AppData.id;
       BackupService cloud = BackupService();
-          await cloud.createUser(AppData.id, {
+          await cloud.createUser(id, {
             'mail': user?.email ?? '',
-            'uid': AppData.id,
+            'uid': id,
             'treinos': jsonEncode(treinosJson),
             'atividades': jsonEncode(atividadeJson),
             'stats': jsonEncode(statsJson),

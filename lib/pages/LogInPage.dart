@@ -46,7 +46,8 @@ class _LogInScreenState extends State<LogInScreen> {
     );
 
     BackupService cloud = BackupService();
-    final user_info = await cloud.getUserByEmail(userCredential.user?.email ?? '');
+    String? id = FirebaseAuth.instance.currentUser?.uid ?? AppData.id;
+    final user_info = await cloud.getUser(id);
 
     if (user_info == null) throw Exception('Dados do usuário não encontrados.');
 
@@ -64,12 +65,12 @@ class _LogInScreenState extends State<LogInScreen> {
     // se tem acesso, carrega as informações
     if (temAcesso) {
       AppData.ultimate = true;
-      AppData.id = user_info['uid'];
+      AppData.id = id ?? AppData.id;
       AppData.currentAvatar = user_info['current_avatar'] ?? "Default";
       AppData.currentTheme = user_info['current_theme'] ?? "Default";
       AppData.level = user_info['nivel'] ?? 1;
       AppData.coins = user_info['coins'] ?? 0;
-      AppData.name = user_info['name'] ?? 'Deafult_Name';
+      AppData.name = user_info['name'] ?? '';
 
       // Helpers para parse de lista JSON ou lista direta
       List<dynamic> parseList(dynamic data) {

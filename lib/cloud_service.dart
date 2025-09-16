@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // serviço na nuvem
 
@@ -23,7 +24,7 @@ class BackupService {
   }
 
   // pega informações do user pelo email
-  Future<Map<String, dynamic>?> getUserByEmail(String email) async {
+/*   Future<Map<String, dynamic>?> getUserByEmail(String email) async {
   final query = await _firestore
       .collection('users')
       .where('mail', isEqualTo: email)
@@ -35,7 +36,7 @@ class BackupService {
   }
 
   return null;
-}
+} */
 
   // manda convite de treino
   Future<void> sendWorkoutInvite({
@@ -75,10 +76,13 @@ Future<void> respondToWorkoutInvite({
 Future<void> deleteOldPendingInvites() async {
   final now = DateTime.now();
 
-  final snapshot = await FirebaseFirestore.instance
-      .collection('invites')
-      .where('status', isEqualTo: 'pending')
-      .get();
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+
+final snapshot = await FirebaseFirestore.instance
+    .collection('invites')
+    .where('status', isEqualTo: 'pending')
+    .where('senderId', isEqualTo: uid)  // só os seus
+    .get();
 
   for (var doc in snapshot.docs) {
     final timestamp = doc['timestamp']?.toDate();

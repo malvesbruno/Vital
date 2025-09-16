@@ -59,6 +59,30 @@ void _updateProgressBar() {
   }
 
 
+Future<void> _removeAtividade(AtividadeModel atividade) async {
+  widget.lista.remove(atividade);
+
+  if (AppData.ultimate) {
+    final atividadeJson = AppData.listaAtividades.map((t) => t.toJson()).toList();
+    final statsJson = AppData.historicoStats.map((t) => t.toJson()).toList();
+
+    BackupService cloud = BackupService();
+    await cloud.updateUser(AppData.id, {
+      'atividades': jsonEncode(atividadeJson),
+      'stats': jsonEncode(statsJson),
+      'current_avatar': AppData.currentAvatar,
+      'current_theme': AppData.currentTheme,
+      'nivel': AppData.level,
+      'coins': AppData.coins,
+    });
+  }
+
+  // Depois atualize a UI de forma síncrona
+  setState(() {
+    _updateProgressBar();
+  });
+}
+
   @override
   Widget build(BuildContext context) {
     bool vazio = widget.lista.every((item) => item.completed);
@@ -290,23 +314,7 @@ void _updateProgressBar() {
     );
 
     if (confirmar == true) {
-      setState(() async{
-        widget.lista.remove(atividade);
-        if (AppData.ultimate){
-      final atividadeJson = AppData.listaAtividades.map((t) => t.toJson()).toList();
-      final statsJson = AppData.historicoStats.map((t) => t.toJson()).toList();
-      BackupService cloud = BackupService();
-          await cloud.updateUser(AppData.id, {
-            'atividades': jsonEncode(atividadeJson),
-            'stats': jsonEncode(statsJson),
-            'current_avatar': AppData.currentAvatar,
-            'current_theme': AppData.currentTheme,
-            'nivel': AppData.level,
-            'coins': AppData.coins,
-          });
-    }
-        _updateProgressBar();
-      });
+      _removeAtividade(atividade);
     }
             },
             backgroundColor: const Color.fromARGB(255, 171, 54, 46),
