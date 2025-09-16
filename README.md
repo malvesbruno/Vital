@@ -1,16 +1,54 @@
-# vital
+# 🏋️ Vital - Seu treino, sua evolução
 
-A new Flutter project.
+<p align="center">
+  <img src="./assets/icons/vital_icon_splash.png" width="120" alt="Bang! Logo">
+</p>
 
-## Getting Started
+O Vital é um app de treino gamificado que transforma sua rotina fitness em uma jornada divertida.
+Ganhe níveis, moedas, avatares e temas enquanto acompanha seus treinos, atividades e evolução.
+Na versão Pro, dispute também no ranking global!
 
-This project is a starting point for a Flutter application.
+## 🎮 Funcionalidades
 
-A few resources to get you started if this is your first Flutter project:
+- 📊 Criação e controle de treinos e atividades
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- ⚡ Sistema de level, moedas, avatares e temas
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- 🥇 Ranking competitivo (na versão paga)
+
+- 🧮 Cálculo de IMC
+
+- 💧 Monitoramento de consumo de água
+
+- 😴 Controle das horas de sono
+
+## 🛠️ Tecnologias
+
+- Flutter / Dart
+
+- SQLite para armazenamento local
+
+- Firebase para serviços em nuvem
+
+- SharedPreferences para configurações rápidas
+
+```bash
+  # Clone o repositório
+git clone https://github.com/malvesbruno/Vital.git
+
+# Entre na pasta
+cd vital
+
+# Instale as dependências
+flutter pub get
+
+# Rode o projeto
+flutter run
+```
+
+## 📌 Roadmap (Missões futuras)
+[ ] adicionar notificações
+
+## 📜 Licença
+- Este projeto está licenciado sob a MIT License - veja o arquivo LICENSE
+ para mais detalhes.
